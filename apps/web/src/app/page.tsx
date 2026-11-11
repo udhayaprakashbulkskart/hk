@@ -13,8 +13,7 @@ export default async function LandingPage() {
         <Link href="/" aria-label="HK FinHub home"><Logo /></Link>
         <nav aria-label="Primary" className="flex items-center gap-2">
           <ThemeToggle />
-          <Link href="/login" className="inline-flex min-h-10 items-center rounded-lg px-3 text-sm font-medium hover:bg-[var(--secondary)]">Log in</Link>
-          <Link href="/login" className="inline-flex min-h-10 items-center rounded-lg bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)]">Open account</Link>
+          <Link href="/login" className="inline-flex min-h-10 items-center whitespace-nowrap rounded-lg px-3 text-sm font-medium hover:bg-[var(--secondary)]">Log in</Link>
         </nav>
       </header>
 
