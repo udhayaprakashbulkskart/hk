@@ -146,3 +146,18 @@ describe("no customer signup", () => {
     expect(cfg.loginUser?.email).toBe("pubgadmin@login.hkfinhub.internal");
   });
 });
+
+describe("browser origins", () => {
+  it("allows a configured preview pattern and refuses an origin outside it", async () => {
+    const original = t.container.config.corsOriginPattern;
+    t.container.config.corsOriginPattern = /^https:\/\/hk-finhub-web-[a-z0-9-]+-udhaya19\.vercel\.app$/;
+    try {
+      const ok = await http().options("/v1/health").set("Origin", "https://hk-finhub-web-abc123-udhaya19.vercel.app").set("Access-Control-Request-Method", "GET");
+      expect(ok.headers["access-control-allow-origin"]).toBe("https://hk-finhub-web-abc123-udhaya19.vercel.app");
+      const bad = await http().options("/v1/health").set("Origin", "https://evil-hk-finhub-web-x-udhaya19.vercel.app.example.com").set("Access-Control-Request-Method", "GET");
+      expect(bad.headers["access-control-allow-origin"]).toBeUndefined();
+    } finally {
+      t.container.config.corsOriginPattern = original;
+    }
+  });
+});

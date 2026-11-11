@@ -14,6 +14,8 @@ const schema = z.object({
   DIGEST_KEY: base64Key32,
   FIELD_ENCRYPTION_KEY: base64Key32,
   CORS_ORIGINS: z.string().default(""),
+  /** Optional pattern for origins that change per deployment, such as Vercel preview addresses. Anchored by the operator. */
+  CORS_ORIGIN_PATTERN: z.string().optional(),
   TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(0),
   OPENAPI_ENABLED: z.enum(["true", "false"]).default("true"),
   EMAIL_PROVIDER: z.enum(["none", "capture"]).default("none"),
@@ -57,6 +59,7 @@ export interface ApiConfig {
   digestKey: Uint8Array;
   fieldKey: Uint8Array;
   corsOrigins: string[];
+  corsOriginPattern: RegExp | undefined;
   trustProxyHops: number;
   openapiEnabled: boolean;
   emailProvider: "none" | "capture";
@@ -102,6 +105,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
     digestKey: Buffer.from(e.DIGEST_KEY, "base64"),
     fieldKey: Buffer.from(e.FIELD_ENCRYPTION_KEY, "base64"),
     corsOrigins: e.CORS_ORIGINS.split(",").map((s) => s.trim()).filter(Boolean),
+    corsOriginPattern: e.CORS_ORIGIN_PATTERN ? new RegExp(e.CORS_ORIGIN_PATTERN) : undefined,
     trustProxyHops: e.TRUST_PROXY_HOPS,
     openapiEnabled: e.OPENAPI_ENABLED === "true",
     emailProvider: e.EMAIL_PROVIDER,

@@ -42,7 +42,13 @@ export async function createApp(container: Container) {
     }),
   );
   app.enableCors({
-    origin: container.config.corsOrigins.length ? container.config.corsOrigins : false,
+    origin: (origin, done) => {
+      // No Origin header means a same-origin or non-browser caller; nothing to allow.
+      if (!origin) return done(null, false);
+      const { corsOrigins, corsOriginPattern } = container.config;
+      const allowed = corsOrigins.includes(origin) || (corsOriginPattern !== undefined && corsOriginPattern.test(origin));
+      done(null, allowed ? origin : false);
+    },
     credentials: true,
     methods: ["GET", "POST", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Request-Id"],
