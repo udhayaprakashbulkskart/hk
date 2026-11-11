@@ -64,6 +64,21 @@ export class PrismaAdminStore implements AdminStore {
     return rows.map(toApproval);
   }
 
+  async listUsers(limit: number) {
+    const rows = await this.q.user.findMany({ orderBy: { createdAt: "desc" }, take: limit, select: { id: true, customerNumber: true, email: true, status: true, createdAt: true } });
+    return rows.map((r) => ({ userId: r.id, customerNumber: r.customerNumber, email: r.email, status: r.status, createdAt: r.createdAt }));
+  }
+
+  async listPayments(limit: number) {
+    const rows = await this.q.payment.findMany({ orderBy: { createdAt: "desc" }, take: limit, select: { id: true, direction: true, providerId: true, status: true, currency: true, amountMinor: true, createdAt: true } });
+    return rows.map((r) => ({ ...r, amountMinor: r.amountMinor }));
+  }
+
+  async listTransfers(limit: number) {
+    const rows = await this.q.transfer.findMany({ orderBy: { createdAt: "desc" }, take: limit, select: { id: true, accountId: true, kind: true, status: true, sourceCurrency: true, sourceMinor: true, recipientCurrency: true, createdAt: true } });
+    return rows;
+  }
+
   async recentAudit(limit: number) {
     return this.q.auditLog.findMany({ orderBy: { createdAt: "desc" }, take: limit, select: { id: true, actorUserId: true, action: true, subjectType: true, subjectId: true, createdAt: true } });
   }

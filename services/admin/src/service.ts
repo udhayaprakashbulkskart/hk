@@ -17,6 +17,12 @@ export type RevealField = (typeof REVEAL_FIELDS)[number];
 export const PROVIDER_IDS = ["razorpay", "razorpayx", "stripe", "adyen", "upi_bank_partner", "intl_payout_partner", "ppi_partner"] as const;
 export const ENVIRONMENTS = ["sandbox", "live"] as const;
 
+/** a***@example.com: first letter and domain only. */
+export function maskEmail(email: string): string {
+  const [local = "", domain = ""] = email.split("@");
+  return `${local.slice(0, 1)}***@${domain}`;
+}
+
 export class AdminService {
   constructor(
     private readonly store: AdminStore,
@@ -90,6 +96,22 @@ export class AdminService {
 
   pendingApprovals(): Promise<ApprovalRow[]> {
     return this.store.listPendingApprovals();
+  }
+
+  /** Read-only lists. Emails are masked here as well as in the API response, so the masking is not optional. */
+  async listUsers(actor: StaffActor, limit: number) {
+    await this.require(actor, "customers.read", { type: "User", id: null });
+    return (await this.store.listUsers(limit)).map(({ email, ...u }) => ({ ...u, emailMasked: maskEmail(email) }));
+  }
+
+  async listPayments(actor: StaffActor, limit: number) {
+    await this.require(actor, "payments.read", { type: "Payment", id: null });
+    return this.store.listPayments(limit);
+  }
+
+  async listTransfers(actor: StaffActor, limit: number) {
+    await this.require(actor, "transfers.read", { type: "Transfer", id: null });
+    return this.store.listTransfers(limit);
   }
 
   async recentAudit(actor: StaffActor, limit: number) {

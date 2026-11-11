@@ -154,6 +154,9 @@ importers:
       '@types/supertest':
         specifier: 7.2.1
         version: 7.2.1
+      jose:
+        specifier: 6.2.13
+        version: 6.2.13
       otplib:
         specifier: 13.5.0
         version: 13.5.0

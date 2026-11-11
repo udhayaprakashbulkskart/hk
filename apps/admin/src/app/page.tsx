@@ -124,6 +124,9 @@ export default function AdminConsole() {
         {can("kyc.read") && <KycPanel token={token} canDecide={can("kyc.decide")} />}
         {can("kyc.document.read") && <DocumentPanel token={token} />}
         {can("customers.pii.reveal") && <RevealPanel token={token} />}
+        {can("customers.read") && <ListPanel title="Customers" path="/admin/users?limit=50" token={token} columns={[["When", "createdAt", "date"], ["Customer", "customerNumber", "text"], ["Email", "emailMasked", "text"], ["Status", "status", "text"]]} />}
+        {can("payments.read") && <ListPanel title="Payments (monitoring)" path="/admin/payments?limit=50" token={token} columns={[["When", "createdAt", "date"], ["Direction", "direction", "text"], ["Provider", "providerId", "text"], ["Status", "status", "text"], ["Amount (minor units)", "amountMinor", "text"], ["Currency", "currency", "text"]]} />}
+        {can("transfers.read") && <ListPanel title="Transfers" path="/admin/transfers?limit=50" token={token} columns={[["When", "createdAt", "date"], ["Kind", "kind", "text"], ["Status", "status", "text"], ["Amount (minor units)", "sourceMinor", "text"], ["From", "sourceCurrency", "text"], ["To", "recipientCurrency", "text"]]} />}
         {can("audit.read") && <AuditPanel token={token} />}
       </div>
     </main>
@@ -365,6 +368,40 @@ function AuditPanel({ token }: { token: string }) {
                 <td>{new Date(r.createdAt).toLocaleString()}</td>
                 <td>{r.action}</td>
                 <td>{r.subjectType}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      {error && <p className="error" role="alert">{error}</p>}
+    </Panel>
+  );
+}
+
+type Column = [label: string, key: string, kind: "text" | "date"];
+
+/** Read-only table. Values come from the API, which has already applied the role's masking. */
+function ListPanel({ title, path, token, columns }: { title: string; path: string; token: string; columns: Column[] }) {
+  const [rows, setRows] = useState<Record<string, unknown>[] | null>(null);
+  const { error, run } = useAction();
+  const load = () => run(async () => {
+    setRows((await api<{ items: Record<string, unknown>[] }>(path, { token })).items);
+  });
+  return (
+    <Panel title={title}>
+      <button type="button" onClick={load}>Load</button>
+      {rows && rows.length === 0 && <p className="muted">Nothing to show.</p>}
+      {rows && rows.length > 0 && (
+        <table>
+          <thead>
+            <tr>{columns.map(([label]) => <th key={label}>{label}</th>)}</tr>
+          </thead>
+          <tbody>
+            {rows.map((r, i) => (
+              <tr key={String(r["id"] ?? r["userId"] ?? i)}>
+                {columns.map(([label, key, kind]) => (
+                  <td key={label}>{kind === "date" ? new Date(String(r[key])).toLocaleString() : String(r[key] ?? "")}</td>
+                ))}
               </tr>
             ))}
           </tbody>

@@ -152,6 +152,24 @@ export class AdminController {
     }));
   }
 
+  @Get("users")
+  users(@Query("limit") limit: string | undefined, @Req() req: AdminRequest) {
+    const n = Math.min(Math.max(Number(limit ?? 50) || 50, 1), 200);
+    return this.run(req, "customers.read", { type: "User", id: null }, async () => ({ items: await this.c.admin.listUsers({ id: req.staff.id, role: req.staff.role }, n) }));
+  }
+
+  @Get("payments")
+  payments(@Query("limit") limit: string | undefined, @Req() req: AdminRequest) {
+    const n = Math.min(Math.max(Number(limit ?? 50) || 50, 1), 200);
+    return this.run(req, "payments.read", { type: "Payment", id: null }, async () => ({ items: (await this.c.admin.listPayments({ id: req.staff.id, role: req.staff.role }, n)).map((p) => ({ ...p, amountMinor: p.amountMinor.toString() })) }));
+  }
+
+  @Get("transfers")
+  transfers(@Query("limit") limit: string | undefined, @Req() req: AdminRequest) {
+    const n = Math.min(Math.max(Number(limit ?? 50) || 50, 1), 200);
+    return this.run(req, "transfers.read", { type: "Transfer", id: null }, async () => ({ items: (await this.c.admin.listTransfers({ id: req.staff.id, role: req.staff.role }, n)).map((t) => ({ ...t, sourceMinor: t.sourceMinor.toString() })) }));
+  }
+
   @Get("audit")
   audit(@Query("limit") limit: string | undefined, @Req() req: AdminRequest) {
     const n = Math.min(Math.max(Number(limit ?? 50) || 50, 1), 200);

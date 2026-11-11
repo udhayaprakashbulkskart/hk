@@ -33,6 +33,9 @@ export interface AdminStore {
   findApproval(id: string): Promise<ApprovalRow | null>;
   decideApproval(id: string, to: "APPROVED" | "REJECTED", decidedBy: string, now: Date): Promise<boolean>;
   listPendingApprovals(): Promise<ApprovalRow[]>;
+  listUsers(limit: number): Promise<{ userId: string; customerNumber: string; email: string; status: string; createdAt: Date }[]>;
+  listPayments(limit: number): Promise<{ id: string; direction: string; providerId: string; status: string; currency: string; amountMinor: bigint; createdAt: Date }[]>;
+  listTransfers(limit: number): Promise<{ id: string; accountId: string; kind: string; status: string; sourceCurrency: string; sourceMinor: bigint; recipientCurrency: string; createdAt: Date }[]>;
   recentAudit(limit: number): Promise<{ id: string; actorUserId: string | null; action: string; subjectType: string; subjectId: string | null; createdAt: Date }[]>;
   audit(entry: { actorUserId: string | null; action: string; subjectType: string; subjectId: string | null; metadata?: Record<string, unknown> | undefined }): Promise<void>;
 }
