@@ -301,7 +301,6 @@ function presentQuote(q: { id: string; fromCurrency: string; toCurrency: string;
     provider: q.provider,
     quotedAt: q.quotedAt.toISOString(),
     expiresAt: q.expiresAt.toISOString(),
-    sample: q.provider.startsWith("sandbox"),
   };
 }
 

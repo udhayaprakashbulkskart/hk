@@ -203,7 +203,7 @@ export class AdminController {
         trading: false,
       },
       adminNetworkRestricted: this.c.config.adminAllowedIps.length > 0,
-      investmentBroker: this.c.sandboxBroker ? "sandbox" : "none",
+      investmentBroker: this.c.investmentBroker ? "configured" : "none",
     }));
   }
 

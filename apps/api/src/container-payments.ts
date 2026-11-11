@@ -3,7 +3,7 @@ import { createRazorpayAdapter } from "@hkfinhub/integration-razorpay";
 import { createRazorpayXAdapter } from "@hkfinhub/integration-razorpayx";
 import { createStripeAdapter } from "@hkfinhub/integration-stripe";
 import { createPartnerStub } from "@hkfinhub/integration-partner-stubs";
-import { createSandboxFxProvider, FxService } from "@hkfinhub/fx";
+import { createUnavailableFxProvider, FxService, type FxProvider } from "@hkfinhub/fx";
 import { PaymentService, type HttpTransport, type ProviderAdapter, type ProviderId } from "@hkfinhub/payments";
 import { PrismaFxStore, PrismaPaymentStore, PrismaRequestStore, PrismaTransferStore, type Database } from "@hkfinhub/database";
 import { TransferService, type OutboundGuard } from "@hkfinhub/transfers";
@@ -35,6 +35,7 @@ export function buildPaymentServices(args: {
   accounts: AccountsService;
   transport?: HttpTransport | undefined;
   guard?: OutboundGuard | undefined;
+  fxProvider?: FxProvider | undefined;
 }): PaymentServices {
   const { db, config, ledger, accounts } = args;
   const transport = args.transport ?? fetchTransport;
@@ -51,7 +52,7 @@ export function buildPaymentServices(args: {
   adapters.set("ppi_partner", createPartnerStub("ppi_partner", "D6"));
 
   const fxStore = new PrismaFxStore(db);
-  const fx = new FxService(fxStore, createSandboxFxProvider(), ledger);
+  const fx = new FxService(fxStore, args.fxProvider ?? createUnavailableFxProvider(), ledger);
   const requests = new PrismaRequestStore(db);
 
   // The payments service and the transfers service depend on each other: payments reports outcomes,

@@ -34,7 +34,7 @@ describe("investment orders", () => {
     const res = await order(c, { symbol: "ACME", side: "BUY", quantity: "1", limitPriceMinor: "100000" });
     expect(res.status).toBe(403);
     expect(res.body.error.code).toBe("KYC_REQUIRED");
-    expect(t.container.sandboxBroker!.orders.size).toBe(0);
+    expect(t.broker.orders.size).toBe(0);
   });
 
   it("walks an order through partial fill, fill and settlement, moving cash once and holding only what the broker confirmed", async () => {
@@ -43,7 +43,7 @@ describe("investment orders", () => {
     const placed = await order(c, { symbol: "acme", side: "BUY", quantity: "10", limitPriceMinor: PRICE.toString() }).expect(201);
     expect(placed.body.status).toBe("PLACED");
     expect(placed.body.symbol).toBe("ACME");
-    const broker = t.container.sandboxBroker!;
+    const broker = t.broker;
     const brokerId = await brokerIdFor(placed.body.id);
 
     // Nothing is held and no cash has moved until the broker confirms a fill.
@@ -79,7 +79,7 @@ describe("investment orders", () => {
     const c = await verifiedCustomer(t, "inv-seller");
     await fundHkd(ctx, c, "2000000");
     const buyOrder = await order(c, { symbol: "ACME", side: "BUY", quantity: "10", limitPriceMinor: PRICE.toString() }).expect(201);
-    t.container.sandboxBroker!.executeFills(await brokerIdFor(buyOrder.body.id), [{ quantity: 10n, priceMinor: PRICE }]);
+    t.broker.executeFills(await brokerIdFor(buyOrder.body.id), [{ quantity: 10n, priceMinor: PRICE }]);
     await http().post(`/v1/investments/orders/${buyOrder.body.id}/sync`).set(authed(c)).expect(200);
 
     const tooMany = await order(c, { symbol: "ACME", side: "SELL", quantity: "11" });
@@ -87,7 +87,7 @@ describe("investment orders", () => {
     expect(tooMany.body.error.code).toBe("INSUFFICIENT_FUNDS");
 
     const sell = await order(c, { symbol: "ACME", side: "SELL", quantity: "4" }).expect(201);
-    t.container.sandboxBroker!.executeFills(await brokerIdFor(sell.body.id), [{ quantity: 4n, priceMinor: 120_000n }]);
+    t.broker.executeFills(await brokerIdFor(sell.body.id), [{ quantity: 4n, priceMinor: 120_000n }]);
     const settled = await http().post(`/v1/investments/orders/${sell.body.id}/sync`).set(authed(c)).expect(200);
     expect(settled.body.status).toBe("SETTLED");
     const holdings = await http().get("/v1/investments/holdings").set(authed(c)).expect(200);

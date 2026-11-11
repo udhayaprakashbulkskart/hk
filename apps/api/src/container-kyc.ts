@@ -1,7 +1,7 @@
-import { ComplianceService, createSandboxScreener, createUnconfiguredScreener, type KycTier, type MonitoringPolicy } from "@hkfinhub/compliance";
-import { createLocalKms, createSandboxKycProvider, createSandboxScanner, KycService, type KeyManagement, type KycProvider, type MalwareScanner } from "@hkfinhub/kyc";
+import { ComplianceService, createUnconfiguredScreener, type KycTier, type MonitoringPolicy, type SanctionsScreener } from "@hkfinhub/compliance";
+import { createLocalKms, KycService, type KeyManagement, type KycProvider, type MalwareScanner } from "@hkfinhub/kyc";
 import { PrismaComplianceStore, PrismaKycStore, type Database } from "@hkfinhub/database";
-import { createMemoryObjectStore, createS3ObjectStore, type ObjectStore } from "@hkfinhub/object-storage";
+import { createS3ObjectStore, type ObjectStore } from "@hkfinhub/object-storage";
 import type { ApiConfig } from "./config";
 
 export interface KycServices {
@@ -12,21 +12,29 @@ export interface KycServices {
 /**
  * Production posture: KMS, malware scanning, the KYC vendor and sanctions screening are NOT yet approved or
  * verified (decisions D2, D11, D15). Each stays null or unconfigured in production, so the matching feature
- * reports NOT_AVAILABLE. Sandbox versions are used everywhere else, and every one is labelled as such.
+ * reports NOT_AVAILABLE. No simulated provider exists in the runtime.
  */
-export function buildKycServices(db: Database, config: ApiConfig): KycServices {
+export interface KycOverrides {
+  /** Test doubles only. The runtime never supplies these. */
+  scanner?: MalwareScanner | undefined;
+  provider?: KycProvider | undefined;
+  screener?: SanctionsScreener | undefined;
+  storage?: ObjectStore | undefined;
+}
+
+export function buildKycServices(db: Database, config: ApiConfig, overrides: KycOverrides = {}): KycServices {
   const production = config.appEnv === "production";
   const kycStore = new PrismaKycStore(db);
   const complianceStore = new PrismaComplianceStore(db);
 
   const kms: KeyManagement | null = config.kyc.masterKey && !production ? createLocalKms(config.kyc.masterKey) : null;
-  const storage: ObjectStore | null = config.kyc.bucket && config.kyc.kmsKeyId
+  // Storage only with a configured private bucket. Without one, uploads are not available.
+  const storage: ObjectStore | null = overrides.storage ?? (config.kyc.bucket && config.kyc.kmsKeyId
     ? createS3ObjectStore({ bucket: config.kyc.bucket, region: config.kyc.region, kmsKeyId: config.kyc.kmsKeyId })
-    : production
-      ? null
-      : createMemoryObjectStore();
-  const scanner: MalwareScanner | null = production ? null : createSandboxScanner();
-  const provider: KycProvider | null = production ? null : createSandboxKycProvider();
+    : null);
+  // No scanner and no identity provider until real, approved ones are configured. Uploads and submission refuse.
+  const scanner: MalwareScanner | null = overrides.scanner ?? null;
+  const provider: KycProvider | null = overrides.provider ?? null;
 
   const kyc = new KycService({ store: kycStore, storage, kms, scanner, provider, config: { fieldKey: config.fieldKey } });
 
@@ -43,7 +51,8 @@ export function buildKycServices(db: Database, config: ApiConfig): KycServices {
 
   const compliance = new ComplianceService({
     store: complianceStore,
-    screener: production ? createUnconfiguredScreener() : createSandboxScreener(),
+    // Sanctions screening fails closed until a vendor is approved (D2). Tests inject a screener.
+    screener: overrides.screener ?? createUnconfiguredScreener(),
     kycTier,
     policy,
   });

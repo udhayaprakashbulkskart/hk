@@ -30,7 +30,7 @@ export interface Container {
   adminStore: AdminServices["adminStore"];
   adjustments: AdminServices["adjustments"];
   investment: InvestmentServices["investment"];
-  sandboxBroker: InvestmentServices["sandboxBroker"];
+  investmentBroker: InvestmentServices["investmentBroker"];
   logger: Logger;
   db: Database;
   redis: Redis | null;
@@ -50,6 +50,12 @@ export interface ContainerOverrides {
   logger?: Logger;
   /** Provider HTTP transport. Tests supply a fake; production uses fetch. */
   transport?: import("@hkfinhub/payments").HttpTransport;
+  /** Test doubles for external providers. The runtime never supplies these; each capability then refuses. */
+  testDoubles?: {
+    fxProvider?: import("@hkfinhub/fx").FxProvider;
+    kyc?: import("./container-kyc").KycOverrides;
+    investmentBroker?: import("@hkfinhub/investment").BrokerAdapter;
+  };
 }
 
 /** Fixed-window limiter stored in Postgres. Each attempt is one upsert, so it is safe across instances. */
@@ -103,10 +109,10 @@ export function createContainer(config: ApiConfig, overrides: ContainerOverrides
   };
   const realtime = redis ? new RedisRealtimePublisher(redis) : noRealtime;
   const accounting = buildAccountingServices(db, config.fieldKey);
-  const kycServices = buildKycServices(db, config);
+  const kycServices = buildKycServices(db, config, overrides.testDoubles?.kyc ?? {});
   const adminServices = buildAdminServices(db, config.fieldKey, accounting.ledger);
-  const investmentServices = buildInvestmentServices({ db, config, ledger: accounting.ledger, accounts: accounting.accounts, kyc: kycServices.kyc });
-  const payments = buildPaymentServices({ db, config, ledger: accounting.ledger, accounts: accounting.accounts, transport: overrides.transport, guard: kycServices.compliance });
+  const investmentServices = buildInvestmentServices({ db, config, ledger: accounting.ledger, accounts: accounting.accounts, kyc: kycServices.kyc, broker: overrides.testDoubles?.investmentBroker });
+  const payments = buildPaymentServices({ db, config, ledger: accounting.ledger, accounts: accounting.accounts, transport: overrides.transport, guard: kycServices.compliance, fxProvider: overrides.testDoubles?.fxProvider });
 
   const email: EmailSender = overrides.email ?? (config.emailProvider === "capture" ? new CaptureSender() : new UnconfiguredSender("email"));
   const sms: SmsSender = overrides.sms ?? (config.smsProvider === "capture" ? new CaptureSender() : new UnconfiguredSender("sms"));
@@ -126,7 +132,7 @@ export function createContainer(config: ApiConfig, overrides: ContainerOverrides
     adminStore: adminServices.adminStore,
     adjustments: adminServices.adjustments,
     investment: investmentServices.investment,
-    sandboxBroker: investmentServices.sandboxBroker,
+    investmentBroker: investmentServices.investmentBroker,
     logger,
     db,
     redis,

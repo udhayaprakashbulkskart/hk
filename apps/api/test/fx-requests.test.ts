@@ -29,7 +29,6 @@ describe("currency conversion", () => {
     expect(q.body.recipientMinor).toBe("1279");
     expect(q.body.rateScaled).toBe("12820000");
     expect(q.body.rateScale).toBe("100000000");
-    expect(q.body.sample).toBe(true);
   });
 
   it("converts once: balances move in both currencies, and the same quote cannot be used twice", async () => {

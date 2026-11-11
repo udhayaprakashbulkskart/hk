@@ -58,7 +58,7 @@ describe("one customer journey across the platform", () => {
     // 4. Invest: place a buy, the broker fills it, and cash settles once.
     const buy = await http().post("/v1/investments/orders").set(authed(alice)).send({ symbol: "ACME", side: "BUY", quantity: "2", limitPriceMinor: "100000", currency: "HKD", idempotencyKey: `j-${randomUUID()}` }).expect(201);
     const row = await t.container.db.investmentOrder.findUniqueOrThrow({ where: { id: buy.body.id } });
-    t.container.sandboxBroker!.executeFills(row.brokerOrderId, [{ quantity: 2n, priceMinor: 100000n }]);
+    t.broker.executeFills(row.brokerOrderId, [{ quantity: 2n, priceMinor: 100000n }]);
     const settled = await http().post(`/v1/investments/orders/${buy.body.id}/sync`).set(authed(alice)).expect(200);
     expect(settled.body.status).toBe("SETTLED");
     const holdings = await http().get("/v1/investments/holdings").set(authed(alice)).expect(200);

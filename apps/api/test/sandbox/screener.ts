@@ -1,4 +1,4 @@
-import type { SanctionsScreener } from "./ports";
+import type { SanctionsScreener } from "@hkfinhub/compliance";
 
 /**
  * SANDBOX ONLY. Not a real sanctions list. It flags one fixed test name so tests can drive the hold path.

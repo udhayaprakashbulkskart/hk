@@ -1,4 +1,4 @@
-import { createSandboxBroker, InvestmentService, type BrokerAdapter, type CashPort, type KycGate } from "@hkfinhub/investment";
+import { InvestmentService, type BrokerAdapter, type CashPort, type KycGate } from "@hkfinhub/investment";
 import { PrismaInvestmentStore, type Database } from "@hkfinhub/database";
 import type { LedgerService } from "@hkfinhub/ledger";
 import type { AccountsService } from "@hkfinhub/accounts";
@@ -7,13 +7,13 @@ import type { ApiConfig } from "./config";
 
 export interface InvestmentServices {
   investment: InvestmentService;
-  /** Sandbox broker, for tests only. Null in production. */
-  sandboxBroker: ReturnType<typeof createSandboxBroker> | null;
+  /** The broker in use. Null in the runtime: no broker contract exists yet (D8 to D10). Tests inject one. */
+  investmentBroker: BrokerAdapter | null;
 }
 
 /**
  * Production has no broker contract (decisions D8 to D10), so no broker is configured and every order is refused.
- * Sandbox uses the simulated broker, which changes state only when a test drives it.
+ * Tests inject a simulated broker; the runtime has none.
  */
 export function buildInvestmentServices(args: {
   db: Database;
@@ -21,10 +21,9 @@ export function buildInvestmentServices(args: {
   ledger: LedgerService;
   accounts: AccountsService;
   kyc: KycService;
+  broker?: BrokerAdapter | undefined;
 }): InvestmentServices {
-  const production = args.config.appEnv === "production";
-  const sandboxBroker = production ? null : createSandboxBroker();
-  const broker: BrokerAdapter | null = sandboxBroker;
+  const broker: BrokerAdapter | null = args.broker ?? null;
 
   const cash: CashPort = {
     async availableMinor(userId, currency) {
@@ -61,5 +60,5 @@ export function buildInvestmentServices(args: {
   };
 
   const investment = new InvestmentService({ store: new PrismaInvestmentStore(args.db), broker, cash, kyc });
-  return { investment, sandboxBroker };
+  return { investment, investmentBroker: broker };
 }

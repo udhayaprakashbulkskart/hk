@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { describe, expect, it } from "vitest";
-import { createLocalKms, decryptDocument, encryptDocument, KycError, KycService, TRANSITIONS, createSandboxScanner, createSandboxKycProvider, EICAR_TEST_STRING } from "../src";
+import { createLocalKms, decryptDocument, encryptDocument, KycError, KycService, TRANSITIONS } from "../src";
+import { createSandboxScanner, createSandboxKycProvider, EICAR_TEST_STRING } from "./doubles";
 import { createMemoryObjectStore } from "../../../packages/object-storage/src";
 import { createMemoryKycStore } from "./memory-store";
 

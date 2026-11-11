@@ -1,4 +1,4 @@
-import type { BrokerAdapter, BrokerOrderSnapshot, Side } from "./ports";
+import type { BrokerAdapter, BrokerOrderSnapshot, Side } from "../src";
 
 /**
  * SANDBOX ONLY. Not a broker. State changes happen only when a test calls `executeFills`, so the order

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { InvestmentError, InvestmentService, createSandboxBroker, positionFromFills, type CashPort } from "../src";
+import { InvestmentError, InvestmentService, positionFromFills, type CashPort } from "../src";
+import { createSandboxBroker } from "./doubles";
 import { createMemoryInvestmentStore } from "./memory-store";
 
 const t0 = new Date("2026-11-11T10:00:00Z");

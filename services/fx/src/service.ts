@@ -4,7 +4,7 @@ import { LAUNCH_CURRENCIES, isLaunchCurrency } from "@hkfinhub/shared";
 import { RATE_SCALE, type FxProvider, type FxQuoteRecord, type FxStore } from "./ports";
 
 export class FxError extends Error {
-  constructor(readonly code: "INVALID_REQUEST" | "CURRENCY_NOT_SUPPORTED" | "QUOTE_NOT_FOUND" | "QUOTE_EXPIRED" | "QUOTE_ALREADY_USED" | "INSUFFICIENT_FUNDS", message: string) {
+  constructor(readonly code: "INVALID_REQUEST" | "CURRENCY_NOT_SUPPORTED" | "QUOTE_NOT_FOUND" | "QUOTE_EXPIRED" | "QUOTE_ALREADY_USED" | "INSUFFICIENT_FUNDS" | "NOT_AVAILABLE", message: string) {
     super(message);
     this.name = "FxError";
   }

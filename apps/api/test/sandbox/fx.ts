@@ -1,4 +1,4 @@
-import { RATE_SCALE, type FxProvider } from "./ports";
+import { RATE_SCALE, type FxProvider } from "@hkfinhub/fx";
 
 /**
  * Sandbox rates. Illustrative values only, from the design sample table. Not market data, and never

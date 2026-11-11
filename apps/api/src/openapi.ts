@@ -114,7 +114,7 @@ export function buildOpenApi(): Record<string, unknown> {
   }
   return {
     openapi: "3.1.0",
-    info: { title: "HK FinHub customer API", version: "0.1.0", description: "Sandbox preview. Live money movement is not yet enabled." },
+    info: { title: "HK FinHub customer API", version: "0.1.0", description: "Customer API. Live money movement is not yet enabled." },
     servers: [{ url: "/" }],
     components: { securitySchemes: { bearerAuth: { type: "http", scheme: "bearer", bearerFormat: "JWT" } } },
     paths,

@@ -1,3 +1,5 @@
+import { createSandboxBroker, createSandboxFxProvider, createSandboxKycProvider, createSandboxScanner, createSandboxScreener } from "./sandbox";
+import { createMemoryObjectStore } from "@hkfinhub/object-storage";
 import { relayOutbox, deliver, CaptureSender, type JobQueue } from "@hkfinhub/notifications";
 import { loadConfig, type ApiConfig } from "../src/config";
 import { createContainer, type Container } from "../src/container";
@@ -43,6 +45,8 @@ export interface TestApp {
   config: ApiConfig;
   email: CaptureSender;
   sms: CaptureSender;
+  /** The simulated broker the tests drive. Test only. */
+  broker: ReturnType<typeof createSandboxBroker>;
   /** Delivers every pending notification now, inline. Mirrors the worker without needing BullMQ. */
   drain(): Promise<void>;
   close(): Promise<void>;
@@ -65,7 +69,14 @@ export async function startTestApp(overrides: { logger?: boolean; transport?: im
   const email = new CaptureSender();
   const sms = new CaptureSender();
   const logger = createLogger(overrides.logger ? "info" : "silent");
-  const container = createContainer(config, { email, sms, logger, ...(overrides.transport ? { transport: overrides.transport } : {}) });
+  // Simulated providers for tests only. See test/sandbox. The runtime container never receives these.
+  const broker = createSandboxBroker();
+  const testDoubles = {
+    fxProvider: createSandboxFxProvider(),
+    kyc: { scanner: createSandboxScanner(), provider: createSandboxKycProvider(), screener: createSandboxScreener(), storage: createMemoryObjectStore() },
+    investmentBroker: broker,
+  };
+  const container = createContainer(config, { email, sms, logger, testDoubles, ...(overrides.transport ? { transport: overrides.transport } : {}) });
   const app = await createApp(container);
   await app.init();
   await app.listen(0, "127.0.0.1");
@@ -80,6 +91,7 @@ export async function startTestApp(overrides: { logger?: boolean; transport?: im
     }
   };
   return {
+    broker,
     app,
     container,
     config,
