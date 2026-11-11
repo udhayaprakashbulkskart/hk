@@ -1,0 +1,10 @@
+{
+  "name": "hk-finhub",
+  "version": "0.1.0",
+  "private": true,
+  "description": "HK FinHub: global fintech platform (web, mobile, admin, API). Monorepo root.",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
