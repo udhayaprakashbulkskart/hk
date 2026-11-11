@@ -1,4 +1,4 @@
-import { createSandboxBroker, createSandboxFxProvider, createSandboxKycProvider, createSandboxScanner, createSandboxScreener } from "./sandbox";
+import { createTestBroker, createTestFxProvider, createTestKycProvider, createTestScanner, createTestScreener } from "./doubles";
 import { createMemoryObjectStore } from "@hkfinhub/object-storage";
 import { relayOutbox, deliver, CaptureSender, type JobQueue } from "@hkfinhub/notifications";
 import { loadConfig, type ApiConfig } from "../src/config";
@@ -22,7 +22,7 @@ export function testEnv(): NodeJS.ProcessEnv {
     SMS_PROVIDER: "capture",
     CORS_ORIGINS: "http://localhost:3000",
     API_PORT: "0",
-    PAYMENT_ENVIRONMENT: "sandbox",
+    PAYMENT_ENVIRONMENT: "test",
     FEATURE_LIVE_PAYMENTS: "false",
     FEATURE_LIVE_TRANSFERS: "false",
     RAZORPAY_KEY_ID: "rzp_test_fake",
@@ -33,7 +33,7 @@ export function testEnv(): NodeJS.ProcessEnv {
     STRIPE_WEBHOOK_SECRET: "whsec_stripe_test",
     ADYEN_API_KEY: "AQE-test-fake",
     ADYEN_HMAC_KEY: "44782DEF547AAA06C910C43932B1EB0C71FC68D9D0C057550C48EC2ACF6BA056",
-    ADYEN_MERCHANT_ACCOUNT: "HKFinHubSandbox",
+    ADYEN_MERCHANT_ACCOUNT: "HKFinHubTest",
     KYC_MASTER_KEY: randomBytes(32).toString("base64"),
     KYC_WEBHOOK_SECRET: "test-kyc-webhook-secret",
   };
@@ -46,7 +46,7 @@ export interface TestApp {
   email: CaptureSender;
   sms: CaptureSender;
   /** The simulated broker the tests drive. Test only. */
-  broker: ReturnType<typeof createSandboxBroker>;
+  broker: ReturnType<typeof createTestBroker>;
   /** Delivers every pending notification now, inline. Mirrors the worker without needing BullMQ. */
   drain(): Promise<void>;
   close(): Promise<void>;
@@ -69,11 +69,11 @@ export async function startTestApp(overrides: { logger?: boolean; transport?: im
   const email = new CaptureSender();
   const sms = new CaptureSender();
   const logger = createLogger(overrides.logger ? "info" : "silent");
-  // Simulated providers for tests only. See test/sandbox. The runtime container never receives these.
-  const broker = createSandboxBroker();
+  // Simulated providers for tests only. See test/test. The runtime container never receives these.
+  const broker = createTestBroker();
   const testDoubles = {
-    fxProvider: createSandboxFxProvider(),
-    kyc: { scanner: createSandboxScanner(), provider: createSandboxKycProvider(), screener: createSandboxScreener(), storage: createMemoryObjectStore() },
+    fxProvider: createTestFxProvider(),
+    kyc: { scanner: createTestScanner(), provider: createTestKycProvider(), screener: createTestScreener(), storage: createMemoryObjectStore() },
     investmentBroker: broker,
   };
   const container = createContainer(config, { email, sms, logger, testDoubles, ...(overrides.transport ? { transport: overrides.transport } : {}) });

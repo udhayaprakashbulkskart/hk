@@ -31,7 +31,7 @@ export function adyenSigningString(item: {
 /**
  * Adyen card and global collections through Sessions. Webhooks (notification items) carry an HMAC in
  * additionalData.hmacSignature. Status is only ever read from webhooks here, so fetchStatus is refused:
- * Adyen collections stay disabled for money until a status lookup is implemented and sandbox-tested.
+ * Adyen collections stay disabled for money until a status lookup is implemented and test-tested.
  */
 export function createAdyenAdapter(opts: AdyenOptions): ProviderAdapter {
   const base = opts.checkoutBaseUrl ?? "https://checkout-test.adyen.com/v71";

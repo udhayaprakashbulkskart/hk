@@ -108,7 +108,7 @@ test.describe("money screens", () => {
     }
   });
 
-  test("trade ticket cannot place an order in the sandbox", async ({ page }) => {
+  test("trade ticket cannot place an order in this app", async ({ page }) => {
     await page.goto("/invest", { waitUntil: "networkidle" });
     await expect(page.getByRole("button", { name: /Place (buy|sell) order/ })).toBeDisabled();
   });

@@ -212,7 +212,7 @@ interface PaymentProviderAdapter {
 - **Receive money.** Payment request with a unique reference, a QR code and a payment link. Funds count only when the collection is confirmed by the provider.
 - **Deposits and withdrawals.** Through the provider's hosted or SDK flow. The platform never sees card numbers.
 
-**Production gate.** Each flow checks `FEATURE_LIVE_*` and a `ProviderApproval` row (contract reference, approval date, approved corridors, approved by a Super Admin). If either is missing, the flow returns a clear "not yet available" response and the UI shows a sandbox banner.
+**Production gate.** Each flow checks `FEATURE_LIVE_*` and a `ProviderApproval` row (contract reference, approval date, approved corridors, approved by a Super Admin). If either is missing, the flow returns a clear "not yet available" response and the UI shows a test banner.
 
 ---
 
@@ -309,7 +309,7 @@ These block specific phases. They are not blockers for Phase 1 or Phase 2.
 | D4 | UPI and bank partner for India | Phase 6 | Finance |
 | D5 | International payout partner | Phase 6 | Finance |
 | D6 | Authorised wallet or PPI partner, if the product needs stored value | Phase 5 | Legal |
-| D7 | Razorpay, RazorpayX, Stripe and Adyen merchant accounts, sandbox and production approvals | Phase 6 | Finance |
+| D7 | Razorpay, RazorpayX, Stripe and Adyen merchant accounts, test and production approvals | Phase 6 | Finance |
 | D8 | Zerodha Kite Connect eligibility and API agreement | Phase 8 | Investments |
 | D9 | DriveWealth or alternative brokerage agreement and market list | Phase 8 | Investments |
 | D10 | Market-data licences for displayed quotes | Phase 8 | Investments |
@@ -345,8 +345,8 @@ Each table has a primary key (UUID v7 for time ordering), explicit foreign keys,
 | Environment | Purpose | Live money |
 |---|---|---|
 | `local` | Developer machines; Docker Compose for Postgres and Redis (`infrastructure/docker/docker-compose.dev.yml`) | Never |
-| `sandbox` | Provider sandbox credentials, seeded test customers | Never |
-| `staging` | Production-like, provider sandbox, pen-test target | Never |
+| `test` | Provider test credentials, seeded test customers | Never |
+| `staging` | Production-like, provider test, pen-test target | Never |
 | `production` | Live, after approvals in D1 to D10 | Only where `ProviderApproval` and feature flags allow |
 
 - Deployment: container images built in CI, pushed to a private registry, deployed to ECS Fargate across two availability zones. Database on RDS PostgreSQL Multi-AZ. Redis on ElastiCache.
@@ -362,12 +362,12 @@ Each table has a primary key (UUID v7 for time ordering), explicit foreign keys,
 | Unit | Vitest (services, money helpers, ledger rules) | Every PR |
 | Ledger property tests | fast-check: random postings always balance; reversals restore balances | Every PR |
 | API integration | Supertest against Postgres and Redis containers | Every PR |
-| Provider adapters | Recorded sandbox fixtures and webhook signature vectors | Every PR |
+| Provider adapters | Recorded test fixtures and webhook signature vectors | Every PR |
 | Contract | OpenAPI diff check; breaking changes need a version bump | Every PR |
 | Web and admin E2E | Playwright (Chromium), at phone and desktop widths | Before staging deploy |
 | Mobile E2E | Maestro on iOS and Android simulators | Before release |
 | Security | Semgrep or CodeQL, `pnpm audit`, secret scanning, DAST on staging | Nightly and before release |
-| Sandbox transactions | Scripted end-to-end flows against provider sandboxes | Phase 11 |
+| Test transactions | Scripted end-to-end flows against provider sandboxes | Phase 11 |
 
 ---
 

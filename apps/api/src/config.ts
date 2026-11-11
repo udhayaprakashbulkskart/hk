@@ -5,7 +5,7 @@ const base64Key32 = z
   .refine((v) => Buffer.from(v, "base64").length === 32, "must be base64 for exactly 32 bytes");
 
 const schema = z.object({
-  APP_ENV: z.enum(["local", "test", "sandbox", "staging", "production"]).default("local"),
+  APP_ENV: z.enum(["local", "test", "staging", "production"]).default("local"),
   API_PORT: z.coerce.number().int().min(0).max(65535).default(4000), // 0 picks a free port (tests)
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
   DATABASE_URL: z.string().url(),
@@ -22,7 +22,7 @@ const schema = z.object({
   SMS_PROVIDER: z.enum(["none", "capture"]).default("none"),
   TOTP_ISSUER: z.string().default("HK FinHub"),
   SENTRY_DSN: z.string().optional(),
-  PAYMENT_ENVIRONMENT: z.enum(["sandbox", "live"]).default("sandbox"),
+  PAYMENT_ENVIRONMENT: z.enum(["test", "live"]).default("test"),
   FEATURE_LIVE_PAYMENTS: z.enum(["true", "false"]).default("false"),
   FEATURE_LIVE_TRANSFERS: z.enum(["true", "false"]).default("false"),
   RAZORPAY_KEY_ID: z.string().optional(),
@@ -54,7 +54,7 @@ const schema = z.object({
 export interface ApiConfig {
   /** The operator's own receiving account. Read from environment only; never committed. Null when unset. */
   receivingAccount: { accountName: string; accountNumber: string; bankName: string } | null;
-  appEnv: "local" | "test" | "sandbox" | "staging" | "production";
+  appEnv: "local" | "test" | "staging" | "production";
   port: number;
   logLevel: string;
   databaseUrl: string;
@@ -71,7 +71,7 @@ export interface ApiConfig {
   smsProvider: "none" | "capture";
   totpIssuer: string;
   sentryDsn: string | undefined;
-  paymentEnvironment: "sandbox" | "live";
+  paymentEnvironment: "test" | "live";
   adminAllowedIps: string[];
   /** The single operator login. Created at startup from configuration; there is no customer signup. */
   loginUser: { email: string; phone: string; password: string; fullName: string } | undefined;

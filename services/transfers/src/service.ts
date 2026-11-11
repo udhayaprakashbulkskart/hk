@@ -9,7 +9,7 @@ import { TransferError } from "./errors";
 import type { OutboundGuard, PaymentRequestRecord, RequestStore, TransferKind, TransferRecord, TransferStore } from "./ports";
 
 export interface TransfersConfig {
-  environment: "sandbox" | "live";
+  environment: "test" | "live";
   liveTransfersEnabled: boolean;
 }
 

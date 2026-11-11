@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { InvestmentError, InvestmentService, positionFromFills, type CashPort } from "../src";
-import { createSandboxBroker } from "./doubles";
+import { createTestBroker } from "./doubles";
 import { createMemoryInvestmentStore } from "./memory-store";
 
 const t0 = new Date("2026-11-11T10:00:00Z");
@@ -8,7 +8,7 @@ const at = (m: number) => new Date(t0.getTime() + m * 60_000);
 
 function harness(opts: { verified?: boolean; cash?: bigint; broker?: boolean } = {}) {
   const store = createMemoryInvestmentStore();
-  const broker = createSandboxBroker();
+  const broker = createTestBroker();
   const settled: { userId: string; side: string; amountMinor: bigint; idempotencyKey: string }[] = [];
   let cash = opts.cash ?? 1_000_000n;
   const cashPort: CashPort = {

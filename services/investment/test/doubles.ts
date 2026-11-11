@@ -1,10 +1,10 @@
 import type { BrokerAdapter, BrokerOrderSnapshot, Side } from "../src";
 
 /**
- * SANDBOX ONLY. Not a broker. State changes happen only when a test calls `executeFills`, so the order
+ * TEST ONLY. Not a broker. State changes happen only when a test calls `executeFills`, so the order
  * lifecycle can be exercised. Nothing here reflects a real market price or a real execution.
  */
-export function createSandboxBroker(): BrokerAdapter & {
+export function createTestBroker(): BrokerAdapter & {
   executeFills(brokerOrderId: string, fills: { quantity: bigint; priceMinor: bigint }[]): void;
   rejectOrder(brokerOrderId: string): void;
   orders: Map<string, { clientOrderId: string; side: Side; quantity: bigint; snapshot: BrokerOrderSnapshot }>;
@@ -13,7 +13,7 @@ export function createSandboxBroker(): BrokerAdapter & {
   const byClient = new Map<string, string>();
   let seq = 0;
   return {
-    id: "sandbox-broker",
+    id: "test-broker",
     orders,
     async placeOrder({ clientOrderId, side, quantity }) {
       const existing = byClient.get(clientOrderId);

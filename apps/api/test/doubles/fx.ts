@@ -1,7 +1,7 @@
 import { RATE_SCALE, type FxProvider } from "@hkfinhub/fx";
 
 /**
- * Sandbox rates. Illustrative values only, from the design sample table. Not market data, and never
+ * Test rates. Illustrative values only, from the design sample table. Not market data, and never
  * shown as live. The real FX provider replaces this adapter (decision D3).
  */
 const SAMPLE: Record<string, string> = {
@@ -19,12 +19,12 @@ export function toScaled(decimal: string): bigint {
   return BigInt(w!) * RATE_SCALE + BigInt((f + "0".repeat(8)).slice(0, 8));
 }
 
-export function createSandboxFxProvider(clock: () => Date = () => new Date()): FxProvider {
+export function createTestFxProvider(clock: () => Date = () => new Date()): FxProvider {
   return {
-    id: "sandbox-sample",
+    id: "test-rates",
     async rate(from, to) {
       const r = SAMPLE[`${from}>${to}`];
-      if (!r) throw new Error(`no sandbox rate for ${from} to ${to}`);
+      if (!r) throw new Error(`no test rate for ${from} to ${to}`);
       return { rateScaled: toScaled(r), quotedAt: clock() };
     },
     async history(from, to, days) {

@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { createLocalKms, decryptDocument, encryptDocument, KycError, KycService, TRANSITIONS } from "../src";
-import { createSandboxScanner, createSandboxKycProvider, EICAR_TEST_STRING } from "./doubles";
+import { createTestScanner, createTestKycProvider, EICAR_TEST_STRING } from "./doubles";
 import { createMemoryObjectStore } from "../../../packages/object-storage/src";
 import { createMemoryKycStore } from "./memory-store";
 
@@ -20,8 +20,8 @@ function build(opts: { now?: Date } = {}) {
     store,
     storage,
     kms,
-    scanner: createSandboxScanner(),
-    provider: createSandboxKycProvider(),
+    scanner: createTestScanner(),
+    provider: createTestKycProvider(),
     config: { fieldKey },
     now: () => opts.now ?? new Date("2026-11-11T00:00:00Z"),
   });

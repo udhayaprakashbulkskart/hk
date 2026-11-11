@@ -10,7 +10,7 @@ Payment orchestration: routes each collection or payout to an enabled provider, 
 - **Every step is idempotent.** Status changes are compare-and-set. Ledger postings use keys derived from the payment, so a replayed or redelivered webhook never credits twice. An interrupted run recovers when the event is redelivered.
 - **Out-of-order events are safe.** The provider's status is the truth. An event that arrives before its state is ignored, and the later confirmed event applies once.
 - **Refunds reverse the original posting** rather than editing it.
-- **Reconciliation against provider statements is planned, not built.** It belongs with the scheduled worker and needs the provider statement formats confirmed in sandbox.
+- **Reconciliation against provider statements is planned, not built.** It belongs with the scheduled worker and needs the provider statement formats confirmed in test.
 
 ## Status
 

@@ -13,7 +13,7 @@ export interface RazorpayOptions {
 /**
  * Razorpay collections (INR, UPI and cards). Collections are orders: the customer pays the order and
  * Razorpay sends webhooks. Request shapes follow Razorpay's public API; they must be confirmed in the
- * sandbox before live use (decision D7).
+ * test before live use (decision D7).
  */
 export function createRazorpayAdapter(opts: RazorpayOptions): ProviderAdapter {
   const base = opts.baseUrl ?? "https://api.razorpay.com/v1";

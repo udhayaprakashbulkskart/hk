@@ -15,7 +15,7 @@ export const REVEAL_FIELDS = ["PAN", "PASSPORT", "DATE_OF_BIRTH"] as const;
 export type RevealField = (typeof REVEAL_FIELDS)[number];
 
 export const PROVIDER_IDS = ["razorpay", "razorpayx", "stripe", "adyen", "upi_bank_partner", "intl_payout_partner", "ppi_partner"] as const;
-export const ENVIRONMENTS = ["sandbox", "live"] as const;
+export const ENVIRONMENTS = ["test", "live"] as const;
 
 /** a***@example.com: first letter and domain only. */
 export function maskEmail(email: string): string {
@@ -58,7 +58,7 @@ export class AdminService {
   async requestProviderApproval(actor: StaffActor, input: { providerId: string; environment: string; contractRef: string }): Promise<string> {
     await this.require(actor, "provider.config.request", { type: "Provider", id: input.providerId });
     if (!(PROVIDER_IDS as readonly string[]).includes(input.providerId)) throw new AdminError("INVALID_REQUEST", "unknown provider");
-    if (!(ENVIRONMENTS as readonly string[]).includes(input.environment)) throw new AdminError("INVALID_REQUEST", "environment must be sandbox or live");
+    if (!(ENVIRONMENTS as readonly string[]).includes(input.environment)) throw new AdminError("INVALID_REQUEST", "environment must be test or live");
     if (input.contractRef.trim().length < 4) throw new AdminError("INVALID_REQUEST", "give the contract reference");
     const row = await this.store.createApproval({ action: "PROVIDER_CONFIG", payload: { ...input, contractRef: input.contractRef.trim() }, requestedBy: actor.id });
     await this.store.audit({ actorUserId: actor.id, action: "provider_approval_requested", subjectType: "ApprovalRequest", subjectId: row.id, metadata: { providerId: input.providerId, environment: input.environment } });

@@ -11,7 +11,7 @@ export function createPartnerStub(id: Extract<ProviderId, "upi_bank_partner" | "
   };
   return {
     id,
-    environment: "sandbox",
+    environment: "test",
     createCollection: async () => refuse(),
     createPayout: async () => refuse(),
     fetchStatus: async () => refuse(),

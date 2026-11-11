@@ -25,4 +25,4 @@ Socket.IO at path `/v1/realtime`. Connect with `auth: { token: <accessToken> }`.
 
 ## Status
 
-Sandbox. Email and SMS are not connected to a provider yet (decision D12), so codes are queued and delivery fails closed until one is approved.
+Test. Email and SMS are not connected to a provider yet (decision D12), so codes are queued and delivery fails closed until one is approved.

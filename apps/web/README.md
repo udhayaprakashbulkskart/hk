@@ -2,7 +2,7 @@
 
 Next.js (App Router) customer app: landing page, authentication screens, and the authenticated area (dashboard, accounts, send, receive, global transfer, exchange, investments, portfolio, history, statements, notifications, security, profile, settings).
 
-**Status: Phase 2 (sandbox UI).** All data comes from `src/lib/api`, which currently returns clearly labelled sample data. No live money movement, live rates, live prices or live sign-in are wired in yet. Phase 4 replaces the sandbox client with the real API.
+**Status: Phase 2 (UI).** All data comes from `src/lib/api`, which currently returns clearly labelled sample data. No live money movement, live rates, live prices or live sign-in are wired in yet. Phase 4 replaces the data client with the real API.
 
 ## Commands
 
@@ -18,7 +18,7 @@ pnpm --filter @hkfinhub/web start
 - `src/app/(auth)`: login, register, OTP verification, password reset.
 - `src/app/(app)`: authenticated screens. `layout.tsx` loads notification counts and renders the shell.
 - `src/components`: app shell (desktop sidebar and mobile bottom navigation), charts (Recharts, theme-aware), send-money wizard, receive panel, FX and global-transfer tools, order ticket, payment entry shell, skyline artwork.
-- `src/lib/api`: the single data boundary. `sandbox.ts` is the sample implementation.
+- `src/lib/api`: the single data boundary. `test.ts` is the sample implementation.
 - `src/lib/nav.ts`: navigation config shared by the sidebar and the "More" page.
 - `src/lib/money.ts`: minor-unit formatting and parsing. Money is never handled as floats.
 

@@ -122,7 +122,7 @@ describe("UPI deposits through Razorpay", () => {
 });
 
 describe("Adyen webhooks", () => {
-  const item = { pspReference: "PSP1", merchantAccountCode: "HKFinHubSandbox", merchantReference: "col-abc", amount: { value: 1000, currency: "HKD" }, eventCode: "AUTHORISATION", success: "true" };
+  const item = { pspReference: "PSP1", merchantAccountCode: "HKFinHubTest", merchantReference: "col-abc", amount: { value: 1000, currency: "HKD" }, eventCode: "AUTHORISATION", success: "true" };
   const envelope = (sig: string) => JSON.stringify({ notificationItems: [{ NotificationRequestItem: { ...item, additionalData: { hmacSignature: sig } } }] });
 
   it("accepts a correctly signed notification and answers the way Adyen expects", async () => {

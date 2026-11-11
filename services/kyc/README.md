@@ -10,7 +10,7 @@ Identity verification: onboarding details, documents, status and provider verdic
 - **Provider verdicts.** A `PASS` is held for review while a blocking compliance case is open on the user.
 
 ## Production posture
-KMS, the malware scanner and the KYC vendor are passed in as `null` in production. The matching feature then returns `NOT_AVAILABLE`. Sandbox versions (`src/sandbox.ts`) are for development and tests only. The EICAR test string is flagged by the sandbox scanner.
+KMS, the malware scanner and the KYC vendor are passed in as `null` in production. The matching feature then returns `NOT_AVAILABLE`. Test versions (`src/test.ts`) are for development and tests only. The EICAR test string is flagged by the test scanner.
 
 ## Not built
 AWS KMS adapter, a real scanner, a real KYC vendor (D2), PAN and address verification against authorities, and the staff review queue (Phase 9).

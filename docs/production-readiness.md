@@ -1,17 +1,17 @@
 # Production readiness (Phase 12)
 
-Status: **not ready for production.** The code is sandbox-complete for the flows in the brief. Nothing here is
+Status: **not ready for production.** The code is test-complete for the flows in the brief. Nothing here is
 live money. Every live path is refused by default and needs a human approval before it can be turned on.
 
 ## What is in place
 - API: auth, accounts and ledger (double entry, database-enforced immutability and no-overdraft), payments
-  (webhook verification, sandbox adapters), FX and transfers (reservation model), KYC and compliance (encrypted
+  (webhook verification, test adapters), FX and transfers (reservation model), KYC and compliance (encrypted
   identity fields, audited document reads, sanctions holds, limits), staff administration (server-side permission
-  matrix, maker-checker, audited PII reveals), and investments (sandbox broker, broker-confirmed fills only).
+  matrix, maker-checker, audited PII reveals), and investments (test broker, broker-confirmed fills only).
 - Tests: 162 API integration tests against real Postgres and Redis, plus unit suites for KYC (20), compliance (8),
   admin (7), investment (11) and ledger (3). Every typecheck passes. Dependency audit: no known vulnerabilities.
 - Database: Neon project `hk-finhub` (Postgres 16, Singapore) holds the full schema, with migrations recorded.
-- Web: deployed to Vercel as a sandbox build with sandbox data. SSO protection is on.
+- Web: deployed to Vercel as a test build with sample data. SSO protection is on.
 
 ## Access model
 - Customers cannot sign up. The public signup and verification-code routes are removed, and their screens are gone
@@ -39,11 +39,11 @@ live money. Every live path is refused by default and needs a human approval bef
 | Broker contracts (Zerodha, DriveWealth) | Investments refused in production | D8 to D10 |
 | Licensed market-data feed | No quotes or market values are shown | D9 |
 | Admin screens not yet built | `apps/admin` covers approvals, cases, identity, reveals, customers, payments, transfers, reconciliation, currencies, settings and audit. Still missing: staff management, provider request screen, fraud monitoring, notifications | Build work |
-| Web and mobile on the real API | Both still use sandbox data. The web data boundary has no real endpoint for market quotes, price history, notifications or devices, and no market-value source for holdings | Build work plus D9 (market data) |
+| Web and mobile on the real API | Both still use sample data. The web data boundary has no real endpoint for market quotes, price history, notifications or devices, and no market-value source for holdings | Build work plus D9 (market data) |
 | API hosting | No host exists for the NestJS API (Vercel is not a fit for Socket.IO and workers) | Infrastructure decision |
 | Admin network allow-list | `ADMIN_ALLOWED_IPS` must be set; production returns NOT_AVAILABLE for admin routes until it is | Ops |
 | Staff MFA enrolment | Staff members must have confirmed TOTP before a role takes effect | Ops |
-| Vercel production target | The sandbox web build still carries the production target. SSO protection now covers every deployment, so only team members can open it. The target itself cannot be changed with the available tools | Ops: redeploy as preview and remove the production domain in Vercel settings |
+| Vercel production target | The test web build still carries the production target. SSO protection now covers every deployment, so only team members can open it. The target itself cannot be changed with the available tools | Ops: redeploy as preview and remove the production domain in Vercel settings |
 
 ## Deployment checklist (once blockers are cleared)
 1. Set every variable in `.env.example`. Secrets come from the secrets manager, never from the repo.

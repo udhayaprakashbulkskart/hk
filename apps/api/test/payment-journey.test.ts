@@ -17,8 +17,8 @@ beforeAll(async () => {
 afterAll(async () => { await t.close(); });
 beforeEach(async () => { await resetState(t); ctx.fake.state.payouts.clear(); ctx.fake.state.intents.clear(); ctx.fake.state.sent.length = 0; });
 
-/** The sandbox loop from the phase 6 exit criteria, end to end, against the HTTP surface. */
-describe("sandbox journey", () => {
+/** The test loop from the phase 6 exit criteria, end to end, against the HTTP surface. */
+describe("payment journey", () => {
   it("collection posts, payout posts, and the books balance", async () => {
     const c = await verifiedCustomer(t, "journey-ok");
     await fundHkd(ctx, c, "250000"); // collection: Stripe, confirmed and posted

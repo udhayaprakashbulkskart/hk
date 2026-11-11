@@ -25,7 +25,7 @@ services:
       - key: SMS_PROVIDER
         value: none
       - key: PAYMENT_ENVIRONMENT
-        value: sandbox
+        value: test
       - key: FEATURE_LIVE_PAYMENTS
         value: "false"
       - key: FEATURE_LIVE_TRANSFERS

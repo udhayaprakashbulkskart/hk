@@ -9,7 +9,7 @@ export interface ObjectStore {
   get(key: string): Promise<Buffer | null>;
 }
 
-/** In-memory store. Tests and the sandbox only: content is lost on restart. */
+/** In-memory store. Tests and the test only: content is lost on restart. */
 export function createMemoryObjectStore(): ObjectStore & { keys(): string[] } {
   const items = new Map<string, Buffer>();
   return {
@@ -26,7 +26,7 @@ export function createMemoryObjectStore(): ObjectStore & { keys(): string[] } {
 
 /**
  * S3 adapter with SSE-KMS. UNVERIFIED against AWS: written from the SDK's documented commands and exercised
- * only through the SDK's own client interface in tests. Verify in a sandbox bucket before storing real documents.
+ * only through the SDK's own client interface in tests. Verify in a test bucket before storing real documents.
  */
 export function createS3ObjectStore(opts: { bucket: string; region: string; kmsKeyId: string; client?: S3Client }): ObjectStore {
   const client = opts.client ?? new S3Client({ region: opts.region });

@@ -192053,7 +192053,7 @@ function date4(params) {
 // src/config.ts
 var base64Key32 = external_exports.string().refine((v2) => Buffer.from(v2, "base64").length === 32, "must be base64 for exactly 32 bytes");
 var schema = external_exports.object({
-  APP_ENV: external_exports.enum(["local", "test", "sandbox", "staging", "production"]).default("local"),
+  APP_ENV: external_exports.enum(["local", "test", "staging", "production"]).default("local"),
   API_PORT: external_exports.coerce.number().int().min(0).max(65535).default(4e3),
   // 0 picks a free port (tests)
   LOG_LEVEL: external_exports.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
@@ -192071,7 +192071,7 @@ var schema = external_exports.object({
   SMS_PROVIDER: external_exports.enum(["none", "capture"]).default("none"),
   TOTP_ISSUER: external_exports.string().default("HK FinHub"),
   SENTRY_DSN: external_exports.string().optional(),
-  PAYMENT_ENVIRONMENT: external_exports.enum(["sandbox", "live"]).default("sandbox"),
+  PAYMENT_ENVIRONMENT: external_exports.enum(["test", "live"]).default("test"),
   FEATURE_LIVE_PAYMENTS: external_exports.enum(["true", "false"]).default("false"),
   FEATURE_LIVE_TRANSFERS: external_exports.enum(["true", "false"]).default("false"),
   RAZORPAY_KEY_ID: external_exports.string().optional(),
@@ -201815,7 +201815,7 @@ function createPartnerStub(id, decision) {
   };
   return {
     id,
-    environment: "sandbox",
+    environment: "test",
     createCollection: async () => refuse(),
     createPayout: async () => refuse(),
     fetchStatus: async () => refuse(),
@@ -202851,7 +202851,7 @@ function hasPermission(role, permission) {
 var REVEAL_REASONS = ["CUSTOMER_REQUEST", "FRAUD_INVESTIGATION", "REGULATORY_REQUEST", "DISPUTE_RESOLUTION"];
 var REVEAL_FIELDS = ["PAN", "PASSPORT", "DATE_OF_BIRTH"];
 var PROVIDER_IDS = ["razorpay", "razorpayx", "stripe", "adyen", "upi_bank_partner", "intl_payout_partner", "ppi_partner"];
-var ENVIRONMENTS = ["sandbox", "live"];
+var ENVIRONMENTS = ["test", "live"];
 function maskEmail(email4) {
   const [local = "", domain2 = ""] = email4.split("@");
   return `${local.slice(0, 1)}***@${domain2}`;
@@ -202891,7 +202891,7 @@ var AdminService = class {
   async requestProviderApproval(actor, input2) {
     await this.require(actor, "provider.config.request", { type: "Provider", id: input2.providerId });
     if (!PROVIDER_IDS.includes(input2.providerId)) throw new AdminError("INVALID_REQUEST", "unknown provider");
-    if (!ENVIRONMENTS.includes(input2.environment)) throw new AdminError("INVALID_REQUEST", "environment must be sandbox or live");
+    if (!ENVIRONMENTS.includes(input2.environment)) throw new AdminError("INVALID_REQUEST", "environment must be test or live");
     if (input2.contractRef.trim().length < 4) throw new AdminError("INVALID_REQUEST", "give the contract reference");
     const row = await this.store.createApproval({ action: "PROVIDER_CONFIG", payload: { ...input2, contractRef: input2.contractRef.trim() }, requestedBy: actor.id });
     await this.store.audit({ actorUserId: actor.id, action: "provider_approval_requested", subjectType: "ApprovalRequest", subjectId: row.id, metadata: { providerId: input2.providerId, environment: input2.environment } });

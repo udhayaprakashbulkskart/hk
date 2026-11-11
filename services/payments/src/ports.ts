@@ -1,7 +1,7 @@
 import type { LaunchCurrency } from "@hkfinhub/shared";
 
 export type Direction = "COLLECTION" | "PAYOUT";
-export type Environment = "sandbox" | "live";
+export type Environment = "test" | "live";
 export type ProviderId =
   | "razorpay" | "razorpayx" | "stripe" | "adyen"
   | "upi_bank_partner" | "intl_payout_partner" | "ppi_partner";

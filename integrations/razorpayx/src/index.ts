@@ -14,7 +14,7 @@ export interface RazorpayXOptions {
 
 /**
  * RazorpayX payouts to India (UPI and bank). A payout needs a contact and a fund account first, then the
- * payout itself. Shapes follow RazorpayX's public API and must be confirmed in the sandbox (decision D7).
+ * payout itself. Shapes follow RazorpayX's public API and must be confirmed in the test (decision D7).
  */
 export function createRazorpayXAdapter(opts: RazorpayXOptions): ProviderAdapter {
   const base = opts.baseUrl ?? "https://api.razorpay.com/v1";

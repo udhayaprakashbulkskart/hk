@@ -16,7 +16,7 @@ const CUSTOMER_ROUTES = [
 ];
 const PUBLIC_ROUTES = ["/login", "/reset"];
 
-/** Client-side navigation keeps the in-memory sandbox session alive across screens. */
+/** Client-side navigation keeps the in-memory test session alive across screens. */
 async function navigate(page: Page, path: string) {
   await page.evaluate((p) => {
     window.history.pushState({}, "", p);

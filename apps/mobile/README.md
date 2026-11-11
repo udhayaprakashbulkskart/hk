@@ -2,7 +2,7 @@
 
 Expo (React Native, TypeScript) customer app. Same screens, data boundary and design tokens as the web app.
 
-**Status: Phase 3 (sandbox UI).** All data comes from `@hkfinhub/api-client`, the same sandbox client as the web app. Sign-in, OTP and transfers are simulated. Phase 4 replaces the client with the real API.
+**Status: Phase 3 (UI).** All data comes from `@hkfinhub/api-client`, the same data client as the web app. Sign-in, OTP and transfers are simulated. Phase 4 replaces the client with the real API.
 
 ## Structure
 
@@ -27,7 +27,7 @@ Expo (React Native, TypeScript) customer app. Same screens, data boundary and de
 | Push notifications | `expo-notifications` | Needs an EAS project ID in `app.json` (`extra.eas.projectId`). |
 | QR scanning | `expo-camera` barcode scanner | Accepts `hkfinhub://pay/REQ-…` and the HTTPS pay link. |
 | Deep links | `scheme: "hkfinhub"` + Expo Router | `hkfinhub://pay/REQ-…` opens the payment request screen. |
-| Secure session | `expo-secure-store` | Token is a sandbox marker, not a credential. |
+| Secure session | `expo-secure-store` | Token is a test marker, not a credential. |
 
 ## Commands
 

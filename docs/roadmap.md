@@ -7,16 +7,16 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 | # | Phase | Status | Blocked by |
 |---|---|---|---|
 | 1 | Repository inspection and technical architecture | ✅ (this commit) | — |
-| 2 | Design system and complete web UI | ✅ | — (sandbox data; live APIs come in Phase 4) |
-| 3 | Mobile app screens | ✅ | — (sandbox data; live APIs in Phase 4) |
+| 2 | Design system and complete web UI | ✅ | — (sample data; live APIs come in Phase 4) |
+| 3 | Mobile app screens | ✅ | — (sample data; live APIs in Phase 4) |
 | 4 | Backend, database and authentication | ✅ | D12 (messaging providers), D13 (Sentry DSN) for live delivery |
 | 5 | Accounts and ledger | ✅ | — (no partner needed: the wallet is a ledger view) |
-| 6 | Payment provider adapters, FX, transfers | 🟡 | D1, D3, D4, D5, D7 for live; sandbox complete |
-| 7 | KYC and compliance modules | 🟡 | D2, D15 for live; D11 for KMS and S3 verification; sandbox complete |
-| 8 | Broker and investment adapters | 🟡 | D8, D9, D10 for live brokers and market data; sandbox broker and ledger settlement complete |
+| 6 | Payment provider adapters, FX, transfers | 🟡 | D1, D3, D4, D5, D7 for live; test complete |
+| 7 | KYC and compliance modules | 🟡 | D2, D15 for live; D11 for KMS and S3 verification; test complete |
+| 8 | Broker and investment adapters | 🟡 | D8, D9, D10 for live brokers and market data; test broker and ledger settlement complete |
 | 9 | Admin dashboard | 🟡 | Backend and staff console built (`apps/admin`); users, payments, transfers, currency, reports and settings screens not built |
-| 10 | Integrate all applications | 🟡 | API journey test complete; web and mobile still on sandbox data |
-| 11 | Tests, security checks and sandbox transactions | 🟡 | 178 API tests, 16 automated security probes (verified against a deliberate mutation), unit suites, typechecks, clean dependency audit; no penetration test |
+| 10 | Integrate all applications | 🟡 | API journey test complete; web and mobile still on sample data |
+| 11 | Tests, security checks and test transactions | 🟡 | 178 API tests, 16 automated security probes (verified against a deliberate mutation), unit suites, typechecks, clean dependency audit; no penetration test |
 | 12 | Production deployment preparation | 🟡 | Readiness document written; not deployed. See docs/production-readiness.md |
 
 ---
@@ -67,7 +67,7 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 
 ## Phase 3: Mobile app screens ✅
 
-**Result:** Expo SDK 58 app in `apps/mobile` with 26 routes covering every screen in spec section 14, plus the QR scanner and the payment-link route. Shares the sandbox client (`packages/api-client`) and colour tokens (`packages/tokens`) with the web app. Native features: biometric app lock, secure session storage, push permission and token (needs EAS project ID), QR scanning, and the `hkfinhub://` deep link.
+**Result:** Expo SDK 58 app in `apps/mobile` with 26 routes covering every screen in spec section 14, plus the QR scanner and the payment-link route. Shares the data client (`packages/api-client`) and colour tokens (`packages/tokens`) with the web app. Native features: biometric app lock, secure session storage, push permission and token (needs EAS project ID), QR scanning, and the `hkfinhub://` deep link.
 
 **Verified:** `expo export` bundles iOS (Hermes), Android (Hermes) and web; the web export is driven by 8 Playwright tests at phone size in both themes (sign-in, every screen without horizontal overflow or uncaught errors, public screens, payment-link handling). Strict TypeScript passes.
 
@@ -79,7 +79,7 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 
 **Deliverables:** expo-router navigation; splash, login, registration, OTP, dashboard, accounts, send, receive, global transfer, exchange, investment, portfolio, history, profile, settings, notifications, security. Placeholder data layer behind the same client interface.
 
-**Exit criteria:** app runs on iOS and Android simulators. Maestro smoke test passes for login → dashboard → send money (sandbox). Biometric prompt wired (real verification comes in Phase 4).
+**Exit criteria:** app runs on iOS and Android simulators. Maestro smoke test passes for login → dashboard → send money (test). Biometric prompt wired (real verification comes in Phase 4).
 
 ---
 
@@ -91,7 +91,7 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 
 **Decisions taken:** in-house authentication (ADR-007 accepted, D14 to be confirmed); Argon2id passwords; OTPs, refresh tokens and recovery codes stored as keyed digests; TOTP secrets encrypted; no DI metadata, so tsx, vitest and tsc behave the same.
 
-**Client wiring (done):** `packages/api-client/src/auth-http.ts` is a typed client for `/v1/auth`. Web sign-in, registration, two-step verification, MFA and password reset call the API. Mobile does the same, and restores sessions from the device secure store on launch. Other domains still use the sandbox client until their endpoints exist in Phase 5 onwards. Web and mobile tests intercept the API at the browser boundary; the API itself is covered by its own suite. The web CSP now allows the configured API origin, which was blocking requests before.
+**Client wiring (done):** `packages/api-client/src/auth-http.ts` is a typed client for `/v1/auth`. Web sign-in, registration, two-step verification, MFA and password reset call the API. Mobile does the same, and restores sessions from the device secure store on launch. Other domains still use the data client until their endpoints exist in Phase 5 onwards. Web and mobile tests intercept the API at the browser boundary; the API itself is covered by its own suite. The web CSP now allows the configured API origin, which was blocking requests before.
 
 **Still open:**
 - D12: no email or SMS provider is approved, so messages fail closed until one is chosen.
@@ -156,7 +156,7 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 
 ## Phase 6: Payment provider adapters, FX and transfers 🟡
 
-**Status: sandbox complete. Live is not enabled and cannot be enabled without the inputs below.**
+**Status: test complete. Live is not enabled and cannot be enabled without the inputs below.**
 
 **Built:**
 - `services/payments`: routing from a capability table, collections and payouts, webhook verification, deduplication, provider confirmation before any change, refunds, and two live gates (flag plus a provider approval row).
@@ -165,21 +165,21 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 - `services/transfers`: pending transfers reserve funds without moving balances; settlement posts once on confirmation; failure releases the reservation. Internal transfers, withdrawals, and payment requests with QR and link.
 - HTTP: `/v1/deposits`, `/v1/transfers`, `/v1/transfers/internal`, `/v1/transfers/withdrawals`, `/v1/fx/*`, `/v1/payment-requests/*`, `/v1/webhooks/{provider}`, `/v1/config/currencies`.
 
-**Verified (131 API tests against real Postgres and Redis):** webhook valid, invalid, forged, stale, replayed, redelivered, unmatched and out-of-order cases, each checked against balances. Refund reversal. A pending transfer leaves balances unchanged and blocks overspend, including two simultaneous payouts. Settlement only after provider confirmation. Failed payout releases funds. The sandbox journey from the exit criteria (collection, posting, payout, posting, reconciled books) and its failure path. Live refused with no provider call while the flag is off, and still refused with the flag on but no approval. Quotes: exact integer fee and rounding, single use, expiry. Payment requests: payer view without account identifiers, payment closes the request, cancel rules. Pinned signature vectors for each provider.
+**Verified (131 API tests against real Postgres and Redis):** webhook valid, invalid, forged, stale, replayed, redelivered, unmatched and out-of-order cases, each checked against balances. Refund reversal. A pending transfer leaves balances unchanged and blocks overspend, including two simultaneous payouts. Settlement only after provider confirmation. Failed payout releases funds. The test journey from the exit criteria (collection, posting, payout, posting, reconciled books) and its failure path. Live refused with no provider call while the flag is off, and still refused with the flag on but no approval. Quotes: exact integer fee and rounding, single use, expiry. Payment requests: payer view without account identifiers, payment closes the request, cancel rules. Pinned signature vectors for each provider.
 
 **Not done, and why:**
 - Provider request shapes are unverified against live sandboxes (D7), and the signature vectors are regression vectors from the documented algorithms, not provider recordings. Both must be replaced before go-live.
 - Provider credentials are not held. No network call has ever been made to a provider.
 - D1, D3 (FX rates are illustrative), D4, D5 and D6 are open. Their stub adapters refuse everything.
 - Provider statement reconciliation is planned, not built.
-- Web and mobile send, receive and deposit screens still use the sandbox client. Wiring them to these endpoints is part of Phase 10.
+- Web and mobile send, receive and deposit screens still use the data client. Wiring them to these endpoints is part of Phase 10.
 - Adyen cannot move money until its status lookup is built.
 
-**Goal:** provider adapters behind one port, FX quotes, and transfer workflows. Sandbox first. Live disabled.
+**Goal:** provider adapters behind one port, FX quotes, and transfer workflows. Test first. Live disabled.
 
 **Deliverables:**
-- `integrations/razorpay`, `razorpayx`, `stripe`, `adyen`: each implements `PaymentProviderAdapter`, with sandbox and production configuration, signature-verified webhooks, idempotent calls and status polling.
-- `UPI/bank partner`, `international payout partner`, `wallet/PPI partner`: adapter interfaces and a sandbox stub. Real adapters only after D4, D5, D6 are signed.
+- `integrations/razorpay`, `razorpayx`, `stripe`, `adyen`: each implements `PaymentProviderAdapter`, with test and production configuration, signature-verified webhooks, idempotent calls and status polling.
+- `UPI/bank partner`, `international payout partner`, `wallet/PPI partner`: adapter interfaces and a test stub. Real adapters only after D4, D5, D6 are signed.
 - `ProviderCapability` data: corridor, currency, method, direction. Routing reads only enabled rows.
 - `services/payments`: collections, payouts, refunds, status machine (`pending` → `posted` | `failed` | `reversed`), reconciliation against provider reports.
 - `services/fx`: quotes from the FX provider (D3), expiry, service fee, recipient amount, rate history.
@@ -189,10 +189,10 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 **Exit criteria:**
 - Webhook tests with recorded signature vectors: valid, invalid, replayed, out-of-order.
 - A transfer shows balance changes only after a verified provider confirmation (test that a `pending` transfer leaves balances unchanged).
-- Sandbox end-to-end: collection → posted → payout → posted; failure → released funds.
+- Test end-to-end: collection → posted → payout → posted; failure → released funds.
 - `FEATURE_LIVE_PAYMENTS` and `FEATURE_LIVE_TRANSFERS` default off; live paths return "not yet available" without an approval row.
 
-**Inputs needed:** D1, D3, D4, D5 for corridors, D7 for merchant accounts. Sandbox accounts can start earlier.
+**Inputs needed:** D1, D3, D4, D5 for corridors, D7 for merchant accounts. Test accounts can start earlier.
 
 ---
 
@@ -211,7 +211,7 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 **Inputs needed:** D2, D15.
 
 **Status and deviations (built):**
-- `services/kyc` and `services/compliance` are built with pure rules, ports, sandbox adapters and Prisma stores. 20 KYC unit tests and 8 compliance unit tests pass. 11 API integration tests cover the exit criteria against real Postgres. The full API suite passes (142 tests).
+- `services/kyc` and `services/compliance` are built with pure rules, ports, test adapters and Prisma stores. 20 KYC unit tests and 8 compliance unit tests pass. 11 API integration tests cover the exit criteria against real Postgres. The full API suite passes (142 tests).
 - **Deviation: uploads go through the API, not presigned URLs.** The client sends raw bytes to `POST /v1/kyc/documents`. The API sniffs the real type, checks size (10 MB), scans, encrypts and only then writes to private storage. This keeps the malware scan and checksum before any object exists. Presigned uploads would let unscanned bytes land in the bucket first. Revisit if file sizes or throughput require it.
 - **Production is fail-closed.** In production, KMS, the malware scanner, the KYC vendor and sanctions screening stay unconfigured until approved (D2, D11, D15). Each reports `NOT_AVAILABLE`. Customers cannot be verified, and beneficiaries cannot be added, until screening runs for real.
 - **Not built yet:** the staff review queue and the decrypt-for-review endpoint (Phase 9 admin, but the service method exists and is audited); AWS KMS adapter (the local envelope key is non-production only); a real malware scanner; a real KYC vendor; PAN and address verification against authorities (only format checks and document review exist); the `FEATURE_LIVE_KYC_PROVIDER` gate, which has no live adapter to gate yet.
@@ -231,7 +231,7 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 - Investment screens in web and mobile, including statements and charts.
 - Explicit labelling: investment valuations separate from cash balances on every screen.
 
-**Exit criteria:** sandbox order lifecycle (place → partially filled → filled → settled) reflected in holdings and ledger. Risk checks block orders for unverified KYC. No holding appears without broker confirmation.
+**Exit criteria:** test order lifecycle (place → partially filled → filled → settled) reflected in holdings and ledger. Risk checks block orders for unverified KYC. No holding appears without broker confirmation.
 
 **Inputs needed:** D8, D9, D10.
 
@@ -258,22 +258,22 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 
 **Deliverables:** generated API client shared by all front ends; end-to-end user journeys (register → verify → fund → send → receive → invest → statement); WebSocket status updates across clients; consistent error codes and copy.
 
-**Exit criteria:** a single sandbox user can complete every journey on web and mobile, with the same balances shown on both.
+**Exit criteria:** a single test user can complete every journey on web and mobile, with the same balances shown on both.
 
 ---
 
-## Phase 11: Tests, security checks and sandbox transactions
+## Phase 11: Tests, security checks and test transactions
 
 **Goal:** prove correctness and security before any production work.
 
 **Deliverables:**
 - Full test suites per section 18 of the architecture.
 - Security: SAST, dependency audit, secret scan, DAST on staging, threat model, review of every webhook and every money-moving endpoint.
-- Sandbox transaction runs with each provider, recorded in `tests/sandbox-reports/`.
+- Test transaction runs with each provider, recorded in `tests/test-reports/`.
 - Test report: pass or fail per suite, coverage, known issues with severity.
 - Fixes applied and re-tested; nothing skipped silently.
 
-**Exit criteria:** zero open critical or high findings. All sandbox journeys pass twice on separate days. Reconciliation of sandbox ledger against provider reports matches to the minor unit.
+**Exit criteria:** zero open critical or high findings. All test journeys pass twice on separate days. Reconciliation of test ledger against provider reports matches to the minor unit.
 
 ---
 
@@ -293,7 +293,7 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 
 ## Provider approvals required before live money
 
-These are not technical tasks. The platform stays in sandbox until each is confirmed in writing.
+These are not technical tasks. The platform stays in test until each is confirmed in writing.
 
 1. Legal entity and licences or registrations for each launch jurisdiction (D1).
 2. Merchant or payout agreement and live credentials for each payment provider (D7).
@@ -304,13 +304,13 @@ These are not technical tasks. The platform stays in sandbox until each is confi
 7. Written confirmation of any account-status label (for example demat status) shown to customers.
 8. Penetration test report and security sign-off before production (Phase 11).
 
-## Pending credentials (sandbox first)
+## Pending credentials (test first)
 
 Listed in `.env.example`. Needed by phase:
 - Phase 4: SMS, email and push provider accounts; Sentry DSN; KMS key.
-- Phase 6: Razorpay, RazorpayX, Stripe and Adyen sandbox keys and webhook secrets; FX provider key; UPI/bank and payout partner sandbox credentials.
-- Phase 7: KYC/AML provider sandbox key.
-- Phase 8: Zerodha Kite Connect and DriveWealth sandbox keys.
+- Phase 6: Razorpay, RazorpayX, Stripe and Adyen test keys and webhook secrets; FX provider key; UPI/bank and payout partner test credentials.
+- Phase 7: KYC/AML provider test key.
+- Phase 8: Zerodha Kite Connect and DriveWealth test keys.
 - Phase 12: production credentials, stored only in Secrets Manager.
 
 ---
@@ -329,7 +329,7 @@ Phase 2 can start without any of these. Phase 4 needs D14 settled first.
 ## Phases 8 to 12: what was built in this pass
 
 - **Phase 8**: `services/investment` (order lifecycle, broker-confirmed fills, average-cost P&L, ledger settlement
-  posted once per order), a sandbox broker, and `/v1/investments/*`. Not built: Zerodha and DriveWealth adapters,
+  posted once per order), a test broker, and `/v1/investments/*`. Not built: Zerodha and DriveWealth adapters,
   market data, daily portfolio snapshots, investment screens.
 - **Phase 9**: `services/admin` (permission matrix, audited denials, maker-checker for provider approvals, PII reveals
   with reason codes), staff role model, and `/v1/admin/*` behind a staff guard (TOTP and optional IP allow-list).
@@ -337,7 +337,7 @@ Phase 2 can start without any of these. Phase 4 needs D14 settled first.
   identity decisions, audited document views, logged reveals and the audit log. Not built: user, payment, transfer,
   currency, report and settings screens.
 - **Phase 10**: one cross-application journey test through the real API (KYC, funding, receiving, investing,
-  sending, dashboard). Not built: moving web and mobile off sandbox data.
+  sending, dashboard). Not built: moving web and mobile off sample data.
 - **Phase 11**: all typechecks and unit suites pass; 162 API tests pass; the production dependency audit is clean
   after pinning patched `minimatch` and `glob` versions. Not done: penetration testing, load testing.
 - **Phase 12**: `docs/production-readiness.md`. Not deployed.

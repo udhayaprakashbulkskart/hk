@@ -22,4 +22,4 @@ Limits live in `LimitRule`, seeded by the migration (STANDARD tier, HKD). A chan
 The velocity and structuring thresholds in `src/container-kyc.ts` are starting values for compliance to confirm. They are not legal advice.
 
 ## Not built
-Staff endpoints for clearing cases and deciding limit changes (Phase 9). The sandbox screener flags only the fixed test name. Real screening needs the vendor (D2).
+Staff endpoints for clearing cases and deciding limit changes (Phase 9). The test screener flags only the fixed test name. Real screening needs the vendor (D2).

@@ -68,7 +68,7 @@ describe("sanctions screening holds money until cleared", () => {
     const c = await registerCustomer(t, "screen-hold");
     await verify(c);
     await fundHkd(ctx, c, "200000");
-    const bene = await indianRecipient(c, "SANDBOX SANCTIONED Recipient");
+    const bene = await indianRecipient(c, "TEST SANCTIONED Recipient");
 
     const held = await payout(c, bene, "100000", (await quote(c, "100000")).id);
     expect(held.status).toBe(403);
@@ -88,7 +88,7 @@ describe("sanctions screening holds money until cleared", () => {
   it("does not let a non-compliance role clear a case", async () => {
     const c = await registerCustomer(t, "clear-denied");
     await verify(c);
-    const bene = await indianRecipient(c, "SANDBOX SANCTIONED Recipient");
+    const bene = await indianRecipient(c, "TEST SANCTIONED Recipient");
     const kase = await t.container.db.complianceCase.findFirst({ where: { subjectId: bene } });
     await expect(t.container.compliance.clearCase({ id: "support-1", role: "SUPPORT_ADMIN" }, kase!.id, "trying to clear this case")).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
@@ -98,7 +98,7 @@ describe("sanctions screening holds money until cleared", () => {
     await putIdentity(c);
     await upload(c, "PASSPORT", "image/png", PNG);
     await upload(c, "ADDRESS_PROOF", "application/pdf", PDF);
-    await http().post("/v1/kyc/submit").set(authed(c)).send({ fullName: "SANDBOX SANCTIONED Customer" }).expect(200);
+    await http().post("/v1/kyc/submit").set(authed(c)).send({ fullName: "TEST SANCTIONED Customer" }).expect(200);
     const rec = await t.container.db.kycRecord.findUniqueOrThrow({ where: { userId: c.userId } });
     await webhook({ providerRef: rec.providerRef, outcome: "PASS" }).expect(200);
     const after = await http().get("/v1/kyc").set(authed(c)).expect(200);

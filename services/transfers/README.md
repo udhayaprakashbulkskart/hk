@@ -13,4 +13,4 @@ Customer transfers, withdrawals and payment requests.
 
 ## Routes
 
-Outbound payouts need an enabled payout route for the recipient's country, currency and method. A SWIFT payout has no sandbox route yet, so it is refused with `NOT_AVAILABLE` and nothing is sent to a provider.
+Outbound payouts need an enabled payout route for the recipient's country, currency and method. A SWIFT payout has no test route yet, so it is refused with `NOT_AVAILABLE` and nothing is sent to a provider.

@@ -8,14 +8,14 @@ import { createAdyenAdapter, adyenEscape, adyenSigningString } from "@hkfinhub/i
 /**
  * Signature vectors. The expected values were computed once from each provider's documented algorithm
  * and pinned here, so any change to verification shows up as a failure. They are NOT samples recorded
- * from a provider. Replace them with recorded sandbox samples before live use (decision D7).
+ * from a provider. Replace them with recorded test samples before live use (decision D7).
  */
 const noTransport = { request: async () => ({ status: 500, body: "" }) };
 const at = (unix: number) => new Date(unix * 1000);
 
 describe("Razorpay vectors", () => {
   const body = Buffer.from('{"event":"payment.captured","payload":{"payment":{"entity":{"id":"pay_1","order_id":"order_1"}}}}');
-  const adapter = createRazorpayAdapter({ keyId: "k", keySecret: "s", webhookSecret: "whsec_vector", environment: "sandbox", transport: noTransport });
+  const adapter = createRazorpayAdapter({ keyId: "k", keySecret: "s", webhookSecret: "whsec_vector", environment: "test", transport: noTransport });
   const good = "3786bd2ccb1c3b15ca4c4519ffe3f1d300251c231aed4a1c6cbe10d4168b0b9f";
 
   it("accepts the pinned signature", () => {
@@ -28,14 +28,14 @@ describe("Razorpay vectors", () => {
     expect(() => adapter.verifyWebhook(Buffer.from(body.toString().replace("pay_1", "pay_2")), { "x-razorpay-signature": good }, at(0))).toThrow(WebhookSignatureError);
   });
   it("RazorpayX uses the same signature scheme", () => {
-    const x = createRazorpayXAdapter({ keyId: "k", keySecret: "s", webhookSecret: "whsec_vector", accountNumber: "1", environment: "sandbox", transport: noTransport });
+    const x = createRazorpayXAdapter({ keyId: "k", keySecret: "s", webhookSecret: "whsec_vector", accountNumber: "1", environment: "test", transport: noTransport });
     expect(() => x.verifyWebhook(body, { "x-razorpay-signature": good }, at(0))).not.toThrow();
   });
 });
 
 describe("Stripe vectors", () => {
   const body = Buffer.from('{"id":"evt_1","type":"payment_intent.succeeded","data":{"object":{"id":"pi_1"}}}');
-  const adapter = createStripeAdapter({ secretKey: "sk", webhookSecret: "whsec_vector", environment: "sandbox", transport: noTransport });
+  const adapter = createStripeAdapter({ secretKey: "sk", webhookSecret: "whsec_vector", environment: "test", transport: noTransport });
   const sig = "829f615e1119a4a01880c449982c1a7db02af38275c8099b2f836171cd5fb682";
 
   it("accepts the pinned signature inside the tolerance window", () => {
@@ -56,7 +56,7 @@ describe("Stripe vectors", () => {
 
 describe("Adyen vectors", () => {
   const key = "44782DEF547AAA06C910C43932B1EB0C71FC68D9D0C057550C48EC2ACF6BA056";
-  const adapter = createAdyenAdapter({ apiKey: "k", hmacKeyHex: key, merchantAccount: "M", environment: "sandbox", transport: noTransport, returnUrl: "https://x.example" });
+  const adapter = createAdyenAdapter({ apiKey: "k", hmacKeyHex: key, merchantAccount: "M", environment: "test", transport: noTransport, returnUrl: "https://x.example" });
   const item = { pspReference: "PSP1", merchantAccountCode: "M", merchantReference: "col-abc", amount: { value: 1000, currency: "HKD" }, eventCode: "AUTHORISATION", success: "true" };
   const sig = "NUqW3LRnZnv9QnaXhT4RpJ4TRSeEJV7UEJaM3hZqSq4=";
 

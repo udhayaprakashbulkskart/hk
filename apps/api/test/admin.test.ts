@@ -38,7 +38,7 @@ const ENDPOINTS: { name: string; method: "get" | "post"; path: string; permissio
   { name: "limit decision", method: "post", path: `/v1/admin/limits/changes/${ids.u}/decision`, permission: "limits.approve", body: { decision: "APPROVED" } },
   { name: "adjustment request", method: "post", path: "/v1/admin/adjustments", permission: "adjustments.request", body: { customerAccountId: ids.a, counterAccountId: ids.u, currency: "HKD", amountMinor: "1000", direction: "CREDIT", reason: "goodwill credit for delay" } },
   { name: "adjustment approve", method: "post", path: `/v1/admin/adjustments/${ids.u}/approve`, permission: "adjustments.approve" },
-  { name: "provider request", method: "post", path: "/v1/admin/provider-approvals", permission: "provider.config.request", body: { providerId: "stripe", environment: "sandbox", contractRef: "CT-2026-0001" } },
+  { name: "provider request", method: "post", path: "/v1/admin/provider-approvals", permission: "provider.config.request", body: { providerId: "stripe", environment: "test", contractRef: "CT-2026-0001" } },
   { name: "provider decision", method: "post", path: `/v1/admin/provider-approvals/${ids.u}/decision`, permission: "provider.config.approve", body: { decision: "APPROVED" } },
   { name: "pending approvals", method: "get", path: "/v1/admin/approvals", permission: "approvals.read" },
   { name: "pii reveal", method: "post", path: `/v1/admin/customers/${ids.u}/reveal`, permission: "customers.pii.reveal", body: { field: "PAN", reason: "CUSTOMER_REQUEST" } },
@@ -124,13 +124,13 @@ describe("maker-checker and reveals", () => {
   it("refuses a provider approval approved by the person who requested it", async () => {
     const a = await staff("SUPER_ADMIN");
     const b = await staff("SUPER_ADMIN", "second-super-admin");
-    const created = await http().post("/v1/admin/provider-approvals").set(authed(a)).send({ providerId: "stripe", environment: "sandbox", contractRef: "CT-2026-0002" }).expect(201);
+    const created = await http().post("/v1/admin/provider-approvals").set(authed(a)).send({ providerId: "stripe", environment: "test", contractRef: "CT-2026-0002" }).expect(201);
     const approvalId = created.body.approvalId as string;
     const self = await http().post(`/v1/admin/provider-approvals/${approvalId}/decision`).set(authed(a)).send({ decision: "APPROVED" });
     expect(self.status).toBe(403);
     expect(self.body.error.code).toBe("SELF_APPROVAL");
     await http().post(`/v1/admin/provider-approvals/${approvalId}/decision`).set(authed(b)).send({ decision: "APPROVED" }).expect(200);
-    const row = await t.container.db.providerApproval.findUnique({ where: { providerId_environment: { providerId: "stripe", environment: "sandbox" } } });
+    const row = await t.container.db.providerApproval.findUnique({ where: { providerId_environment: { providerId: "stripe", environment: "test" } } });
     expect(row?.approvedBy).toBe(b.userId);
   });
 

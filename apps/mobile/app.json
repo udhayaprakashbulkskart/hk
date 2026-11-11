@@ -10,7 +10,7 @@
     "backgroundColor": "#080b10",
     "newArchEnabled": true,
     "ios": {
-      "bundleIdentifier": "com.hkfinhub.sandbox",
+      "bundleIdentifier": "com.hkfinhub.app",
       "supportsTablet": false,
       "infoPlist": {
         "NSFaceIDUsageDescription": "Use Face ID to unlock HK FinHub.",
@@ -18,7 +18,7 @@
       }
     },
     "android": {
-      "package": "com.hkfinhub.sandbox",
+      "package": "com.hkfinhub.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#080b10"

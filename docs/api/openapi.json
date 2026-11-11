@@ -3,7 +3,7 @@
   "info": {
     "title": "HK FinHub customer API",
     "version": "0.1.0",
-    "description": "Sandbox preview. Live money movement is not yet enabled."
+    "description": "Preview. Live money movement is not yet enabled."
   },
   "servers": [
     {
