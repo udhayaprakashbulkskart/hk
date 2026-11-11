@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { loadConfig } from "../src/config";
-import { createContainer } from "../src/container";
-import { createApp } from "../src/app";
+import { loadConfig } from "./config";
+import { createContainer } from "./container";
+import { createApp } from "./app";
 
 type Handler = (req: IncomingMessage, res: ServerResponse) => void;
 

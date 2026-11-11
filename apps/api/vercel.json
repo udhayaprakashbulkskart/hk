@@ -1,6 +1,6 @@
 {
   "installCommand": "cd ../.. && npx -y pnpm@9.15.0 install --frozen-lockfile",
-  "buildCommand": "cd ../.. && npx -y pnpm@9.15.0 --filter @hkfinhub/database exec prisma generate",
+  "buildCommand": "cd ../.. && npx -y pnpm@9.15.0 --filter @hkfinhub/database exec prisma generate && cd apps/api && npx -y pnpm@9.15.0 build:vercel",
   "outputDirectory": "public",
-  "rewrites": [{ "source": "/(.*)", "destination": "/api" }]
+  "rewrites": [{ "source": "/(.*)", "destination": "/api/server" }]
 }

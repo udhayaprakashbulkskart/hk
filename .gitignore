@@ -50,3 +50,6 @@ database/src/generated/
 
 # Redis snapshots written by local servers
 *.rdb
+
+# Bundled Vercel function (built during deploy)
+apps/api/api/server.mjs
