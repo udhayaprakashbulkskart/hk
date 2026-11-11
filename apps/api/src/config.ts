@@ -34,6 +34,7 @@ const schema = z.object({
   ADYEN_MERCHANT_ACCOUNT: z.string().optional(),
   PAYMENT_RETURN_URL: z.string().url().default("https://app.hkfinhub.example/payments/return"),
   ADMIN_ALLOWED_IPS: z.string().default(""),
+  LOGIN_USER_USERNAME: z.string().optional(),
   LOGIN_USER_EMAIL: z.string().optional(),
   LOGIN_USER_PHONE: z.string().optional(),
   LOGIN_USER_PASSWORD: z.string().optional(),
@@ -135,15 +136,18 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
   };
 }
 
-/** All four values or none. A partial login configuration is refused rather than silently ignored. */
+/**
+ * The operator login. Password is required. The sign-in name defaults to LOGIN_USER_USERNAME (pubgadmin), which maps
+ * to an internal address. The phone number is needed by the account model; if it is not given, a placeholder is used
+ * and must be replaced before any SMS feature is used.
+ */
 function loginUserFrom(e: z.infer<typeof schema>): ApiConfig["loginUser"] {
-  const given = [e.LOGIN_USER_EMAIL, e.LOGIN_USER_PHONE, e.LOGIN_USER_PASSWORD].filter((v) => v !== undefined && v !== "");
-  if (given.length === 0) return undefined;
-  if (given.length !== 3) throw new Error("Invalid configuration: LOGIN_USER_EMAIL, LOGIN_USER_PHONE and LOGIN_USER_PASSWORD must be set together");
+  if (!e.LOGIN_USER_PASSWORD) return undefined;
+  const username = (e.LOGIN_USER_USERNAME ?? "pubgadmin").trim().toLowerCase();
   return {
-    email: e.LOGIN_USER_EMAIL!,
-    phone: e.LOGIN_USER_PHONE!,
-    password: e.LOGIN_USER_PASSWORD!,
+    email: e.LOGIN_USER_EMAIL && e.LOGIN_USER_EMAIL.length > 0 ? e.LOGIN_USER_EMAIL : `${username}@login.hkfinhub.internal`,
+    phone: e.LOGIN_USER_PHONE && e.LOGIN_USER_PHONE.length > 0 ? e.LOGIN_USER_PHONE : "+85255550123",
+    password: e.LOGIN_USER_PASSWORD,
     fullName: e.LOGIN_USER_NAME ?? "Operator",
   };
 }

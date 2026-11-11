@@ -139,10 +139,10 @@ describe("no customer signup", () => {
     }
   });
 
-  it("refuses a partial operator login configuration instead of ignoring it", async () => {
+  it("creates no operator account without a password, and uses the username default otherwise", async () => {
     const { loadConfig } = await import("../src/config");
-    expect(() => loadConfig({ ...testEnv(), LOGIN_USER_EMAIL: "ops@example.com" })).toThrow(/must be set together/);
-    const cfg = loadConfig({ ...testEnv(), LOGIN_USER_EMAIL: "ops@example.com", LOGIN_USER_PHONE: "+85290000000", LOGIN_USER_PASSWORD: "a-long-enough-passphrase" });
-    expect(cfg.loginUser?.email).toBe("ops@example.com");
+    expect(loadConfig({ ...testEnv(), LOGIN_USER_PASSWORD: undefined }).loginUser).toBeUndefined();
+    const cfg = loadConfig({ ...testEnv(), LOGIN_USER_PASSWORD: "a-long-enough-passphrase" });
+    expect(cfg.loginUser?.email).toBe("pubgadmin@login.hkfinhub.internal");
   });
 });

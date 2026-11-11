@@ -25,7 +25,15 @@ export const registerSchema = z
 
 export const resendOtpSchema = z.object({ email, channel: z.enum(["EMAIL", "SMS"]) }).strict();
 export const verifyOtpSchema = z.object({ email, channel: z.enum(["EMAIL", "SMS"]), code: otpCode }).strict();
-export const loginSchema = z.object({ email, password: z.string().min(1).max(256), device }).strict();
+/** A sign-in name is an email address, or a bare username that maps to the internal login domain. */
+export const LOGIN_DOMAIN = "login.hkfinhub.internal";
+export function toLoginEmail(identifier: string): string {
+  const v = identifier.trim().toLowerCase();
+  return v.includes("@") ? v : `${v}@${LOGIN_DOMAIN}`;
+}
+const signInName = z.string().trim().min(1).max(254).transform(toLoginEmail).pipe(z.email().max(254));
+
+export const loginSchema = z.object({ email: signInName, password: z.string().min(1).max(256), device }).strict();
 
 export const mfaLoginSchema = z
   .object({
