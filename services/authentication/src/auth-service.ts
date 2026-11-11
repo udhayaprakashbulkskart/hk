@@ -50,84 +50,36 @@ export class AuthService {
     private readonly clock: AuthClock = systemClock,
   ) {}
 
-  // ---------------------------------------------------------------- registration
+  // ---------------------------------------------------------------- provisioning
 
-  /** Always answers the same way whether or not the email or phone is already registered. */
-  async register(
-    input: { email: string; phone: string; password: string; fullName: string; countryCode: string; language: string },
-    ctx: RequestContext,
-  ): Promise<typeof ACCEPTED> {
+  /**
+   * Creates the single operator login from configuration. There is no public route for this: customers
+   * cannot sign up. The account is marked verified at creation, because the operator provisions it directly.
+   * Idempotent: an existing account with the same email is left as it is.
+   */
+  async provisionLoginUser(input: { email: string; phone: string; password: string; fullName: string; countryCode: string; language: string }): Promise<{ userId: string; created: boolean }> {
     const now = this.clock.now();
     const email = normaliseEmail(input.email);
     const phoneE164 = normalisePhone(input.phone, this.config.defaultPhoneCountry);
     assertPasswordPolicy(input.password, { email, name: input.fullName });
 
-    const existing = (await this.store.findUserByEmail(email)) ?? (await this.store.findUserByPhone(phoneE164));
-    if (existing) {
-      // Tell the existing owner, rather than revealing to the requester that the account exists.
-      await this.store.transaction(async (tx) => {
-        await tx.addOutbox(this.notification(existing.id, "registration_attempted", { email }));
-        await tx.audit({ actorUserId: existing.id, action: "register_duplicate", subjectType: "User", subjectId: existing.id, ...ctx });
-      });
-      return ACCEPTED;
-    }
+    const existing = await this.store.findUserByEmail(email);
+    if (existing) return { userId: existing.id, created: false };
 
     const passwordHash = await hashPassword(input.password);
-    try {
-      await this.store.transaction(async (tx) => {
-        const user = await tx.createUser({
-          customerNumber: newCustomerNumber(),
-          email,
-          phoneE164,
-          passwordHash,
-          profile: { fullName: input.fullName.trim(), countryCode: input.countryCode, language: input.language, baseCurrency: "HKD", timezone: "Asia/Hong_Kong" },
-        });
-        await this.issueOtp(tx, user.id, "VERIFY_EMAIL", "EMAIL", email, now);
-        await this.issueOtp(tx, user.id, "VERIFY_PHONE", "SMS", phoneE164, now);
-        await tx.audit({ actorUserId: user.id, action: "register", subjectType: "User", subjectId: user.id, ...ctx });
+    const user = await this.store.transaction(async (tx) => {
+      const created = await tx.createUser({
+        customerNumber: newCustomerNumber(),
+        email,
+        phoneE164,
+        passwordHash,
+        profile: { fullName: input.fullName.trim(), countryCode: input.countryCode, language: input.language, baseCurrency: "HKD", timezone: "Asia/Hong_Kong" },
       });
-    } catch (err) {
-      // A concurrent registration with the same details: answer the same way.
-      if (err instanceof DuplicateAccountError) return ACCEPTED;
-      throw err;
-    }
-    return ACCEPTED;
-  }
-
-  async resendOtp(input: { email: string; channel: OtpChannel }): Promise<typeof ACCEPTED> {
-    const user = await this.store.findUserByEmail(normaliseEmail(input.email));
-    const purpose: OtpPurpose = input.channel === "EMAIL" ? "VERIFY_EMAIL" : "VERIFY_PHONE";
-    const pending = user && user.status === "PENDING_VERIFICATION" && !isVerified(user, input.channel);
-    if (user && pending) {
-      try {
-        await this.store.transaction((tx) => this.issueOtp(tx, user.id, purpose, input.channel, destinationFor(user, input.channel), this.clock.now()));
-      } catch (err) {
-        if (!(err instanceof AuthError && err.code === "RATE_LIMITED")) throw err; // silent when throttled
-      }
-    }
-    return ACCEPTED;
-  }
-
-  async verifyOtp(input: { email: string; channel: OtpChannel; code: string }, ctx: RequestContext): Promise<{ channel: OtpChannel; verified: true; accountActive: boolean }> {
-    const now = this.clock.now();
-    const user = await this.store.findUserByEmail(normaliseEmail(input.email));
-    if (!user || user.status !== "PENDING_VERIFICATION" || isVerified(user, input.channel)) {
-      throw new AuthError("OTP_INVALID", "That code is invalid or has expired.");
-    }
-    const purpose: OtpPurpose = input.channel === "EMAIL" ? "VERIFY_EMAIL" : "VERIFY_PHONE";
-    await this.checkOtp(user.id, purpose, destinationFor(user, input.channel), input.code, now, ctx);
-
-    let accountActive = false;
-    await this.store.transaction(async (tx) => {
-      const patch = input.channel === "EMAIL" ? { emailVerifiedAt: now } : { phoneVerifiedAt: now };
-      const emailOk = input.channel === "EMAIL" || user.emailVerifiedAt !== null;
-      const phoneOk = input.channel === "SMS" || user.phoneVerifiedAt !== null;
-      accountActive = emailOk && phoneOk;
-      await tx.updateUser(user.id, accountActive ? { ...patch, status: "ACTIVE" } : patch);
-      if (accountActive) await tx.addOutbox(this.notification(user.id, "welcome", {}));
-      await tx.audit({ actorUserId: user.id, action: `otp_verified_${input.channel.toLowerCase()}`, subjectType: "User", subjectId: user.id, ...ctx });
+      await tx.updateUser(created.id, { status: "ACTIVE", emailVerifiedAt: now, phoneVerifiedAt: now });
+      await tx.audit({ actorUserId: created.id, action: "login_user_provisioned", subjectType: "User", subjectId: created.id , ip: null, userAgent: null });
+      return created;
     });
-    return { channel: input.channel, verified: true, accountActive };
+    return { userId: user.id, created: true };
   }
 
   // ---------------------------------------------------------------- login

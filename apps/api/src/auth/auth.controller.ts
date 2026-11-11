@@ -6,9 +6,9 @@ import type { Container } from "../container";
 import { ZodPipe } from "../common/zod-pipe";
 import { AuthGuard, requestContext, type AuthedRequest } from "./auth.guard";
 import {
-  changePasswordSchema, loginSchema, mfaLoginSchema, refreshSchema, registerSchema, resendOtpSchema,
-  resetConfirmSchema, resetRequestSchema, totpCodeSchema, verifyOtpSchema,
-  type LoginInput, type MfaLoginInput, type RegisterInput,
+  changePasswordSchema, loginSchema, mfaLoginSchema, refreshSchema,
+  resetConfirmSchema, resetRequestSchema, totpCodeSchema,
+  type LoginInput, type MfaLoginInput,
 } from "./schemas";
 import { z } from "zod";
 
@@ -18,24 +18,6 @@ const uuid = z.uuid();
 @Controller("auth")
 export class AuthController {
   constructor(@Inject(CONTAINER) private readonly c: Container) {}
-
-  @Post("register")
-  @HttpCode(202)
-  register(@Body(new ZodPipe(registerSchema)) body: RegisterInput, @Req() req: Request) {
-    return this.c.auth.register(body, requestContext(req));
-  }
-
-  @Post("otp/resend")
-  @HttpCode(202)
-  resend(@Body(new ZodPipe(resendOtpSchema)) body: { email: string; channel: "EMAIL" | "SMS" }) {
-    return this.c.auth.resendOtp(body);
-  }
-
-  @Post("otp/verify")
-  @HttpCode(200)
-  verifyOtp(@Body(new ZodPipe(verifyOtpSchema)) body: { email: string; channel: "EMAIL" | "SMS"; code: string }, @Req() req: Request) {
-    return this.c.auth.verifyOtp(body, requestContext(req));
-  }
 
   @Post("login")
   @HttpCode(200)

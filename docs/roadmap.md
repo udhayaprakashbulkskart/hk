@@ -341,3 +341,11 @@ Phase 2 can start without any of these. Phase 4 needs D14 settled first.
 - **Phase 11**: all typechecks and unit suites pass; 162 API tests pass; the production dependency audit is clean
   after pinning patched `minimatch` and `glob` versions. Not done: penetration testing, load testing.
 - **Phase 12**: `docs/production-readiness.md`. Not deployed.
+
+---
+
+## Access change: operator login only
+
+Customer self-signup is removed. The API has no public register or verification-code routes, and the web and mobile
+apps have no signup screens. A single operator login is created at startup from configuration (see
+`docs/production-readiness.md`, "Access model"). Tests create customers through the same provisioning path.

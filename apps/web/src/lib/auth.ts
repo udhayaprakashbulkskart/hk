@@ -33,7 +33,7 @@ export function clearSession(): void {
 export function messageFor(err: unknown): string {
   if (err instanceof ApiError) {
     if (err.code === "RATE_LIMITED") return `Too many attempts. Try again in ${Math.ceil((err.retryAfterSeconds ?? 60) / 60)} minute(s).`;
-    if (err.code === "VERIFICATION_REQUIRED") return "Verify your email and mobile number first. We sent codes when you registered.";
+    if (err.code === "VERIFICATION_REQUIRED") return "This account is not active. Contact the HK FinHub team for help.";
     if (err.code === "ACCOUNT_UNAVAILABLE") return "This account is not available. Contact support.";
     if (err.code === "PASSWORD_POLICY" || err.code === "PHONE_INVALID" || err.code === "OTP_INVALID" || err.code === "MFA_INVALID") return err.message;
     return err.message;

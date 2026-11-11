@@ -6,7 +6,7 @@ import { io as connect, type Socket } from "socket.io-client";
 import { relayOutbox, CaptureSender, REALTIME_CHANNEL_PREFIX, deliver, type NotificationJob } from "@hkfinhub/notifications";
 import { NOTIFICATION_QUEUE } from "../src/container";
 import { attachRealtime } from "../src/realtime";
-import { startTestApp, resetState, codeSentTo, PASSWORD, DEVICE, type TestApp } from "./helpers";
+import { startTestApp, resetState, codeSentTo, PASSWORD, DEVICE, provisionActive, type TestApp } from "./helpers";
 
 let t: TestApp;
 const http = () => request(t.app.getHttpServer());
@@ -18,10 +18,8 @@ afterAll(async () => { await t.close(); });
 beforeEach(async () => { await resetState(t); });
 
 async function activeAccount(): Promise<void> {
-  await http().post("/v1/auth/register").send({ email: EMAIL, phone: PHONE, password: PASSWORD, fullName: "Fay Leung", countryCode: "HK", language: "en" }).expect(202);
+  await provisionActive(t, { email: EMAIL, phone: PHONE, name: "Fay Leung" });
   await t.drain();
-  await http().post("/v1/auth/otp/verify").send({ email: EMAIL, channel: "EMAIL", code: codeSentTo(t.email, EMAIL) }).expect(200);
-  await http().post("/v1/auth/otp/verify").send({ email: EMAIL, channel: "SMS", code: codeSentTo(t.sms, PHONE) }).expect(200);
 }
 
 describe("notification pipeline on BullMQ", () => {
@@ -41,11 +39,13 @@ describe("notification pipeline on BullMQ", () => {
       },
     };
     try {
-      await http().post("/v1/auth/register").send({ email: EMAIL, phone: PHONE, password: PASSWORD, fullName: "Fay Leung", countryCode: "HK", language: "en" }).expect(202);
+      await provisionActive(t, { email: EMAIL, phone: PHONE, name: "Fay Leung" });
+      // A sign-in from a new device creates a security notification for the relay to deliver.
+      await http().post("/v1/auth/login").send({ email: EMAIL, password: PASSWORD, device: { name: "New phone", platform: "ios" } }).expect(200);
       await relayOutbox(t.container.outbox, jobQueue);
-      await waitFor(() => email.sent.length >= 1 && sms.sent.length >= 1);
-      const code = codeSentTo(email, EMAIL);
-      expect(code).toMatch(/^\d{6}$/);
+      await waitFor(() => email.sent.length >= 1);
+      expect(email.sent.some((m) => m.to === EMAIL)).toBe(true);
+      expect(email.sent.every((m) => !m.text.includes(PASSWORD))).toBe(true);
       await waitFor(async () => (await t.container.db.outboxEvent.count({ where: { publishedAt: null } })) === 0);
       const rows = await t.container.db.outboxEvent.findMany();
       expect(rows.every((r) => (r.payload as Record<string, unknown>)["redacted"] === true)).toBe(true);
@@ -57,7 +57,7 @@ describe("notification pipeline on BullMQ", () => {
   });
 
   it("does not deliver the same notification twice when the relay runs twice", async () => {
-    await http().post("/v1/auth/register").send({ email: EMAIL, phone: PHONE, password: PASSWORD, fullName: "Fay Leung", countryCode: "HK", language: "en" });
+    await provisionActive(t, { email: EMAIL, phone: PHONE, name: "Fay Leung" });
     const seen: string[] = [];
     const q = { add: async (id: string) => { seen.push(id); } };
     await relayOutbox(t.container.outbox, q);

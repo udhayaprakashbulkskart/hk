@@ -1,6 +1,6 @@
 import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { startTestApp, resetState, codeSentTo, PASSWORD, DEVICE, type TestApp } from "./helpers";
+import { startTestApp, resetState, codeSentTo, PASSWORD, DEVICE, provisionActive, type TestApp } from "./helpers";
 
 let t: TestApp;
 const http = () => request(t.app.getHttpServer());
@@ -13,10 +13,8 @@ beforeEach(async () => { await resetState(t); });
 async function customer(name: string): Promise<{ access: string; accountId: string }> {
   const email = `${name}@example.com`;
   const phone = `+8529${Math.floor(1000000 + Math.random() * 8999999)}`;
-  await http().post("/v1/auth/register").send({ email, phone, password: PASSWORD, fullName: name, countryCode: "HK", language: "en" }).expect(202);
+  await provisionActive(t, { email, phone, name });
   await t.drain();
-  await http().post("/v1/auth/otp/verify").send({ email, channel: "EMAIL", code: codeSentTo(t.email, email) }).expect(200);
-  await http().post("/v1/auth/otp/verify").send({ email, channel: "SMS", code: codeSentTo(t.sms, phone) }).expect(200);
   const login = await http().post("/v1/auth/login").send({ email, password: PASSWORD, device: DEVICE }).expect(200);
   const access = login.body.tokens.accessToken as string;
   // Accounts are created on first use, so make the first account request before looking the account up.

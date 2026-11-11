@@ -8,6 +8,10 @@ async function main() {
   const config = loadConfig();
   initSentry(config);
   const container = createContainer(config);
+  if (config.loginUser) {
+    const r = await container.auth.provisionLoginUser({ ...config.loginUser, countryCode: "HK", language: "en" });
+    container.logger.info({ created: r.created }, "login user ready");
+  }
   const app = await createApp(container);
   await app.init();
   const server = app.getHttpServer() as import("node:http").Server;

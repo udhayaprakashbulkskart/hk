@@ -21,7 +21,7 @@ export interface ApiErrorLike {
 export function messageFor(err: unknown): string {
   const e = err as ApiErrorLike;
   if (e && e.code === "RATE_LIMITED") return `Too many attempts. Try again in ${Math.ceil((e.retryAfterSeconds ?? 60) / 60)} minute(s).`;
-  if (e && e.code === "VERIFICATION_REQUIRED") return "Verify your email and mobile number first. We sent codes when you registered.";
+  if (e && e.code === "VERIFICATION_REQUIRED") return "This account is not active. Contact the HK FinHub team for help.";
   if (e && e.code === "ACCOUNT_UNAVAILABLE") return "This account is not available. Contact support.";
   if (e && e.message) return e.message;
   return "Something went wrong. Please try again.";

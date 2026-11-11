@@ -53,68 +53,6 @@ test.describe("authentication screens", () => {
     await expect(page).toHaveURL(/\/dashboard$/);
   });
 
-  test("OTP verifies the email code, then the mobile code, and returns to log in", async ({ page }) => {
-    const seen: { channel: string }[] = [];
-    await mockApi(page, {
-      "/v1/auth/otp/verify": (b) => {
-        const body = b as { channel: string };
-        seen.push({ channel: body.channel });
-        return { status: 200, body: { verified: true, channel: body.channel, accountActive: body.channel === "SMS" } };
-      },
-    });
-    await page.goto("/verify?email=customer%40example.com", { waitUntil: "networkidle" });
-    await expect(page.getByRole("heading", { name: "Enter the code sent to your email" })).toBeVisible();
-    const first = page.getByLabel("Digit 1 of 6");
-    await first.focus();
-    await page.evaluate(() => {
-      const el = document.querySelector<HTMLInputElement>('input[aria-label="Digit 1 of 6"]')!;
-      const dt = new DataTransfer();
-      dt.setData("text", "123456");
-      el.dispatchEvent(new ClipboardEvent("paste", { clipboardData: dt, bubbles: true, cancelable: true }));
-    });
-    await expect(page.getByLabel("Digit 6 of 6")).toHaveValue("6");
-    await page.getByRole("button", { name: "Continue" }).click();
-    await expect(page.getByRole("heading", { name: "Enter the code sent to your mobile" })).toBeVisible();
-    await page.getByLabel("Digit 1 of 6").focus();
-    await page.evaluate(() => {
-      const el = document.querySelector<HTMLInputElement>('input[aria-label="Digit 1 of 6"]')!;
-      const dt = new DataTransfer();
-      dt.setData("text", "654321");
-      el.dispatchEvent(new ClipboardEvent("paste", { clipboardData: dt, bubbles: true, cancelable: true }));
-    });
-    await page.getByRole("button", { name: "Verify and finish" }).click();
-    await expect(page).toHaveURL(/\/login\?verified=1$/);
-    expect(seen.map((s) => s.channel)).toEqual(["EMAIL", "SMS"]);
-  });
-
-  test("registration sends the details to the API and moves to verification", async ({ page }) => {
-    let sent: unknown = null;
-    await mockApi(page, { "/v1/auth/register": (b) => { sent = b; return { status: 202, body: { accepted: true } }; } });
-    await page.goto("/register", { waitUntil: "networkidle" });
-    await page.getByLabel("Full name").fill("Sample Customer");
-    await page.getByLabel("Email").fill("sample@example.com");
-    await page.getByLabel("Mobile number").fill("55550123");
-    await page.getByLabel("Password").fill("a-good-passphrase-1");
-    await page.getByRole("checkbox").check();
-    await page.getByRole("button", { name: "Continue" }).click();
-    await expect(page).toHaveURL(/\/verify\?email=/);
-    expect(sent).toMatchObject({ email: "sample@example.com", phone: "+852 55550123", countryCode: "HK", language: "en" });
-  });
-
-  test("registration blocks weak passwords before calling the API", async ({ page }) => {
-    let calls = 0;
-    await mockApi(page, { "/v1/auth/register": () => { calls++; return { status: 202, body: { accepted: true } }; } });
-    await page.goto("/register", { waitUntil: "networkidle" });
-    await page.getByLabel("Full name").fill("Sample Customer");
-    await page.getByLabel("Email").fill("sample@example.com");
-    await page.getByLabel("Mobile number").fill("55550123");
-    await page.getByLabel("Password").fill("short");
-    await page.getByRole("checkbox").check();
-    await page.getByRole("button", { name: "Continue" }).click();
-    await expect(page.locator("p[role=alert]")).toContainText("at least 12 characters");
-    expect(calls).toBe(0);
-  });
-
   test("password reset answers the same way and moves to the code step", async ({ page }) => {
     await mockApi(page, { "/v1/auth/password/reset/request": () => ({ status: 202, body: { accepted: true } }) });
     await page.goto("/reset-password", { waitUntil: "networkidle" });

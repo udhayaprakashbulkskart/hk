@@ -1,6 +1,6 @@
 import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { startTestApp, resetState, codeSentTo, PASSWORD, DEVICE, type TestApp } from "./helpers";
+import { startTestApp, resetState, codeSentTo, PASSWORD, DEVICE, provisionActive, type TestApp } from "./helpers";
 
 let t: TestApp;
 const http = () => request(t.app.getHttpServer());
@@ -13,10 +13,8 @@ beforeEach(async () => { await resetState(t); });
 
 /** Creates an active account through the real registration and verification endpoints. */
 async function activeAccount(): Promise<void> {
-  await http().post("/v1/auth/register").send({ email: EMAIL, phone: PHONE, password: PASSWORD, fullName: "Ben Lau", countryCode: "HK", language: "en" }).expect(202);
+  await provisionActive(t, { email: EMAIL, phone: PHONE, name: "Ben Lau" });
   await t.drain();
-  await http().post("/v1/auth/otp/verify").send({ email: EMAIL, channel: "EMAIL", code: codeSentTo(t.email, EMAIL) }).expect(200);
-  await http().post("/v1/auth/otp/verify").send({ email: EMAIL, channel: "SMS", code: codeSentTo(t.sms, PHONE) }).expect(200);
 }
 
 /** Returns the request itself (not a promise), so callers can chain .expect(...). */
@@ -46,15 +44,6 @@ describe("login", () => {
     expect(user.lockedUntil).not.toBeNull();
     const inbox = await t.container.db.notification.findMany({ where: { userId: user.id } });
     expect(inbox.map((n) => n.title)).toContain("Account temporarily locked");
-  });
-
-  it("refuses a correct password until verification is complete, and says so", async () => {
-    await http().post("/v1/auth/register").send({ email: EMAIL, phone: PHONE, password: PASSWORD, fullName: "Ben Lau", countryCode: "HK", language: "en" });
-    const wrong = await login("wrong-password-xx");
-    const pending = await login();
-    expect(wrong.body.error.code).toBe("INVALID_CREDENTIALS");
-    expect(pending.status).toBe(403);
-    expect(pending.body.error.code).toBe("VERIFICATION_REQUIRED");
   });
 
   it("issues tokens, serves /me, and ends the session on logout", async () => {

@@ -66,11 +66,6 @@ export function createAuthClient(opts: AuthClientOptions) {
   }
 
   return {
-    register: (input: { email: string; phone: string; password: string; fullName: string; countryCode: string; language: string }) =>
-      call<{ accepted: true }>("POST", "/auth/register", input),
-    resendOtp: (input: { email: string; channel: "EMAIL" | "SMS" }) => call<{ accepted: true }>("POST", "/auth/otp/resend", input),
-    verifyOtp: (input: { email: string; channel: "EMAIL" | "SMS"; code: string }) =>
-      call<{ verified: true; channel: "EMAIL" | "SMS"; accountActive: boolean }>("POST", "/auth/otp/verify", input),
     login: (input: { email: string; password: string; device: DevicePayload }) => call<LoginOutcome>("POST", "/auth/login", input),
     loginMfa: (input: { mfaToken: string; code?: string; recoveryCode?: string; device: DevicePayload }) =>
       call<LoginOutcome>("POST", "/auth/login/mfa", input),

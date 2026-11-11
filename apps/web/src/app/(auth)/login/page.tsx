@@ -110,7 +110,6 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-6 text-center text-sm text-[var(--muted-foreground)]">
-          New to HK FinHub? <Link href="/register" className="font-semibold text-[var(--gold)] hover:underline">Create an account</Link>
         </p>
       </CardContent>
     </Card>

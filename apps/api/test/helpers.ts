@@ -111,3 +111,9 @@ export function codeSentTo(capture: CaptureSender, to: string): string {
 
 export const PASSWORD = "correct-horse-battery-9";
 export const DEVICE = { name: "Test browser", platform: "web" as const };
+
+/** Creates an active customer through the operator provisioning path. Tests use this in place of signup. */
+export async function provisionActive(t: TestApp, who: { email: string; phone: string; name: string }): Promise<string> {
+  const r = await t.container.auth.provisionLoginUser({ email: who.email, phone: who.phone, password: PASSWORD, fullName: who.name, countryCode: "HK", language: "en" });
+  return r.userId;
+}

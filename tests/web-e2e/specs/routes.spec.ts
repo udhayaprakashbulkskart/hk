@@ -8,7 +8,7 @@ import { join } from "node:path";
  */
 
 const ROUTES = [
-  "/", "/login", "/register", "/verify?purpose=login", "/reset-password",
+  "/", "/login", "/reset-password",
   "/dashboard", "/accounts", "/send", "/receive", "/transfer", "/exchange", "/invest",
   "/invest/orders?tab=open", "/portfolio", "/history", "/reports", "/notifications", "/security",
   "/profile", "/settings", "/more", "/deposit", "/withdraw",

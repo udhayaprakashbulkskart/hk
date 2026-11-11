@@ -1,6 +1,6 @@
 import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { startTestApp, resetState, codeSentTo, PASSWORD, DEVICE, type TestApp } from "./helpers";
+import { startTestApp, resetState, codeSentTo, PASSWORD, DEVICE, provisionActive, type TestApp } from "./helpers";
 
 let t: TestApp;
 const http = () => request(t.app.getHttpServer());
@@ -13,10 +13,8 @@ afterAll(async () => { await t.close(); });
 beforeEach(async () => { await resetState(t); });
 
 async function activeLogin(): Promise<{ access: string; refresh: string }> {
-  await http().post("/v1/auth/register").send({ email: EMAIL, phone: PHONE, password: PASSWORD, fullName: "Dan Yip", countryCode: "HK", language: "en" }).expect(202);
+  await provisionActive(t, { email: EMAIL, phone: PHONE, name: "Dan Yip" });
   await t.drain();
-  await http().post("/v1/auth/otp/verify").send({ email: EMAIL, channel: "EMAIL", code: codeSentTo(t.email, EMAIL) }).expect(200);
-  await http().post("/v1/auth/otp/verify").send({ email: EMAIL, channel: "SMS", code: codeSentTo(t.sms, PHONE) }).expect(200);
   const r = await http().post("/v1/auth/login").send({ email: EMAIL, password: PASSWORD, device: DEVICE }).expect(200);
   return { access: r.body.tokens.accessToken, refresh: r.body.tokens.refreshToken };
 }

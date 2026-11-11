@@ -48,9 +48,6 @@ export default function LoginScreen() {
       </Card>
       <View style={{ alignItems: "center", gap: 8, paddingTop: 8 }}>
         <Muted>New to HK FinHub?</Muted>
-        <Link href="/(auth)/register" asChild>
-          <Text accessibilityRole="link" style={{ color: colors.gold, fontWeight: "700" }}>Create an account</Text>
-        </Link>
       </View>
     </Screen>
   );

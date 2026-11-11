@@ -13,6 +13,17 @@ live money. Every live path is refused by default and needs a human approval bef
 - Database: Neon project `hk-finhub` (Postgres 16, Singapore) holds the full schema, with migrations recorded.
 - Web: deployed to Vercel as a sandbox build with sandbox data. SSO protection is on.
 
+## Access model
+- Customers cannot sign up. The public signup and verification-code routes are removed, and their screens are gone
+  from the web and mobile apps.
+- There is one operator login. It is created at API startup from `LOGIN_USER_EMAIL`, `LOGIN_USER_PHONE`,
+  `LOGIN_USER_PASSWORD` and `LOGIN_USER_NAME`. Set all three together, or startup refuses. The password is never
+  stored in the repository.
+- The operator password must be changed from the one used during setup. It was shared in a chat, and the policy
+  minimum is only 12 characters. Use a long, random passphrase in the secrets manager.
+- Admin console access also requires a staff role and confirmed two-factor authentication. The login password alone
+  does not open it.
+
 ## Resolved in this pass
 - Neon owner password rotated. The previous credential is verified as rejected.
 - Vercel deployment protection set to SSO for all deployments.

@@ -14,7 +14,7 @@ const CUSTOMER_ROUTES = [
   "/exchange", "/history", "/notifications", "/security", "/profile", "/settings", "/scan",
   "/deposit", "/withdraw", "/reports", "/orders", "/symbol/AAPL", "/pay/REQ-AB12CD",
 ];
-const PUBLIC_ROUTES = ["/login", "/register", "/otp?purpose=login", "/reset"];
+const PUBLIC_ROUTES = ["/login", "/reset"];
 
 /** Client-side navigation keeps the in-memory sandbox session alive across screens. */
 async function navigate(page: Page, path: string) {

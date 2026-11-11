@@ -14,7 +14,7 @@ export default async function LandingPage() {
         <nav aria-label="Primary" className="flex items-center gap-2">
           <ThemeToggle />
           <Link href="/login" className="inline-flex min-h-10 items-center rounded-lg px-3 text-sm font-medium hover:bg-[var(--secondary)]">Log in</Link>
-          <Link href="/register" className="inline-flex min-h-10 items-center rounded-lg bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)]">Open account</Link>
+          <Link href="/login" className="inline-flex min-h-10 items-center rounded-lg bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)]">Open account</Link>
         </nav>
       </header>
 
@@ -26,8 +26,8 @@ export default async function LandingPage() {
           </h1>
           <p className="mt-4 text-base text-[var(--muted-foreground)] sm:text-lg">Banking · Trading · Investing · Global transfers</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link href="/register" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[var(--primary)] px-6 text-base font-semibold text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)]">
-              Create account <ArrowRight className="size-4" aria-hidden="true" />
+            <Link href="/login" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[var(--primary)] px-6 text-base font-semibold text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)]">
+              Sign in <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
             <Link href="/login" className="inline-flex min-h-12 items-center justify-center rounded-lg border border-[var(--gold)] px-6 text-base font-semibold text-[var(--gold)] hover:bg-[var(--gold)] hover:text-[var(--gold-foreground)]">
               Log in

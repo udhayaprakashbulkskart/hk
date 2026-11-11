@@ -34,6 +34,10 @@ const schema = z.object({
   ADYEN_MERCHANT_ACCOUNT: z.string().optional(),
   PAYMENT_RETURN_URL: z.string().url().default("https://app.hkfinhub.example/payments/return"),
   ADMIN_ALLOWED_IPS: z.string().default(""),
+  LOGIN_USER_EMAIL: z.string().optional(),
+  LOGIN_USER_PHONE: z.string().optional(),
+  LOGIN_USER_PASSWORD: z.string().optional(),
+  LOGIN_USER_NAME: z.string().optional(),
   KYC_MASTER_KEY: z.string().optional(),
   KYC_WEBHOOK_SECRET: z.string().optional(),
   KYC_DOCUMENT_BUCKET: z.string().optional(),
@@ -59,6 +63,8 @@ export interface ApiConfig {
   sentryDsn: string | undefined;
   paymentEnvironment: "sandbox" | "live";
   adminAllowedIps: string[];
+  /** The single operator login. Created at startup from configuration; there is no customer signup. */
+  loginUser: { email: string; phone: string; password: string; fullName: string } | undefined;
   kyc: { masterKey: Buffer | undefined; webhookSecret: string | undefined; bucket: string | undefined; kmsKeyId: string | undefined; region: string };
   liveFeaturePayments: boolean;
   liveFeatureTransfers: boolean;
@@ -117,6 +123,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
     },
     paymentReturnUrl: e.PAYMENT_RETURN_URL,
     adminAllowedIps: e.ADMIN_ALLOWED_IPS.split(",").map((s) => s.trim()).filter(Boolean),
+    loginUser: loginUserFrom(e),
     kyc: {
       masterKey: e.KYC_MASTER_KEY ? Buffer.from(e.KYC_MASTER_KEY, "base64") : undefined,
       webhookSecret: e.KYC_WEBHOOK_SECRET,
@@ -124,5 +131,18 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
       kmsKeyId: e.KMS_KEY_ID,
       region: e.AWS_REGION,
     },
+  };
+}
+
+/** All four values or none. A partial login configuration is refused rather than silently ignored. */
+function loginUserFrom(e: z.infer<typeof schema>): ApiConfig["loginUser"] {
+  const given = [e.LOGIN_USER_EMAIL, e.LOGIN_USER_PHONE, e.LOGIN_USER_PASSWORD].filter((v) => v !== undefined && v !== "");
+  if (given.length === 0) return undefined;
+  if (given.length !== 3) throw new Error("Invalid configuration: LOGIN_USER_EMAIL, LOGIN_USER_PHONE and LOGIN_USER_PASSWORD must be set together");
+  return {
+    email: e.LOGIN_USER_EMAIL!,
+    phone: e.LOGIN_USER_PHONE!,
+    password: e.LOGIN_USER_PASSWORD!,
+    fullName: e.LOGIN_USER_NAME ?? "Operator",
   };
 }

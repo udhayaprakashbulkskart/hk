@@ -2,7 +2,7 @@ import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { loadConfig } from "../src/config";
 import { ROUTES, buildOpenApi } from "../src/openapi";
-import { startTestApp, resetState, codeSentTo, PASSWORD, DEVICE, type TestApp } from "./helpers";
+import { startTestApp, resetState, codeSentTo, PASSWORD, DEVICE, provisionActive, testEnv, type TestApp } from "./helpers";
 
 let t: TestApp;
 const http = () => request(t.app.getHttpServer());
@@ -49,7 +49,7 @@ describe("HTTP hardening", () => {
 
 describe("rate limiting", () => {
   it("limits password guessing per account and returns Retry-After", async () => {
-    await http().post("/v1/auth/register").send({ email: EMAIL, phone: PHONE, password: PASSWORD, fullName: "Ed Wong", countryCode: "HK", language: "en" });
+    await provisionActive(t, { email: EMAIL, phone: PHONE, name: "Ed Wong" });
     let last: request.Response | null = null;
     for (let i = 0; i < 12; i++) {
       last = await http().post("/v1/auth/login").send({ email: EMAIL, password: "guess-guess-guess-1", device: DEVICE });
@@ -60,17 +60,6 @@ describe("rate limiting", () => {
     expect(Number(last?.headers["retry-after"])).toBeGreaterThan(0);
   });
 
-  it("limits verification-code sends per destination", async () => {
-    await http().post("/v1/auth/register").send({ email: EMAIL, phone: PHONE, password: PASSWORD, fullName: "Ed Wong", countryCode: "HK", language: "en" });
-    for (let i = 0; i < 8; i++) await http().post("/v1/auth/otp/resend").send({ email: EMAIL, channel: "EMAIL" });
-    await t.drain();
-    const sends = t.email.sent.filter((m) => m.to === EMAIL).length;
-    // One from registration, then at most the per-hour allowance of five in total.
-    expect(sends).toBeLessThanOrEqual(5);
-  });
-});
-
-describe("contract", () => {
   it("every documented route is mounted: only a domain 404 is allowed, never the router's 404", async () => {
     for (const r of ROUTES) {
       const path = `/v1${r.path.replace(/\{[^}]+\}/g, "00000000-0000-7000-8000-000000000000")}`;
@@ -95,20 +84,18 @@ describe("contract", () => {
 
 describe("audit trail", () => {
   it("records sign-in and cannot be rewritten or deleted", async () => {
-    await http().post("/v1/auth/register").send({ email: EMAIL, phone: PHONE, password: PASSWORD, fullName: "Ed Wong", countryCode: "HK", language: "en" });
+    await provisionActive(t, { email: EMAIL, phone: PHONE, name: "Ed Wong" });
     await t.drain();
-    await http().post("/v1/auth/otp/verify").send({ email: EMAIL, channel: "EMAIL", code: codeSentTo(t.email, EMAIL) }).expect(200);
-    await http().post("/v1/auth/otp/verify").send({ email: EMAIL, channel: "SMS", code: codeSentTo(t.sms, PHONE) }).expect(200);
     await http().post("/v1/auth/login").send({ email: EMAIL, password: PASSWORD, device: DEVICE }).expect(200);
     const rows = await t.container.db.auditLog.findMany();
-    expect(rows.map((r) => r.action)).toEqual(expect.arrayContaining(["register", "otp_verified_email", "otp_verified_sms", "login"]));
+    expect(rows.map((r) => r.action)).toEqual(expect.arrayContaining(["login_user_provisioned", "login"]));
 
     await expect(t.container.db.$executeRawUnsafe(`UPDATE "AuditLog" SET "action" = 'tampered'`)).rejects.toThrow(/append-only/);
     await expect(t.container.db.$executeRawUnsafe(`DELETE FROM "AuditLog"`)).rejects.toThrow(/append-only/);
   });
 
   it("never stores a password or a plain code in the audit trail", async () => {
-    await http().post("/v1/auth/register").send({ email: EMAIL, phone: PHONE, password: PASSWORD, fullName: "Ed Wong", countryCode: "HK", language: "en" });
+    await provisionActive(t, { email: EMAIL, phone: PHONE, name: "Ed Wong" });
     await http().post("/v1/auth/login").send({ email: EMAIL, password: "a-wrong-password-99", device: DEVICE });
     const dump = JSON.stringify(await t.container.db.auditLog.findMany());
     expect(dump).not.toContain(PASSWORD);
@@ -140,5 +127,22 @@ describe("configuration", () => {
   it("starts with no messaging provider configured, which fails closed on send", () => {
     const c = loadConfig({ ...base, APP_ENV: "local" });
     expect(c.emailProvider).toBe("none");
+  });
+});
+
+describe("no customer signup", () => {
+  it("does not serve the signup or verification-code routes", async () => {
+    for (const path of ["/v1/auth/register", "/v1/auth/otp/verify", "/v1/auth/otp/resend"]) {
+      const res = await http().post(path).send({});
+      expect(res.status, path).toBe(404);
+      expect(res.body?.error?.message, path).toBe("No such endpoint.");
+    }
+  });
+
+  it("refuses a partial operator login configuration instead of ignoring it", async () => {
+    const { loadConfig } = await import("../src/config");
+    expect(() => loadConfig({ ...testEnv(), LOGIN_USER_EMAIL: "ops@example.com" })).toThrow(/must be set together/);
+    const cfg = loadConfig({ ...testEnv(), LOGIN_USER_EMAIL: "ops@example.com", LOGIN_USER_PHONE: "+85290000000", LOGIN_USER_PASSWORD: "a-long-enough-passphrase" });
+    expect(cfg.loginUser?.email).toBe("ops@example.com");
   });
 });

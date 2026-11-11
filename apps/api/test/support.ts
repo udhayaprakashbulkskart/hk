@@ -1,7 +1,7 @@
 import request from "supertest";
 import { expect } from "vitest";
 import { randomUUID } from "node:crypto";
-import { codeSentTo, DEVICE, PASSWORD, type TestApp } from "./helpers";
+import { provisionActive, DEVICE, PASSWORD, type TestApp } from "./helpers";
 import { createFakeProviders, signRazorpay, signStripe } from "./provider-fake";
 
 export interface Customer {
@@ -24,10 +24,7 @@ export async function registerCustomer(t: TestApp, name: string): Promise<Custom
   const email = `${name}-${randomUUID().slice(0, 8)}@example.com`;
   const phone = `+8529${String(3000000 + (phoneSeed++ % 6000000)).padStart(7, "0")}`;
   const http = () => request(t.app.getHttpServer());
-  await http().post("/v1/auth/register").send({ email, phone, password: PASSWORD, fullName: name, countryCode: "HK", language: "en" }).expect(202);
-  await t.drain();
-  await http().post("/v1/auth/otp/verify").send({ email, channel: "EMAIL", code: codeSentTo(t.email, email) }).expect(200);
-  await http().post("/v1/auth/otp/verify").send({ email, channel: "SMS", code: codeSentTo(t.sms, phone) }).expect(200);
+  await provisionActive(t, { email, phone, name });
   const login = await http().post("/v1/auth/login").send({ email, password: PASSWORD, device: DEVICE }).expect(200);
   const access = login.body.tokens.accessToken as string;
   await http().get("/v1/accounts").set("Authorization", `Bearer ${access}`).expect(200);
