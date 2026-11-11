@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "HK FinHub",
+    "slug": "hk-finhub",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "hkfinhub",
+    "userInterfaceStyle": "automatic",
+    "icon": "./assets/icon.png",
+    "backgroundColor": "#080b10",
+    "newArchEnabled": true,
+    "ios": {
+      "bundleIdentifier": "com.hkfinhub.sandbox",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Use Face ID to unlock HK FinHub.",
+        "NSCameraUsageDescription": "Scan payment QR codes."
+      }
+    },
+    "android": {
+      "package": "com.hkfinhub.sandbox",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#080b10"
+      },
+      "permissions": ["CAMERA", "USE_BIOMETRIC", "USE_FINGERPRINT", "POST_NOTIFICATIONS"]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-local-authentication",
+      ["expo-camera", { "cameraPermission": "HK FinHub uses the camera to scan payment QR codes." }],
+      ["expo-notifications", { "color": "#b5121b" }],
+      ["expo-splash-screen", { "backgroundColor": "#080b10", "image": "./assets/icon.png", "imageWidth": 120 }]
+    ],
+    "experiments": { "typedRoutes": false }
+  }
+}

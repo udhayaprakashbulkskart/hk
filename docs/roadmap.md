@@ -8,7 +8,7 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 |---|---|---|---|
 | 1 | Repository inspection and technical architecture | ✅ (this commit) | — |
 | 2 | Design system and complete web UI | ✅ | — (sandbox data; live APIs come in Phase 4) |
-| 3 | Mobile app screens | ⬜ | Phase 2 tokens |
+| 3 | Mobile app screens | ✅ | — (sandbox data; live APIs in Phase 4) |
 | 4 | Backend, database and authentication | ⬜ | D12, D13, D14 |
 | 5 | Accounts and ledger | ⬜ | D6 (only if stored value is in scope) |
 | 6 | Payment provider adapters, FX, transfers | ⬜ | D1, D3, D4, D5, D7 for live; sandbox can start earlier |
@@ -65,7 +65,15 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 
 ---
 
-## Phase 3: Mobile app screens
+## Phase 3: Mobile app screens ✅
+
+**Result:** Expo SDK 58 app in `apps/mobile` with 26 routes covering every screen in spec section 14, plus the QR scanner and the payment-link route. Shares the sandbox client (`packages/api-client`) and colour tokens (`packages/tokens`) with the web app. Native features: biometric app lock, secure session storage, push permission and token (needs EAS project ID), QR scanning, and the `hkfinhub://` deep link.
+
+**Verified:** `expo export` bundles iOS (Hermes), Android (Hermes) and web; the web export is driven by 8 Playwright tests at phone size in both themes (sign-in, every screen without horizontal overflow or uncaught errors, public screens, payment-link handling). Strict TypeScript passes.
+
+**Not verified here (run on device in Phase 11):** iOS and Android simulators, Face ID / fingerprint, camera scanning, push delivery, Maestro flows.
+
+**Known gaps:** push tokens are not sent to a backend yet; the EAS project ID is not set; the recipient list in the send wizard is sample data; screen titles appear twice on some stack screens (header plus in-body title).
 
 **Goal:** Expo app (iOS and Android) with all screens from spec section 14, sharing types and tokens with the web app.
 

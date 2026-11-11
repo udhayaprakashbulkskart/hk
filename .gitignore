@@ -41,3 +41,6 @@ playwright-report/
 blob-report/
 next-env.d.ts
 .vercel/
+
+# Expo generated
+expo-env.d.ts

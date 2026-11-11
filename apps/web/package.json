@@ -13,6 +13,7 @@
     "node": ">=22.0.0"
   },
   "dependencies": {
+    "@hkfinhub/api-client": "workspace:*",
     "@hkfinhub/types": "workspace:*",
     "@hkfinhub/ui": "workspace:*",
     "lucide-react": "1.62.0",
