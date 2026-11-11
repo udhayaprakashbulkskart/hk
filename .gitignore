@@ -52,4 +52,3 @@ database/src/generated/
 *.rdb
 
 # Bundled Vercel function (built during deploy)
-apps/api/api/server.mjs
