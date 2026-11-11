@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowDownToLine, ArrowUpFromLine, Send, Download, TrendingUp, TrendingDown, Globe2, Briefcase, ArrowRight } from "lucide-react";
 import { Badge, Card, CardContent, CardHeader, CardTitle, Stat, cn } from "@hkfinhub/ui";
 import { ReceivingAccountCard } from "@/components/receiving-account";
+import { fetchReferenceRates, unitsPerHkd } from "@/lib/reference-rates";
 import { PageHeader, Section } from "@/components/page";
 import { TrendChart, Sparkline } from "@/components/charts";
 import { api } from "@/lib/api";
@@ -28,17 +29,18 @@ function signed(t: Transaction) {
 }
 
 export default async function DashboardPage() {
-  const [dash, txns, history, market, notifications, fxUsd, fxInr, fxEur, fxGbp] = await Promise.all([
+  const [dash, txns, history, market, notifications, ref] = await Promise.all([
     api.getDashboard(),
     api.listTransactions(),
     api.getPortfolioHistory(),
     api.listMarket(),
     api.listNotifications(),
-    api.getFxQuote("HKD", "USD", "10000"),
-    api.getFxQuote("HKD", "INR", "10000"),
-    api.getFxQuote("EUR", "HKD", "10000"),
-    api.getFxQuote("GBP", "HKD", "10000"),
+    fetchReferenceRates(),
   ]);
+  const usdPerHkd = unitsPerHkd(ref, "USD");
+  const inrPerHkd = unitsPerHkd(ref, "INR");
+  const eurPerHkd = unitsPerHkd(ref, "EUR");
+  const gbpPerHkd = unitsPerHkd(ref, "GBP");
   const cash = dash.cashTotal;
   const cashUsd = await api.getFxQuote("HKD", "USD", cash.amountMinor);
   const pnl = dash.investmentValue.unrealisedPnl;
@@ -178,14 +180,18 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             {[
-              { pair: "USD → HKD", rate: fxUsd ? (1 / fxUsd.rate).toFixed(4) : null },
-              { pair: "HKD → INR", rate: fxInr ? fxInr.rate.toFixed(2) : null },
-              { pair: "EUR → HKD", rate: fxEur ? fxEur.rate.toFixed(4) : null },
-              { pair: "GBP → HKD", rate: fxGbp ? fxGbp.rate.toFixed(4) : null },
+              { pair: "USD → HKD", rate: usdPerHkd ? (1 / usdPerHkd).toFixed(4) : null },
+              { pair: "HKD → INR", rate: inrPerHkd ? inrPerHkd.toFixed(2) : null },
+              { pair: "EUR → HKD", rate: eurPerHkd ? (1 / eurPerHkd).toFixed(4) : null },
+              { pair: "GBP → HKD", rate: gbpPerHkd ? (1 / gbpPerHkd).toFixed(4) : null },
             ].map((r) => (
-              <div key={r.pair} className="flex justify-between tabular-nums"><span className="text-[var(--muted-foreground)]">{r.pair}</span><span className="font-medium">{r.rate ?? "Not connected"}</span></div>
+              <div key={r.pair} className="flex justify-between tabular-nums"><span className="text-[var(--muted-foreground)]">{r.pair}</span><span className="font-medium">{r.rate ?? "Not available"}</span></div>
             ))}
-            <p className="pt-2 text-xs text-[var(--muted-foreground)]">Rates appear once our FX provider is connected. Every transfer shows a live quote first.</p>
+            <p className="pt-2 text-xs text-[var(--muted-foreground)]">
+              {ref?.available && ref.date
+                ? `ECB reference rates for ${ref.date}, via Frankfurter. Daily, not live, not a rate you can transact at.`
+                : "Reference rates are not available right now."}
+            </p>
           </CardContent>
         </Card>
 

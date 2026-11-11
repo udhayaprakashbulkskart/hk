@@ -604,7 +604,7 @@ var require_textParsers = __commonJS({
 var require_pg_int8 = __commonJS({
   "../../node_modules/.pnpm/pg-int8@1.0.1/node_modules/pg-int8/index.js"(exports, module) {
     "use strict";
-    var BASE = 1e6;
+    var BASE2 = 1e6;
     function readInt8(buffer) {
       var high = buffer.readInt32BE(0);
       var low = buffer.readUInt32BE(4);
@@ -622,11 +622,11 @@ var require_pg_int8 = __commonJS({
       var l4;
       var i5;
       {
-        carry = high % BASE;
-        high = high / BASE >>> 0;
+        carry = high % BASE2;
+        high = high / BASE2 >>> 0;
         t8 = 4294967296 * carry + low;
-        low = t8 / BASE >>> 0;
-        digits2 = "" + (t8 - BASE * low);
+        low = t8 / BASE2 >>> 0;
+        digits2 = "" + (t8 - BASE2 * low);
         if (low === 0 && high === 0) {
           return sign4 + digits2 + result2;
         }
@@ -638,11 +638,11 @@ var require_pg_int8 = __commonJS({
         result2 = pad + digits2 + result2;
       }
       {
-        carry = high % BASE;
-        high = high / BASE >>> 0;
+        carry = high % BASE2;
+        high = high / BASE2 >>> 0;
         t8 = 4294967296 * carry + low;
-        low = t8 / BASE >>> 0;
-        digits2 = "" + (t8 - BASE * low);
+        low = t8 / BASE2 >>> 0;
+        digits2 = "" + (t8 - BASE2 * low);
         if (low === 0 && high === 0) {
           return sign4 + digits2 + result2;
         }
@@ -654,11 +654,11 @@ var require_pg_int8 = __commonJS({
         result2 = pad + digits2 + result2;
       }
       {
-        carry = high % BASE;
-        high = high / BASE >>> 0;
+        carry = high % BASE2;
+        high = high / BASE2 >>> 0;
         t8 = 4294967296 * carry + low;
-        low = t8 / BASE >>> 0;
-        digits2 = "" + (t8 - BASE * low);
+        low = t8 / BASE2 >>> 0;
+        digits2 = "" + (t8 - BASE2 * low);
         if (low === 0 && high === 0) {
           return sign4 + digits2 + result2;
         }
@@ -670,9 +670,9 @@ var require_pg_int8 = __commonJS({
         result2 = pad + digits2 + result2;
       }
       {
-        carry = high % BASE;
+        carry = high % BASE2;
         t8 = 4294967296 * carry + low;
-        digits2 = "" + t8 % BASE;
+        digits2 = "" + t8 % BASE2;
         return sign4 + digits2 + result2;
       }
     }
@@ -7761,7 +7761,7 @@ var require_range = __commonJS({
         range2 = range2.replace(BUILDSTRIPRE, "");
         const memoOpts = (this.options.includePrerelease && FLAG_INCLUDE_PRERELEASE) | (this.options.loose && FLAG_LOOSE);
         const memoKey = memoOpts + ":" + range2;
-        const cached2 = cache6.get(memoKey);
+        const cached2 = cache7.get(memoKey);
         if (cached2) {
           return cached2;
         }
@@ -7795,7 +7795,7 @@ var require_range = __commonJS({
           rangeMap.delete("");
         }
         const result2 = [...rangeMap.values()];
-        cache6.set(memoKey, result2);
+        cache7.set(memoKey, result2);
         return result2;
       }
       intersects(range2, options) {
@@ -7834,7 +7834,7 @@ var require_range = __commonJS({
     };
     module.exports = Range;
     var LRU = require_lrucache();
-    var cache6 = new LRU();
+    var cache7 = new LRU();
     var parseOptions = require_parse_options();
     var Comparator = require_comparator();
     var debug4 = require_debug();
@@ -80053,39 +80053,39 @@ var init_S3ExpressIdentityProviderImpl = __esm({
       static REFRESH_WINDOW_MS = 6e4;
       accessKeyId;
       cacheGeneration = 0;
-      constructor(createSessionFn, cache6 = new S3ExpressIdentityCache()) {
+      constructor(createSessionFn, cache7 = new S3ExpressIdentityCache()) {
         this.createSessionFn = createSessionFn;
-        this.cache = cache6;
+        this.cache = cache7;
       }
       async getS3ExpressIdentity(awsIdentity, identityProperties) {
         const bucket = identityProperties.Bucket;
-        const { cache: cache6 } = this;
+        const { cache: cache7 } = this;
         if (awsIdentity.accessKeyId !== this.accessKeyId) {
           this.accessKeyId = awsIdentity.accessKeyId;
           this.cacheGeneration++;
-          cache6.clear();
+          cache7.clear();
         }
         const cacheGeneration = this.cacheGeneration;
-        const entry = cache6.get(bucket);
+        const entry = cache7.get(bucket);
         if (entry) {
           return entry.identity.then((identity) => {
             const isExpired = (identity.expiration?.getTime() ?? 0) < Date.now();
             if (isExpired) {
-              return cache6.set(bucket, new S3ExpressIdentityCacheEntry(this.getIdentity(bucket))).identity;
+              return cache7.set(bucket, new S3ExpressIdentityCacheEntry(this.getIdentity(bucket))).identity;
             }
             const isExpiringSoon = (identity.expiration?.getTime() ?? 0) < Date.now() + _S3ExpressIdentityProviderImpl.REFRESH_WINDOW_MS;
             if (isExpiringSoon && !entry.isRefreshing) {
               entry.isRefreshing = true;
               this.getIdentity(bucket).then((id) => {
                 if (cacheGeneration === this.cacheGeneration) {
-                  cache6.set(bucket, new S3ExpressIdentityCacheEntry(Promise.resolve(id)));
+                  cache7.set(bucket, new S3ExpressIdentityCacheEntry(Promise.resolve(id)));
                 }
               });
             }
             return identity;
           });
         }
-        return cache6.set(bucket, new S3ExpressIdentityCacheEntry(this.getIdentity(bucket))).identity;
+        return cache7.set(bucket, new S3ExpressIdentityCacheEntry(this.getIdentity(bucket))).identity;
       }
       async getIdentity(bucket) {
         await this.cache.purgeExpired().catch((error64) => {
@@ -93158,7 +93158,7 @@ var require_dist_cjs16 = __commonJS({
       r6 + 20
     ]);
     var bdd5 = BinaryDecisionDiagram2.from(nodes5, root5, _data5.conditions, _data5.results);
-    var cache6 = new EndpointCache2({
+    var cache7 = new EndpointCache2({
       size: 50,
       params: [
         "Accelerate",
@@ -93178,7 +93178,7 @@ var require_dist_cjs16 = __commonJS({
       ]
     });
     var defaultEndpointResolver5 = (endpointParams, context = {}) => {
-      return cache6.get(endpointParams, () => decideEndpoint2(bdd5, {
+      return cache7.get(endpointParams, () => decideEndpoint2(bdd5, {
         endpointParams,
         logger: context.logger
       }));
@@ -104148,12 +104148,12 @@ var require_levels = __commonJS({
     function genLsCache(instance) {
       const formatter = instance[formattersSym].level;
       const { labels } = instance.levels;
-      const cache6 = {};
+      const cache7 = {};
       for (const label in labels) {
         const level = formatter(labels[label], Number(label));
-        cache6[label] = JSON.stringify(level).slice(0, -1);
+        cache7[label] = JSON.stringify(level).slice(0, -1);
       }
-      instance[lsCacheSym] = cache6;
+      instance[lsCacheSym] = cache7;
       return instance;
     }
     function isStandardLevel(level, useOnlyCustomLevels) {
@@ -153159,7 +153159,7 @@ var require_application = __commonJS({
       return this;
     };
     app.render = function render2(name2, options, callback) {
-      var cache6 = this.cache;
+      var cache7 = this.cache;
       var done = callback;
       var engines = this.engines;
       var opts = options || {};
@@ -153173,7 +153173,7 @@ var require_application = __commonJS({
         renderOptions.cache = this.enabled("view cache");
       }
       if (renderOptions.cache) {
-        view = cache6[name2];
+        view = cache7[name2];
       }
       if (!view) {
         var View2 = this.get("view");
@@ -153189,7 +153189,7 @@ var require_application = __commonJS({
           return done(err);
         }
         if (renderOptions.cache) {
-          cache6[name2] = view;
+          cache7[name2] = view;
         }
       }
       tryRender(view, renderOptions, done);
@@ -191835,21 +191835,21 @@ function visit(schema2, fnOrHandlers) {
     const h7 = fnOrHandlers[node2._zod.def.type];
     return h7 ? h7(node2, rewritten) : node2;
   };
-  const cache6 = /* @__PURE__ */ new Map();
+  const cache7 = /* @__PURE__ */ new Map();
   function run(s2) {
-    const cached2 = cache6.get(s2);
+    const cached2 = cache7.get(s2);
     if (cached2 === RESOLVING) {
       return new $ZodLazy({
         type: "lazy",
-        getter: () => cache6.get(s2)
+        getter: () => cache7.get(s2)
       });
     }
     if (cached2 !== void 0)
       return cached2;
-    cache6.set(s2, RESOLVING);
+    cache7.set(s2, RESOLVING);
     const inner = mapInner(s2);
     const mapped = fn(inner, inner !== s2);
-    cache6.set(s2, mapped);
+    cache7.set(s2, mapped);
     return mapped;
   }
   function mapInner(s2) {
@@ -192090,6 +192090,9 @@ var schema = external_exports.object({
   LOGIN_USER_PHONE: external_exports.string().optional(),
   LOGIN_USER_PASSWORD: external_exports.string().optional(),
   LOGIN_USER_NAME: external_exports.string().optional(),
+  RECEIVING_ACCOUNT_NAME: external_exports.string().optional(),
+  RECEIVING_ACCOUNT_NUMBER: external_exports.string().optional(),
+  RECEIVING_BANK_NAME: external_exports.string().optional(),
   KYC_MASTER_KEY: external_exports.string().optional(),
   KYC_WEBHOOK_SECRET: external_exports.string().optional(),
   KYC_DOCUMENT_BUCKET: external_exports.string().optional(),
@@ -192137,6 +192140,7 @@ function loadConfig(env2 = process.env) {
     paymentReturnUrl: e5.PAYMENT_RETURN_URL,
     adminAllowedIps: e5.ADMIN_ALLOWED_IPS.split(",").map((s2) => s2.trim()).filter(Boolean),
     loginUser: loginUserFrom(e5),
+    receivingAccount: e5.RECEIVING_ACCOUNT_NUMBER ? { accountName: e5.RECEIVING_ACCOUNT_NAME ?? "", accountNumber: e5.RECEIVING_ACCOUNT_NUMBER, bankName: e5.RECEIVING_BANK_NAME ?? "" } : null,
     kyc: {
       masterKey: e5.KYC_MASTER_KEY ? Buffer.from(e5.KYC_MASTER_KEY, "base64") : void 0,
       webhookSecret: e5.KYC_WEBHOOK_SECRET,
@@ -197457,15 +197461,15 @@ var Debug = new Proxy(debugCreate, {
   set: (_3, prop, value) => topProps[prop] = value
 });
 function safeStringify(value, indent = 2) {
-  const cache6 = /* @__PURE__ */ new Set();
+  const cache7 = /* @__PURE__ */ new Set();
   return JSON.stringify(
     value,
     (key, value2) => {
       if (typeof value2 === "object" && value2 !== null) {
-        if (cache6.has(value2)) {
+        if (cache7.has(value2)) {
           return `[Circular *]`;
         }
-        cache6.add(value2);
+        cache7.add(value2);
       } else if (typeof value2 === "bigint") {
         return value2.toString();
       }
@@ -204244,6 +204248,11 @@ var AccountsController = class {
       }))
     };
   }
+  receivingAccount() {
+    const acct = this.c.config.receivingAccount;
+    if (!acct) return { configured: false };
+    return { configured: true, ...acct };
+  }
   async openCurrency(body, req) {
     try {
       return await this.c.accounts.openCurrencyAccount(req.auth.userId, body.currency);
@@ -204257,6 +204266,10 @@ __decorateClass([
   UseGuards(AuthGuard),
   __decorateParam(0, Req())
 ], AccountsController.prototype, "summary", 1);
+__decorateClass([
+  Get("receiving-account"),
+  UseGuards(AuthGuard)
+], AccountsController.prototype, "receivingAccount", 1);
 __decorateClass([
   Post("currencies"),
   HttpCode(200),
@@ -205317,12 +205330,73 @@ function presentRequest(r6) {
   };
 }
 
+// src/fx/reference-rates.controller.ts
+init_common2();
+
+// src/fx/reference-rates.ts
+var REFERENCE_SOURCE = "European Central Bank reference rates, via Frankfurter";
+var REFERENCE_CURRENCIES = ["USD", "INR", "EUR", "GBP", "SGD", "CNY"];
+var BASE = "HKD";
+var ENDPOINT = "https://api.frankfurter.app/latest";
+var CACHE_MS = 6 * 60 * 60 * 1e3;
+var TIMEOUT_MS2 = 5e3;
+var UNAVAILABLE = () => ({
+  available: false,
+  source: REFERENCE_SOURCE,
+  base: BASE,
+  date: null,
+  rates: [],
+  note: "Reference rates are temporarily unavailable."
+});
+var cache6 = null;
+function isFrankfurterBody(x3) {
+  if (!x3 || typeof x3 !== "object") return false;
+  const o3 = x3;
+  if (typeof o3.date !== "string" || !o3.rates || typeof o3.rates !== "object") return false;
+  return Object.values(o3.rates).every((v2) => typeof v2 === "number" && Number.isFinite(v2) && v2 > 0);
+}
+async function getReferenceRates() {
+  if (cache6 && Date.now() - cache6.at < CACHE_MS) return cache6.value;
+  try {
+    const url2 = `${ENDPOINT}?base=${BASE}&symbols=${REFERENCE_CURRENCIES.join(",")}`;
+    const res = await fetch(url2, { headers: { accept: "application/json" }, signal: AbortSignal.timeout(TIMEOUT_MS2) });
+    if (!res.ok) throw new Error(`status ${res.status}`);
+    const body = await res.json();
+    if (!isFrankfurterBody(body)) throw new Error("unexpected response");
+    const value = {
+      available: true,
+      source: REFERENCE_SOURCE,
+      base: BASE,
+      date: body.date,
+      rates: REFERENCE_CURRENCIES.filter((c7) => typeof body.rates[c7] === "number").map((c7) => ({ currency: c7, unitsPerHkd: body.rates[c7] })),
+      note: "Daily reference rates. Not a live quote and not a rate you can transact at."
+    };
+    cache6 = { at: Date.now(), value };
+    return value;
+  } catch {
+    return cache6?.value ?? UNAVAILABLE();
+  }
+}
+
+// src/fx/reference-rates.controller.ts
+var ReferenceRatesController = class {
+  async referenceRates() {
+    return getReferenceRates();
+  }
+};
+__decorateClass([
+  Get("reference-rates")
+], ReferenceRatesController.prototype, "referenceRates", 1);
+ReferenceRatesController = __decorateClass([
+  Controller("fx")
+], ReferenceRatesController);
+
 // src/app.module.ts
 var AppModule = class {
   static forRoot(container) {
     return {
       module: AppModule,
-      controllers: [HealthController, AuthController, MeController, AccountsController, DashboardController, DepositsController, TransfersController, FxController, RequestsController, WebhooksController, ConfigController, KycController, AdminController, InvestmentController],
+      controllers: [HealthController, AuthController, MeController, AccountsController, DashboardController, DepositsController, TransfersController, FxController, ReferenceRatesController, RequestsController, WebhooksController, ConfigController, KycController, AdminController, InvestmentController],
       providers: [
         { provide: CONTAINER, useValue: container },
         AuthGuard
@@ -206497,7 +206571,7 @@ var ROUTES2 = [
   { method: "get", path: "/transfers/{id}", summary: "One transfer and its status.", auth: true, responses: { "200": "Transfer.", "404": ERR } },
   { method: "post", path: "/fx/quotes", summary: "Quote a currency conversion. Rate and fee are locked for 30 seconds.", auth: true, body: fxQuoteSchema, responses: { "201": "Quote.", "410": ERR, "422": ERR } },
   { method: "post", path: "/fx/conversions", summary: "Convert using a quote. A quote can be used once.", auth: true, body: fxConvertSchema, responses: { "201": "Converted.", "409": ERR, "410": ERR, "422": ERR } },
-  { method: "get", path: "/fx/history", summary: "Sample rate history for a pair (labelled sample).", auth: true, responses: { "200": "Points.", "422": ERR } },
+  { method: "get", path: "/fx/history", summary: "Rate history for a pair.", auth: true, responses: { "200": "Points.", "422": ERR } },
   { method: "post", path: "/payment-requests", summary: "Create a payment request to share by link or QR code.", auth: true, body: requestCreateSchema, responses: { "201": "Request.", "422": ERR } },
   { method: "get", path: "/payment-requests", summary: "Your payment requests.", auth: true, responses: { "200": "Requests.", "401": ERR } },
   { method: "get", path: "/payment-requests/{ref}/public", summary: "What a payer sees: amount, memo and status. No account identifiers.", auth: false, responses: { "200": "Request.", "404": ERR } },
