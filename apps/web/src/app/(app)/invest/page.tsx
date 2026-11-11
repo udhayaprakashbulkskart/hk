@@ -16,6 +16,24 @@ export default async function InvestPage({ searchParams }: { searchParams: SP })
   const q = (sp.q ?? "").trim().toLowerCase();
   const market = sp.market ?? "all";
   const all = await api.listMarket();
+  if (all.length === 0) {
+    return (
+      <div className="space-y-8">
+        <PageHeader
+          eyebrow="Investments"
+          title="Invest in global markets"
+          description="Hong Kong, United States and India through licensed brokerage partners. Market data appears once it is licensed and connected."
+        />
+        <Card>
+          <CardContent className="space-y-2 p-6 text-sm">
+            <p className="font-medium">Market data is not connected yet.</p>
+            <p className="text-[var(--muted-foreground)]">Prices, charts and trading appear here once a licensed market data feed and brokerage partner are connected. No order can be placed until then.</p>
+            <Link href="/invest/orders?tab=open" className="inline-block pt-2 text-[var(--gold)] hover:underline">View my orders</Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   const list = all.filter((m) => (market === "all" || m.market === market) && (!q || m.symbol.toLowerCase().includes(q) || m.name.toLowerCase().includes(q)));
   const selected = all.find((m) => m.symbol === sp.symbol) ?? all[0]!;
   const series = await api.getPriceHistory(selected.symbol);
