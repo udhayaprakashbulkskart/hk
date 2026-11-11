@@ -13,11 +13,11 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 | 5 | Accounts and ledger | ✅ | — (no partner needed: the wallet is a ledger view) |
 | 6 | Payment provider adapters, FX, transfers | 🟡 | D1, D3, D4, D5, D7 for live; sandbox complete |
 | 7 | KYC and compliance modules | 🟡 | D2, D15 for live; D11 for KMS and S3 verification; sandbox complete |
-| 8 | Broker and investment adapters | ⬜ | D8, D9, D10 |
-| 9 | Admin dashboard | ⬜ | Phases 4–8 for full coverage |
-| 10 | Integrate all applications | ⬜ | Phases 2–9 |
-| 11 | Tests, security checks and sandbox transactions | ⬜ | Sandbox credentials from Phase 6 and 8 |
-| 12 | Production deployment preparation | ⬜ | D11, approvals in section "Provider approvals" |
+| 8 | Broker and investment adapters | 🟡 | D8, D9, D10 for live brokers and market data; sandbox broker and ledger settlement complete |
+| 9 | Admin dashboard | 🟡 | Backend complete (RBAC, maker-checker, audited reveals); `apps/admin` UI not built |
+| 10 | Integrate all applications | 🟡 | API journey test complete; web and mobile still on sandbox data |
+| 11 | Tests, security checks and sandbox transactions | 🟡 | 162 API tests, unit suites, typechecks, clean dependency audit; no penetration test |
+| 12 | Production deployment preparation | 🟡 | Readiness document written; not deployed. See docs/production-readiness.md |
 
 ---
 
@@ -323,3 +323,19 @@ Phase 2 can start without any of these. Phase 4 needs D14 settled first.
 2. **D1:** which launch jurisdictions? This determines which partners are needed first.
 3. **D16:** brand assets and fonts. Placeholders are fine for Phase 2.
 4. **D11:** confirm AWS Hong Kong region (`ap-east-1`) for hosting and data residency.
+
+---
+
+## Phases 8 to 12: what was built in this pass
+
+- **Phase 8**: `services/investment` (order lifecycle, broker-confirmed fills, average-cost P&L, ledger settlement
+  posted once per order), a sandbox broker, and `/v1/investments/*`. Not built: Zerodha and DriveWealth adapters,
+  market data, daily portfolio snapshots, investment screens.
+- **Phase 9**: `services/admin` (permission matrix, audited denials, maker-checker for provider approvals, PII reveals
+  with reason codes), staff role model, and `/v1/admin/*` behind a staff guard (TOTP and optional IP allow-list).
+  The permission matrix test covers 16 endpoints across 4 roles. Not built: the admin UI in `apps/admin`.
+- **Phase 10**: one cross-application journey test through the real API (KYC, funding, receiving, investing,
+  sending, dashboard). Not built: moving web and mobile off sandbox data.
+- **Phase 11**: all typechecks and unit suites pass; 162 API tests pass; the production dependency audit is clean
+  after pinning patched `minimatch` and `glob` versions. Not done: penetration testing, load testing.
+- **Phase 12**: `docs/production-readiness.md`. Not deployed.

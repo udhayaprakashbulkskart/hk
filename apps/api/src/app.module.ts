@@ -6,6 +6,8 @@ import { AuthGuard } from "./auth/auth.guard";
 import { HealthController } from "./health/health.controller";
 import { AccountsController, DashboardController } from "./accounts/accounts.controller";
 import { KycController } from "./kyc/kyc.controller";
+import { AdminController } from "./admin/admin.controller";
+import { InvestmentController } from "./investment/investment.controller";
 import { ConfigController, DepositsController, FxController, RequestsController, TransfersController, WebhooksController } from "./payments/payments.controller";
 
 /** Composition root. The container is built outside Nest so tests can substitute providers. */
@@ -14,7 +16,7 @@ export class AppModule {
   static forRoot(container: Container): DynamicModule {
     return {
       module: AppModule,
-      controllers: [HealthController, AuthController, MeController, AccountsController, DashboardController, DepositsController, TransfersController, FxController, RequestsController, WebhooksController, ConfigController, KycController],
+      controllers: [HealthController, AuthController, MeController, AccountsController, DashboardController, DepositsController, TransfersController, FxController, RequestsController, WebhooksController, ConfigController, KycController, AdminController, InvestmentController],
       providers: [
         { provide: CONTAINER, useValue: container },
         AuthGuard,

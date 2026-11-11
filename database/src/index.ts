@@ -10,3 +10,5 @@ export { PrismaTransferStore, PrismaRequestStore } from "./transfers-store";
 export { acquireAccountLock } from "./locks";
 export { PrismaKycStore } from "./kyc-store";
 export { PrismaComplianceStore } from "./compliance-store";
+export { PrismaAdminStore } from "./admin-store";
+export { PrismaInvestmentStore } from "./investment-store";

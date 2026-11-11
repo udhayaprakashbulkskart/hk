@@ -112,6 +112,11 @@ export class ComplianceService implements OutboundGuard {
     await this.d.store.openCase({ kind, severity: "MEDIUM", blocking: false, ...subject, accountId: input.accountId, detail });
   }
 
+  /** Open cases for the staff review queue. */
+  openCases(limit: number) {
+    return this.d.store.listOpenCases(limit);
+  }
+
   /** True when an open blocking case exists on the user. Used to hold an identity PASS for review. */
   async hasBlockingCase(userId: string): Promise<boolean> {
     return (await this.d.store.findOpenBlocking([{ subjectType: "USER", subjectId: userId }])) !== null;

@@ -5,6 +5,8 @@ import { LedgerError } from "@hkfinhub/ledger";
 import { PaymentError, WebhookSignatureError } from "@hkfinhub/payments";
 import { TransferError } from "@hkfinhub/transfers";
 import { KycError } from "@hkfinhub/kyc";
+import { AdminError } from "@hkfinhub/admin";
+import { InvestmentError } from "@hkfinhub/investment";
 import { ComplianceError } from "@hkfinhub/compliance";
 
 const LEDGER: Record<string, number> = {
@@ -46,6 +48,14 @@ export function mapDomainError(err: unknown): never {
     throw new HttpException({ code, message }, PAYMENT[err.code] ?? 422);
   }
   if (err instanceof AccountError) throw new HttpException({ code: err.code, message: err.message }, err.code === "NOT_FOUND" ? HttpStatus.NOT_FOUND : HttpStatus.UNPROCESSABLE_ENTITY);
+  if (err instanceof InvestmentError) {
+    const status: Record<string, number> = { INVALID_REQUEST: 422, NOT_FOUND: 404, KYC_REQUIRED: 403, INSUFFICIENT_FUNDS: 422, NOT_AVAILABLE: 503, INVALID_TRANSITION: 409 };
+    throw new HttpException({ code: err.code, message: err.message }, status[err.code] ?? 422);
+  }
+  if (err instanceof AdminError) {
+    const status: Record<string, number> = { FORBIDDEN: 403, INVALID_REQUEST: 422, NOT_FOUND: 404, SELF_APPROVAL: 403, APPROVAL_NOT_PENDING: 409, NOT_AVAILABLE: 503 };
+    throw new HttpException({ code: err.code, message: err.message }, status[err.code] ?? 422);
+  }
   if (err instanceof KycError) {
     // Generic messages where the real reason could reveal review state or internal detail.
     const message = err.code === "INTEGRITY_FAILURE" ? "This document could not be read. Our team has been notified." : err.code === "NOT_AVAILABLE" ? "This is not yet available." : err.message;

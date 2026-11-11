@@ -33,6 +33,7 @@ const schema = z.object({
   ADYEN_HMAC_KEY: z.string().regex(/^[0-9a-fA-F]*$/).optional(),
   ADYEN_MERCHANT_ACCOUNT: z.string().optional(),
   PAYMENT_RETURN_URL: z.string().url().default("https://app.hkfinhub.example/payments/return"),
+  ADMIN_ALLOWED_IPS: z.string().default(""),
   KYC_MASTER_KEY: z.string().optional(),
   KYC_WEBHOOK_SECRET: z.string().optional(),
   KYC_DOCUMENT_BUCKET: z.string().optional(),
@@ -57,6 +58,7 @@ export interface ApiConfig {
   totpIssuer: string;
   sentryDsn: string | undefined;
   paymentEnvironment: "sandbox" | "live";
+  adminAllowedIps: string[];
   kyc: { masterKey: Buffer | undefined; webhookSecret: string | undefined; bucket: string | undefined; kmsKeyId: string | undefined; region: string };
   liveFeaturePayments: boolean;
   liveFeatureTransfers: boolean;
@@ -114,6 +116,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
         : {}),
     },
     paymentReturnUrl: e.PAYMENT_RETURN_URL,
+    adminAllowedIps: e.ADMIN_ALLOWED_IPS.split(",").map((s) => s.trim()).filter(Boolean),
     kyc: {
       masterKey: e.KYC_MASTER_KEY ? Buffer.from(e.KYC_MASTER_KEY, "base64") : undefined,
       webhookSecret: e.KYC_WEBHOOK_SECRET,

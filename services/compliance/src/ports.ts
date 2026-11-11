@@ -48,6 +48,8 @@ export interface ComplianceStore {
   /** Any open case of this kind on this subject, used to avoid duplicate alerts. */
   findOpenCase(kind: CaseKind, subject: { subjectType: SubjectType; subjectId: string }): Promise<ComplianceCaseRecord | null>;
   findCase(id: string): Promise<ComplianceCaseRecord | null>;
+  /** Open cases, newest first. Used by the staff review queue. */
+  listOpenCases(limit: number): Promise<ComplianceCaseRecord[]>;
   /** Compare-and-set OPEN to CLEARED. */
   clearCase(id: string, resolvedBy: string, note: string, now: Date): Promise<boolean>;
 

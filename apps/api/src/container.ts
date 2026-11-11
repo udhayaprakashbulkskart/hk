@@ -6,6 +6,8 @@ import { Redis } from "ioredis";
 import { buildAccountingServices } from "./container-services";
 import { buildPaymentServices, type PaymentServices } from "./container-payments";
 import { buildKycServices } from "./container-kyc";
+import { buildAdminServices, type AdminServices } from "./container-admin";
+import { buildInvestmentServices, type InvestmentServices } from "./container-investment";
 import type { ComplianceService } from "@hkfinhub/compliance";
 import type { KycService } from "@hkfinhub/kyc";
 import type { ApiConfig } from "./config";
@@ -24,6 +26,11 @@ export interface Container {
   requests: PaymentServices["requests"];
   kyc: KycService;
   compliance: ComplianceService;
+  admin: AdminServices["admin"];
+  adminStore: AdminServices["adminStore"];
+  adjustments: AdminServices["adjustments"];
+  investment: InvestmentServices["investment"];
+  sandboxBroker: InvestmentServices["sandboxBroker"];
   logger: Logger;
   db: Database;
   redis: Redis;
@@ -89,6 +96,8 @@ export function createContainer(config: ApiConfig, overrides: ContainerOverrides
   const realtime = new RedisRealtimePublisher(redis);
   const accounting = buildAccountingServices(db, config.fieldKey);
   const kycServices = buildKycServices(db, config);
+  const adminServices = buildAdminServices(db, config.fieldKey, accounting.ledger);
+  const investmentServices = buildInvestmentServices({ db, config, ledger: accounting.ledger, accounts: accounting.accounts, kyc: kycServices.kyc });
   const payments = buildPaymentServices({ db, config, ledger: accounting.ledger, accounts: accounting.accounts, transport: overrides.transport, guard: kycServices.compliance });
 
   const email: EmailSender = overrides.email ?? (config.emailProvider === "capture" ? new CaptureSender() : new UnconfiguredSender("email"));
@@ -105,6 +114,11 @@ export function createContainer(config: ApiConfig, overrides: ContainerOverrides
     requests: payments.requests,
     kyc: kycServices.kyc,
     compliance: kycServices.compliance,
+    admin: adminServices.admin,
+    adminStore: adminServices.adminStore,
+    adjustments: adminServices.adjustments,
+    investment: investmentServices.investment,
+    sandboxBroker: investmentServices.sandboxBroker,
     logger,
     db,
     redis,

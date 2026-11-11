@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { beneficiarySchema, openCurrencySchema } from "./accounts/schemas";
 import { identitySchema, submitSchema } from "./kyc/schemas";
+import { adjustmentSchema, clearCaseSchema, decisionSchema, kycDecisionSchema, limitChangeSchema, providerRequestSchema, revealSchema, staffSchema } from "./admin/schemas";
 import { depositSchema, fxConvertSchema, fxQuoteSchema, internalTransferSchema, payoutSchema, requestCreateSchema, requestPaySchema, withdrawalSchema } from "./payments/schemas";
 import {
   changePasswordSchema, loginSchema, mfaLoginSchema, refreshSchema, registerSchema, resendOtpSchema,
@@ -21,6 +22,27 @@ const ERR = "Error response: { error: { code, message } }";
 
 /** The HTTP surface of the customer API. The request schemas are the same zod objects the server validates with. */
 export const ROUTES: Route[] = [
+  { method: "post", path: "/investments/orders", summary: "Place a buy or sell order. KYC must be verified. Buys need a limit price and cash to cover them. Refused when no broker is configured.", auth: true, responses: { "201": "Placed.", "403": ERR, "422": ERR, "503": ERR } },
+  { method: "get", path: "/investments/orders", summary: "Recent investment orders with status.", auth: true, responses: { "200": "Orders.", "401": ERR } },
+  { method: "post", path: "/investments/orders/{orderId}/sync", summary: "Refresh an order from the broker. Settles cash once when fully filled.", auth: true, responses: { "200": "Order.", "404": ERR } },
+  { method: "get", path: "/investments/holdings", summary: "Holdings and realised P&L from broker-confirmed fills. Cost basis only; no market value.", auth: true, responses: { "200": "Holdings.", "401": ERR } },
+  { method: "get", path: "/admin/me", summary: "Staff member, role and permissions. Staff only.", auth: true, responses: { "200": "Profile.", "403": ERR } },
+  { method: "get", path: "/admin/customers/{userId}", summary: "Customer summary with masked KYC status. Requires customers.read.", auth: true, responses: { "200": "Summary.", "403": ERR } },
+  { method: "get", path: "/admin/kyc/{userId}", summary: "KYC status and masked identifiers. Requires kyc.read.", auth: true, responses: { "200": "Status.", "403": ERR } },
+  { method: "post", path: "/admin/kyc/{userId}/decision", summary: "Approve, reject or request information on an identity case. Compliance admin only.", auth: true, body: kycDecisionSchema, responses: { "200": "Decided.", "403": ERR, "409": ERR } },
+  { method: "get", path: "/admin/kyc/documents/{fileId}", summary: "Read one identity document. Requires a reason; every read is audited.", auth: true, responses: { "200": "Document bytes.", "403": ERR, "404": ERR } },
+  { method: "get", path: "/admin/compliance/cases", summary: "Open compliance cases for review. Requires compliance.read.", auth: true, responses: { "200": "Cases.", "403": ERR } },
+  { method: "post", path: "/admin/compliance/cases/{caseId}/clear", summary: "Clear a compliance case with a written note. Compliance admin only.", auth: true, body: clearCaseSchema, responses: { "200": "Cleared.", "403": ERR, "409": ERR } },
+  { method: "post", path: "/admin/limits/changes", summary: "Request a transaction limit change. A different compliance admin must approve it.", auth: true, body: limitChangeSchema, responses: { "201": "Requested.", "403": ERR } },
+  { method: "post", path: "/admin/limits/changes/{approvalId}/decision", summary: "Approve or reject a limit change. Must be a different person from the requester.", auth: true, body: decisionSchema, responses: { "200": "Decided.", "403": ERR, "409": ERR } },
+  { method: "post", path: "/admin/adjustments", summary: "Request a balance adjustment (maker). Posts nothing until approved.", auth: true, body: adjustmentSchema, responses: { "201": "Requested.", "403": ERR } },
+  { method: "post", path: "/admin/adjustments/{approvalId}/approve", summary: "Approve and post a balance adjustment (checker). Self-approval refused.", auth: true, responses: { "200": "Posted.", "403": ERR, "409": ERR } },
+  { method: "post", path: "/admin/provider-approvals", summary: "Request a provider approval for the live-payment gate.", auth: true, body: providerRequestSchema, responses: { "201": "Requested.", "403": ERR } },
+  { method: "post", path: "/admin/provider-approvals/{approvalId}/decision", summary: "Approve or reject a provider approval. Super admin, and a different person from the requester.", auth: true, body: decisionSchema, responses: { "200": "Decided.", "403": ERR, "409": ERR } },
+  { method: "get", path: "/admin/approvals", summary: "Pending maker-checker requests.", auth: true, responses: { "200": "Pending requests.", "403": ERR } },
+  { method: "post", path: "/admin/customers/{userId}/reveal", summary: "Reveal one identity field. Requires a reason code; recorded in the audit log.", auth: true, body: revealSchema, responses: { "200": "Value.", "403": ERR, "422": ERR } },
+  { method: "get", path: "/admin/audit", summary: "Recent audit log entries. Requires audit.read.", auth: true, responses: { "200": "Entries.", "403": ERR } },
+  { method: "post", path: "/admin/staff", summary: "Assign a staff role. Super admin only; the target must have confirmed two-factor.", auth: true, body: staffSchema, responses: { "201": "Assigned.", "403": ERR, "422": ERR } },
   { method: "get", path: "/kyc", summary: "Identity verification status: tier, what is still missing, masked identifiers and documents. Never decrypted values.", auth: true, responses: { "200": "Status.", "401": ERR } },
   { method: "put", path: "/kyc/identity", summary: "Save PAN or passport number, date of birth and nationality. Identifiers are encrypted at rest.", auth: true, body: identitySchema, responses: { "200": "Saved.", "401": ERR, "422": ERR } },
   { method: "post", path: "/kyc/documents", summary: "Upload a document as raw bytes. Content-Type must match the file: JPEG, PNG or PDF, 10 MB maximum. Scanned before storage.", auth: true, responses: { "201": "Stored.", "401": ERR, "422": ERR, "503": ERR } },

@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@hkfinhub/accounts": "workspace:*",
+    "@hkfinhub/admin": "workspace:*",
     "@hkfinhub/authentication": "workspace:*",
     "@hkfinhub/compliance": "workspace:*",
     "@hkfinhub/database": "workspace:*",
@@ -24,6 +25,7 @@
     "@hkfinhub/integration-razorpay": "workspace:*",
     "@hkfinhub/integration-razorpayx": "workspace:*",
     "@hkfinhub/integration-stripe": "workspace:*",
+    "@hkfinhub/investment": "workspace:*",
     "@hkfinhub/kyc": "workspace:*",
     "@hkfinhub/ledger": "workspace:*",
     "@hkfinhub/notifications": "workspace:*",

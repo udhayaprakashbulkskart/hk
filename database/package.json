@@ -16,9 +16,11 @@
   },
   "dependencies": {
     "@hkfinhub/accounts": "workspace:*",
+    "@hkfinhub/admin": "workspace:*",
     "@hkfinhub/authentication": "workspace:*",
     "@hkfinhub/compliance": "workspace:*",
     "@hkfinhub/fx": "workspace:*",
+    "@hkfinhub/investment": "workspace:*",
     "@hkfinhub/kyc": "workspace:*",
     "@hkfinhub/ledger": "workspace:*",
     "@hkfinhub/notifications": "workspace:*",

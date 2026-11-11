@@ -586,3 +586,60 @@ model LimitRule {
 
   @@unique([tier, corridor, scope, currency])
 }
+
+// ---------------------------------------------------------------------------
+// Phase 9: staff access. A staff member is also a User, who must have TOTP confirmed.
+// Roles are enforced on the server for every admin endpoint.
+// ---------------------------------------------------------------------------
+
+model StaffMember {
+  userId     String   @id
+  role       String   @db.VarChar(24)
+  status     String   @db.VarChar(16)
+  createdBy  String?  @db.VarChar(64)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Phase 8: investment orders and broker fills. Holdings are computed from fills only.
+// A broker fill id is unique, so a fill cannot be recorded twice.
+// ---------------------------------------------------------------------------
+
+model InvestmentOrder {
+  id              String           @id @default(uuid(7))
+  userId          String
+  accountId       String
+  symbol          String           @db.VarChar(12)
+  side            String           @db.VarChar(4)
+  quantity        BigInt
+  limitPriceMinor BigInt?
+  currency        String           @db.VarChar(3)
+  status          String           @db.VarChar(20)
+  brokerOrderId   String           @db.VarChar(64)
+  brokerId        String           @db.VarChar(32)
+  filledQuantity  BigInt           @default(0)
+  settledMinor    BigInt?
+  settlementTxId  String?
+  idempotencyKey  String           @db.VarChar(128)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  fills           InvestmentFill[]
+
+  @@unique([userId, idempotencyKey])
+  @@index([userId, createdAt])
+  @@index([accountId, status])
+}
+
+model InvestmentFill {
+  id           String          @id @default(uuid(7))
+  orderId      String
+  order        InvestmentOrder @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  brokerFillId String          @unique @db.VarChar(128)
+  side         String          @db.VarChar(4)
+  quantity     BigInt
+  priceMinor   BigInt
+  executedAt   DateTime
+
+  @@index([orderId])
+}

@@ -38,6 +38,8 @@ jobs:
           npx -y pnpm@9.15.0 --filter @hkfinhub/kyc exec tsc --noEmit -p tsconfig.json
           npx -y pnpm@9.15.0 --filter @hkfinhub/compliance exec tsc --noEmit -p tsconfig.json
           npx -y pnpm@9.15.0 --filter @hkfinhub/object-storage exec tsc --noEmit -p tsconfig.json
+          npx -y pnpm@9.15.0 --filter @hkfinhub/admin exec tsc --noEmit -p tsconfig.json
+          npx -y pnpm@9.15.0 --filter @hkfinhub/investment exec tsc --noEmit -p tsconfig.json
           npx -y pnpm@9.15.0 --filter @hkfinhub/database exec tsc --noEmit -p tsconfig.json
           npx -y pnpm@9.15.0 --filter @hkfinhub/api exec tsc --noEmit -p tsconfig.json
       - name: Typecheck web and mobile

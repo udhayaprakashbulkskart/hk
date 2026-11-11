@@ -61,6 +61,11 @@ export class PrismaComplianceStore implements ComplianceStore {
     return row ? toCase(row) : null;
   }
 
+  async listOpenCases(limit: number) {
+    const rows = await this.q.complianceCase.findMany({ where: { status: "OPEN" }, orderBy: { openedAt: "desc" }, take: limit });
+    return rows.map(toCase);
+  }
+
   /** Compare-and-set OPEN to CLEARED. Clearing lifts the blocking flag too. */
   async clearCase(id: string, resolvedBy: string, note: string, now: Date): Promise<boolean> {
     const res = await this.q.complianceCase.updateMany({
