@@ -1,0 +1,60 @@
+# Render blueprint for the HK FinHub API. Values marked sync: false are entered in the Render dashboard,
+# never committed. Database: Neon (hk-finhub). Redis: a hosted Redis instance (for example Upstash).
+services:
+  - type: web
+    name: hk-finhub-api
+    runtime: docker
+    dockerfilePath: ./infrastructure/docker/api.Dockerfile
+    dockerContext: .
+    region: singapore
+    healthCheckPath: /v1/health
+    autoDeploy: false
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: NODE_ENV
+        value: production
+      - key: LOG_LEVEL
+        value: info
+      - key: TRUST_PROXY_HOPS
+        value: "1"
+      - key: OPENAPI_ENABLED
+        value: "false"
+      - key: EMAIL_PROVIDER
+        value: none
+      - key: SMS_PROVIDER
+        value: none
+      - key: PAYMENT_ENVIRONMENT
+        value: sandbox
+      - key: FEATURE_LIVE_PAYMENTS
+        value: "false"
+      - key: FEATURE_LIVE_TRANSFERS
+        value: "false"
+      - key: FEATURE_LIVE_TRADING
+        value: "false"
+      - key: FEATURE_LIVE_KYC_PROVIDER
+        value: "false"
+      # Set to the web app's origin(s) only.
+      - key: CORS_ORIGINS
+        sync: false
+      # Secrets and connection strings: entered in the dashboard.
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: DIGEST_KEY
+        sync: false
+      - key: FIELD_ENCRYPTION_KEY
+        sync: false
+      - key: ADMIN_ALLOWED_IPS
+        sync: false
+      - key: LOGIN_USER_EMAIL
+        sync: false
+      - key: LOGIN_USER_PHONE
+        sync: false
+      - key: LOGIN_USER_PASSWORD
+        sync: false
+      - key: LOGIN_USER_NAME
+        value: Operator
