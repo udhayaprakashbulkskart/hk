@@ -86,7 +86,7 @@ export default function LoginPage() {
       <CardContent>
         <form onSubmit={onLogin} noValidate className="space-y-4">
           <Field id="email" label="Email" hint="Mobile-number log in is coming soon.">
-            <Input id="email" name="email" type="email" autoComplete="username" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
+            <Input id="email" name="email" type="text" autoComplete="username" autoCapitalize="none" spellCheck={false} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
           </Field>
           <Field id="password" label="Password">
             <Input id="password" name="password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />

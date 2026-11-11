@@ -1,5 +1,5 @@
 /** Calls the API. Tokens are passed in per call and never written to storage. */
-export const API_ORIGIN = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:4000";
+export const API_ORIGIN = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 export class ApiError extends Error {
   constructor(readonly status: number, readonly code: string, message: string) {

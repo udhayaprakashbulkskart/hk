@@ -2,7 +2,7 @@ import { ApiError, createAuthClient, type DevicePayload, type TokenPair } from "
 
 /** Base URL of the customer API. Set NEXT_PUBLIC_API_URL per environment. Must be in the API's CORS_ORIGINS. */
 export const authClient = createAuthClient({
-  baseUrl: process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:4000",
+  baseUrl: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000",
 });
 
 export const WEB_DEVICE: DevicePayload = { name: "Web browser", platform: "web" };

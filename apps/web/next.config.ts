@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 /** Origin of the customer API, allowed by connect-src. Set NEXT_PUBLIC_API_URL per environment. */
 const apiOrigin = (() => {
   try {
-    return new URL(process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:4000").origin;
+    return new URL(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000").origin;
   } catch {
     return "http://localhost:4000";
   }
