@@ -17,9 +17,12 @@
   "dependencies": {
     "@hkfinhub/accounts": "workspace:*",
     "@hkfinhub/authentication": "workspace:*",
+    "@hkfinhub/compliance": "workspace:*",
     "@hkfinhub/fx": "workspace:*",
+    "@hkfinhub/kyc": "workspace:*",
     "@hkfinhub/ledger": "workspace:*",
     "@hkfinhub/notifications": "workspace:*",
+    "@hkfinhub/object-storage": "workspace:*",
     "@hkfinhub/payments": "workspace:*",
     "@hkfinhub/shared": "workspace:*",
     "@hkfinhub/transfers": "workspace:*",

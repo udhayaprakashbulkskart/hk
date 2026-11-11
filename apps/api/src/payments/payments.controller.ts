@@ -56,7 +56,7 @@ export class TransfersController {
   async internal(@Body(new ZodPipe(internalTransferSchema)) body: z.infer<typeof internalTransferSchema>, @Req() req: AuthedRequest) {
     try {
       const account = await this.c.accounts.ensureAccount(req.auth.userId);
-      const t = await this.c.transfers.internal({ accountId: account.id, toAccountRef: body.toAccountRef, currency: body.currency, amountMinor: BigInt(body.amountMinor), idempotencyKey: `${req.auth.userId}:${body.idempotencyKey}` });
+      const t = await this.c.transfers.internal({ userId: req.auth.userId, accountId: account.id, toAccountRef: body.toAccountRef, currency: body.currency, amountMinor: BigInt(body.amountMinor), idempotencyKey: `${req.auth.userId}:${body.idempotencyKey}` });
       return present(t);
     } catch (err) {
       return mapDomainError(err);

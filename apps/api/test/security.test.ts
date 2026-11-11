@@ -74,7 +74,7 @@ describe("contract", () => {
   it("every documented route is mounted: only a domain 404 is allowed, never the router's 404", async () => {
     for (const r of ROUTES) {
       const path = `/v1${r.path.replace(/\{[^}]+\}/g, "00000000-0000-7000-8000-000000000000")}`;
-      const req = r.method === "get" ? http().get(path) : r.method === "delete" ? http().delete(path) : http().post(path);
+      const req = r.method === "get" ? http().get(path) : r.method === "delete" ? http().delete(path) : r.method === "put" ? http().put(path) : http().post(path);
       const res = await req.send({});
       // The router's own 404 says "No such endpoint." Any other response means the route exists.
       const routerMiss = res.status === 404 && res.body?.error?.message === "No such endpoint.";

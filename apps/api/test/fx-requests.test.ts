@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { startTestApp, resetState, type TestApp } from "./helpers";
 import { createFakeProviders } from "./provider-fake";
-import { authed, balanceOf, fundHkd, lastKey, registerCustomer, stripeWebhook, type Ctx } from "./support";
+import { verifiedCustomer, authed, balanceOf, fundHkd, lastKey, registerCustomer, stripeWebhook, type Ctx } from "./support";
 
 let t: TestApp;
 let ctx: Ctx;
@@ -22,7 +22,7 @@ beforeEach(async () => {
 
 describe("currency conversion", () => {
   it("computes fee and recipient amount in whole minor units, rounding in the platform's favour", async () => {
-    const c = await registerCustomer(t, "fx-math");
+    const c = await verifiedCustomer(t, "fx-math");
     const q = await http().post("/v1/fx/quotes").set(authed(c)).send({ from: "HKD", to: "USD", amountMinor: "10000" }).expect(201);
     // Fee: 0.20% of HK$100.00 = 20 cents. Net 9,980 cents at 0.1282 USD per HKD = 1,279.36, rounded down to 1,279.
     expect(q.body.feeMinor).toBe("20");
@@ -33,7 +33,7 @@ describe("currency conversion", () => {
   });
 
   it("converts once: balances move in both currencies, and the same quote cannot be used twice", async () => {
-    const c = await registerCustomer(t, "fx-once");
+    const c = await verifiedCustomer(t, "fx-once");
     await fundHkd(ctx, c, "50000");
     const q = await http().post("/v1/fx/quotes").set(authed(c)).send({ from: "HKD", to: "USD", amountMinor: "10000" }).expect(201);
     const done = await http().post("/v1/fx/conversions").set(authed(c)).send({ quoteId: q.body.id, idempotencyKey: `conv-${randomUUID()}` }).expect(201);
@@ -47,7 +47,7 @@ describe("currency conversion", () => {
   });
 
   it("refuses a quote that has expired", async () => {
-    const c = await registerCustomer(t, "fx-expired");
+    const c = await verifiedCustomer(t, "fx-expired");
     await fundHkd(ctx, c, "50000");
     const q = await http().post("/v1/fx/quotes").set(authed(c)).send({ from: "HKD", to: "USD", amountMinor: "10000" }).expect(201);
     await t.container.db.fxQuote.update({ where: { id: q.body.id }, data: { expiresAt: new Date(Date.now() - 1000) } });
@@ -57,7 +57,7 @@ describe("currency conversion", () => {
   });
 
   it("refuses a conversion the customer cannot afford, and a quote for the same currency", async () => {
-    const c = await registerCustomer(t, "fx-poor");
+    const c = await verifiedCustomer(t, "fx-poor");
     await fundHkd(ctx, c, "1000");
     const big = await http().post("/v1/fx/quotes").set(authed(c)).send({ from: "HKD", to: "USD", amountMinor: "999999" }).expect(201);
     const res = await http().post("/v1/fx/conversions").set(authed(c)).send({ quoteId: big.body.id, idempotencyKey: `poor-${randomUUID()}` });
@@ -68,7 +68,7 @@ describe("currency conversion", () => {
   });
 
   it("does not let a conversion spend money that a pending transfer has reserved", async () => {
-    const c = await registerCustomer(t, "fx-reserved");
+    const c = await verifiedCustomer(t, "fx-reserved");
     await fundHkd(ctx, c, "10000");
     const bene = await http().post("/v1/beneficiaries").set(authed(c)).send({ name: "Priya Raman", country: "IN", method: "upi", destination: "priya@upi", currency: "INR" }).expect(201);
     const tq = await http().post("/v1/fx/quotes").set(authed(c)).send({ from: "HKD", to: "INR", amountMinor: "8000" }).expect(201);
@@ -79,7 +79,7 @@ describe("currency conversion", () => {
   });
 
   it("returns a labelled sample history for a pair", async () => {
-    const c = await registerCustomer(t, "fx-hist");
+    const c = await verifiedCustomer(t, "fx-hist");
     const res = await http().get("/v1/fx/history?from=HKD&to=USD&days=10").set(authed(c)).expect(200);
     expect(res.body.sample).toBe(true);
     expect(res.body.points).toHaveLength(10);
@@ -88,8 +88,8 @@ describe("currency conversion", () => {
 
 describe("payment requests", () => {
   it("lets a payer see the request without any account details, pay it, and closes the request once confirmed", async () => {
-    const alice = await registerCustomer(t, "req-alice");
-    const bob = await registerCustomer(t, "req-bob");
+    const alice = await verifiedCustomer(t, "req-alice");
+    const bob = await verifiedCustomer(t, "req-bob");
     const created = await http().post("/v1/payment-requests").set(authed(alice)).send({ currency: "HKD", amountMinor: "5000", memo: "Dinner" }).expect(201);
     const ref = created.body.reference as string;
 
@@ -114,8 +114,8 @@ describe("payment requests", () => {
   });
 
   it("requires the payer to state the amount on an open-amount request, and refuses a different amount on a fixed one", async () => {
-    const alice = await registerCustomer(t, "req-open");
-    const bob = await registerCustomer(t, "req-payer");
+    const alice = await verifiedCustomer(t, "req-open");
+    const bob = await verifiedCustomer(t, "req-payer");
     const open = await http().post("/v1/payment-requests").set(authed(alice)).send({ currency: "HKD", memo: "Any amount" }).expect(201);
     const missing = await http().post(`/v1/payment-requests/${open.body.reference}/pay`).set(authed(bob)).send({ method: "card", country: "HK", idempotencyKey: `m-${randomUUID()}` });
     expect(missing.body.error.code).toBe("INVALID_REQUEST");
@@ -125,12 +125,12 @@ describe("payment requests", () => {
   });
 
   it("lets the owner cancel an open request, but not one that is already paid", async () => {
-    const alice = await registerCustomer(t, "req-cancel");
+    const alice = await verifiedCustomer(t, "req-cancel");
     const r = await http().post("/v1/payment-requests").set(authed(alice)).send({ currency: "HKD", amountMinor: "100", memo: "x" }).expect(201);
     await http().post(`/v1/payment-requests/${r.body.reference}/cancel`).set(authed(alice)).expect(200);
     const gone = await http().post(`/v1/payment-requests/${r.body.reference}/pay`).set(authed(alice)).send({ method: "card", country: "HK", idempotencyKey: `c-${randomUUID()}` });
     expect(gone.body.error.code).toBe("REQUEST_NOT_OPEN");
-    const other = await registerCustomer(t, "req-notowner");
+    const other = await verifiedCustomer(t, "req-notowner");
     const again = await http().post("/v1/payment-requests").set(authed(alice)).send({ currency: "HKD", amountMinor: "100", memo: "y" }).expect(201);
     expect((await http().post(`/v1/payment-requests/${again.body.reference}/cancel`).set(authed(other))).status).toBe(409);
   });

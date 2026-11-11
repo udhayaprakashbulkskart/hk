@@ -67,3 +67,8 @@ export interface RequestStore {
   /** Marks an open request as paid by a confirmed payment. Returns false if it was not open. */
   markPaid(ref: string, paymentId: string, now: Date): Promise<boolean>;
 }
+
+/** Compliance gate, called inside the account-locked section before any funds are reserved. */
+export interface OutboundGuard {
+  assertOutbound(input: { userId: string; accountId: string; beneficiaryId: string | null; corridor: string; currency: string; amountMinor: bigint }): Promise<void>;
+}

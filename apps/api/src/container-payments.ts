@@ -6,7 +6,7 @@ import { createPartnerStub } from "@hkfinhub/integration-partner-stubs";
 import { createSandboxFxProvider, FxService } from "@hkfinhub/fx";
 import { PaymentService, type HttpTransport, type ProviderAdapter, type ProviderId } from "@hkfinhub/payments";
 import { PrismaFxStore, PrismaPaymentStore, PrismaRequestStore, PrismaTransferStore, type Database } from "@hkfinhub/database";
-import { TransferService } from "@hkfinhub/transfers";
+import { TransferService, type OutboundGuard } from "@hkfinhub/transfers";
 import type { LedgerService } from "@hkfinhub/ledger";
 import type { AccountsService } from "@hkfinhub/accounts";
 import type { ApiConfig } from "./config";
@@ -34,6 +34,7 @@ export function buildPaymentServices(args: {
   ledger: LedgerService;
   accounts: AccountsService;
   transport?: HttpTransport | undefined;
+  guard?: OutboundGuard | undefined;
 }): PaymentServices {
   const { db, config, ledger, accounts } = args;
   const transport = args.transport ?? fetchTransport;
@@ -76,6 +77,7 @@ export function buildPaymentServices(args: {
     fx,
     accounts,
     config: { environment: env, liveTransfersEnabled: config.liveFeatureTransfers },
+    guard: args.guard,
   });
   return { payments, fx, transfers, requests };
 }

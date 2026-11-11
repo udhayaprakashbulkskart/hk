@@ -12,7 +12,7 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 | 4 | Backend, database and authentication | ✅ | D12 (messaging providers), D13 (Sentry DSN) for live delivery |
 | 5 | Accounts and ledger | ✅ | — (no partner needed: the wallet is a ledger view) |
 | 6 | Payment provider adapters, FX, transfers | 🟡 | D1, D3, D4, D5, D7 for live; sandbox complete |
-| 7 | KYC and compliance modules | ⬜ | D2, D15 |
+| 7 | KYC and compliance modules | 🟡 | D2, D15 for live; D11 for KMS and S3 verification; sandbox complete |
 | 8 | Broker and investment adapters | ⬜ | D8, D9, D10 |
 | 9 | Admin dashboard | ⬜ | Phases 4–8 for full coverage |
 | 10 | Integrate all applications | ⬜ | Phases 2–9 |
@@ -209,6 +209,13 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 **Exit criteria:** a screening hit blocks a transfer until cleared. An identity document is not readable by any role without an audit entry. Encryption round-trip test. A limit breach is rejected with a clear code.
 
 **Inputs needed:** D2, D15.
+
+**Status and deviations (built):**
+- `services/kyc` and `services/compliance` are built with pure rules, ports, sandbox adapters and Prisma stores. 20 KYC unit tests and 8 compliance unit tests pass. 11 API integration tests cover the exit criteria against real Postgres. The full API suite passes (142 tests).
+- **Deviation: uploads go through the API, not presigned URLs.** The client sends raw bytes to `POST /v1/kyc/documents`. The API sniffs the real type, checks size (10 MB), scans, encrypts and only then writes to private storage. This keeps the malware scan and checksum before any object exists. Presigned uploads would let unscanned bytes land in the bucket first. Revisit if file sizes or throughput require it.
+- **Production is fail-closed.** In production, KMS, the malware scanner, the KYC vendor and sanctions screening stay unconfigured until approved (D2, D11, D15). Each reports `NOT_AVAILABLE`. Customers cannot be verified, and beneficiaries cannot be added, until screening runs for real.
+- **Not built yet:** the staff review queue and the decrypt-for-review endpoint (Phase 9 admin, but the service method exists and is audited); AWS KMS adapter (the local envelope key is non-production only); a real malware scanner; a real KYC vendor; PAN and address verification against authorities (only format checks and document review exist); the `FEATURE_LIVE_KYC_PROVIDER` gate, which has no live adapter to gate yet.
+- The S3 adapter is **unverified against AWS**. It is tested only through the SDK's command objects in unit tests.
 
 ---
 

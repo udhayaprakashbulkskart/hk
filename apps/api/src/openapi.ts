@@ -1,12 +1,13 @@
 import { z } from "zod";
 import { beneficiarySchema, openCurrencySchema } from "./accounts/schemas";
+import { identitySchema, submitSchema } from "./kyc/schemas";
 import { depositSchema, fxConvertSchema, fxQuoteSchema, internalTransferSchema, payoutSchema, requestCreateSchema, requestPaySchema, withdrawalSchema } from "./payments/schemas";
 import {
   changePasswordSchema, loginSchema, mfaLoginSchema, refreshSchema, registerSchema, resendOtpSchema,
   resetConfirmSchema, resetRequestSchema, totpCodeSchema, verifyOtpSchema,
 } from "./auth/schemas";
 
-type Method = "get" | "post" | "delete";
+type Method = "get" | "post" | "put" | "delete";
 interface Route {
   method: Method;
   path: string;
@@ -20,6 +21,11 @@ const ERR = "Error response: { error: { code, message } }";
 
 /** The HTTP surface of the customer API. The request schemas are the same zod objects the server validates with. */
 export const ROUTES: Route[] = [
+  { method: "get", path: "/kyc", summary: "Identity verification status: tier, what is still missing, masked identifiers and documents. Never decrypted values.", auth: true, responses: { "200": "Status.", "401": ERR } },
+  { method: "put", path: "/kyc/identity", summary: "Save PAN or passport number, date of birth and nationality. Identifiers are encrypted at rest.", auth: true, body: identitySchema, responses: { "200": "Saved.", "401": ERR, "422": ERR } },
+  { method: "post", path: "/kyc/documents", summary: "Upload a document as raw bytes. Content-Type must match the file: JPEG, PNG or PDF, 10 MB maximum. Scanned before storage.", auth: true, responses: { "201": "Stored.", "401": ERR, "422": ERR, "503": ERR } },
+  { method: "post", path: "/kyc/submit", summary: "Submit for identity checking. Requires identity details and the required documents.", auth: true, body: submitSchema, responses: { "200": "Submitted.", "401": ERR, "422": ERR, "503": ERR } },
+  { method: "post", path: "/kyc/webhook", summary: "Identity provider verdicts. Signed with HMAC-SHA256 over the raw body. Not for customers.", auth: false, responses: { "200": "Received.", "401": ERR, "503": ERR } },
   { method: "post", path: "/auth/register", summary: "Create an account. Sends verification codes to email and mobile.", auth: false, body: registerSchema, responses: { "202": "Accepted. Same response whether or not the details are already registered.", "422": ERR } },
   { method: "post", path: "/auth/otp/resend", summary: "Send a new verification code.", auth: false, body: resendOtpSchema, responses: { "202": "Accepted." } },
   { method: "post", path: "/auth/otp/verify", summary: "Verify the email or mobile code.", auth: false, body: verifyOtpSchema, responses: { "200": "Verified.", "400": ERR } },

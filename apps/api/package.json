@@ -16,6 +16,7 @@
   "dependencies": {
     "@hkfinhub/accounts": "workspace:*",
     "@hkfinhub/authentication": "workspace:*",
+    "@hkfinhub/compliance": "workspace:*",
     "@hkfinhub/database": "workspace:*",
     "@hkfinhub/fx": "workspace:*",
     "@hkfinhub/integration-adyen": "workspace:*",
@@ -23,8 +24,10 @@
     "@hkfinhub/integration-razorpay": "workspace:*",
     "@hkfinhub/integration-razorpayx": "workspace:*",
     "@hkfinhub/integration-stripe": "workspace:*",
+    "@hkfinhub/kyc": "workspace:*",
     "@hkfinhub/ledger": "workspace:*",
     "@hkfinhub/notifications": "workspace:*",
+    "@hkfinhub/object-storage": "workspace:*",
     "@hkfinhub/payments": "workspace:*",
     "@hkfinhub/shared": "workspace:*",
     "@hkfinhub/transfers": "workspace:*",

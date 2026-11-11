@@ -32,6 +32,8 @@ export function testEnv(): NodeJS.ProcessEnv {
     ADYEN_API_KEY: "AQE-test-fake",
     ADYEN_HMAC_KEY: "44782DEF547AAA06C910C43932B1EB0C71FC68D9D0C057550C48EC2ACF6BA056",
     ADYEN_MERCHANT_ACCOUNT: "HKFinHubSandbox",
+    KYC_MASTER_KEY: randomBytes(32).toString("base64"),
+    KYC_WEBHOOK_SECRET: "test-kyc-webhook-secret",
   };
 }
 
@@ -94,7 +96,7 @@ export async function startTestApp(overrides: { logger?: boolean; transport?: im
 /** Clean slate: empties every table and the test Redis database. Only ever points at the test database. */
 export async function resetState(t: TestApp): Promise<void> {
   if (!t.config.databaseUrl.includes("_test")) throw new Error("refusing to reset a non-test database");
-  await t.container.db.$executeRawUnsafe(`TRUNCATE "User","UserProfile","Device","Session","RefreshToken","OtpChallenge","TotpFactor","RecoveryCode","MfaChallenge","OutboxEvent","Notification","AuditLog","Account","CurrencyAccount","Beneficiary","LedgerEntry","LedgerBalance","LedgerTransaction","ReconciliationRecord","ApprovalRequest","LedgerAccount","Payment","ProviderWebhook","FxQuote","Transfer","PaymentRequest","ProviderApproval" RESTART IDENTITY CASCADE`);
+  await t.container.db.$executeRawUnsafe(`TRUNCATE "User","UserProfile","Device","Session","RefreshToken","OtpChallenge","TotpFactor","RecoveryCode","MfaChallenge","OutboxEvent","Notification","AuditLog","Account","CurrencyAccount","Beneficiary","LedgerEntry","LedgerBalance","LedgerTransaction","ReconciliationRecord","ApprovalRequest","LedgerAccount","Payment","ProviderWebhook","FxQuote","Transfer","PaymentRequest","ProviderApproval","KycRecord","KycIdentity","ComplianceCase","ScreeningResult" RESTART IDENTITY CASCADE`);
   await t.container.redis.flushdb();
 }
 

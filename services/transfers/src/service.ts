@@ -6,7 +6,7 @@ import type { PaymentListener, PaymentRecord, PaymentService } from "@hkfinhub/p
 import { PaymentError } from "@hkfinhub/payments";
 import { CURRENCY_META, isLaunchCurrency, type LaunchCurrency } from "@hkfinhub/shared";
 import { TransferError } from "./errors";
-import type { PaymentRequestRecord, RequestStore, TransferKind, TransferRecord, TransferStore } from "./ports";
+import type { OutboundGuard, PaymentRequestRecord, RequestStore, TransferKind, TransferRecord, TransferStore } from "./ports";
 
 export interface TransfersConfig {
   environment: "sandbox" | "live";
@@ -21,6 +21,8 @@ export interface Deps {
   fx: FxService;
   accounts: AccountsService;
   config: TransfersConfig;
+  /** KYC, holds and limits. Optional so that internal wiring can run without it; the API always supplies it. */
+  guard?: OutboundGuard | undefined;
   clock?: () => Date;
 }
 
@@ -44,7 +46,7 @@ export class TransferService implements PaymentListener {
   // ------------------------------------------------------------------ internal transfers
 
   /** Customer to customer, instantly, on the ledger. Same currency only: convert first. */
-  async internal(input: { accountId: string; toAccountRef: string; currency: string; amountMinor: bigint; idempotencyKey: string }) {
+  async internal(input: { userId: string; accountId: string; toAccountRef: string; currency: string; amountMinor: bigint; idempotencyKey: string }) {
     const replay = await this.d.store.findByKey(input.idempotencyKey);
     if (replay) return replay;
     if (!isLaunchCurrency(input.currency)) throw new TransferError("INVALID_REQUEST", `${input.currency} is not offered`);
@@ -57,6 +59,7 @@ export class TransferService implements PaymentListener {
     const id = randomUUID();
     return this.d.store.transaction(async (tx) => {
       await tx.lockAccounts([input.accountId, recipientAccountId]);
+      await this.d.guard?.assertOutbound({ userId: input.userId, accountId: input.accountId, beneficiaryId: null, corridor: "INTERNAL", currency: input.currency, amountMinor: input.amountMinor });
       await this.assertFunds(tx, input.accountId, input.currency, input.amountMinor);
       const [from, to] = await Promise.all([
         this.d.ledger.customerAccount(input.accountId, input.currency, "AVAILABLE"),
@@ -138,6 +141,7 @@ export class TransferService implements PaymentListener {
     const id = randomUUID();
     const reserved = await this.d.store.transaction(async (tx) => {
       await tx.lockAccounts([input.accountId]);
+      await this.d.guard?.assertOutbound({ userId: input.userId, accountId: input.accountId, beneficiaryId: input.beneficiaryId, corridor: details.country, currency: input.sourceCurrency, amountMinor: input.amountMinor });
       await this.assertFunds(tx, input.accountId, input.sourceCurrency, input.amountMinor);
       return tx.insert({
         id,

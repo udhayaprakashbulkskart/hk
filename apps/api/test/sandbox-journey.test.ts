@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { startTestApp, resetState, type TestApp } from "./helpers";
 import { createFakeProviders } from "./provider-fake";
-import { authed, balanceOf, fundHkd, lastKey, razorpayXWebhook, registerCustomer, type Ctx } from "./support";
+import { verifiedCustomer, authed, balanceOf, fundHkd, lastKey, razorpayXWebhook, registerCustomer, type Ctx } from "./support";
 
 let t: TestApp;
 let ctx: Ctx;
@@ -20,7 +20,7 @@ beforeEach(async () => { await resetState(t); ctx.fake.state.payouts.clear(); ct
 /** The sandbox loop from the phase 6 exit criteria, end to end, against the HTTP surface. */
 describe("sandbox journey", () => {
   it("collection posts, payout posts, and the books balance", async () => {
-    const c = await registerCustomer(t, "journey-ok");
+    const c = await verifiedCustomer(t, "journey-ok");
     await fundHkd(ctx, c, "250000"); // collection: Stripe, confirmed and posted
     expect(await balanceOf(t, c.accountId, "HKD", "AVAILABLE")).toBe(250000n);
 
@@ -43,7 +43,7 @@ describe("sandbox journey", () => {
   });
 
   it("a failed payout releases the funds and leaves the customer exactly where they were", async () => {
-    const c = await registerCustomer(t, "journey-fail");
+    const c = await verifiedCustomer(t, "journey-fail");
     await fundHkd(ctx, c, "250000");
     const bene = await http().post("/v1/beneficiaries").set(authed(c)).send({ name: "Priya Raman", country: "IN", method: "upi", destination: "priya.raman@upi", currency: "INR" }).expect(201);
     const quote = await http().post("/v1/fx/quotes").set(authed(c)).send({ from: "HKD", to: "INR", amountMinor: "100000" }).expect(201);

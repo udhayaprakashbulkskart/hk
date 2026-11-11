@@ -8,3 +8,5 @@ export { PrismaPaymentStore } from "./payments-store";
 export { PrismaFxStore } from "./fx-store";
 export { PrismaTransferStore, PrismaRequestStore } from "./transfers-store";
 export { acquireAccountLock } from "./locks";
+export { PrismaKycStore } from "./kyc-store";
+export { PrismaComplianceStore } from "./compliance-store";

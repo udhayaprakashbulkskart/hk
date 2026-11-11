@@ -5,6 +5,9 @@ import { Queue } from "bullmq";
 import { Redis } from "ioredis";
 import { buildAccountingServices } from "./container-services";
 import { buildPaymentServices, type PaymentServices } from "./container-payments";
+import { buildKycServices } from "./container-kyc";
+import type { ComplianceService } from "@hkfinhub/compliance";
+import type { KycService } from "@hkfinhub/kyc";
 import type { ApiConfig } from "./config";
 import { createLogger, type Logger } from "./logger";
 
@@ -19,6 +22,8 @@ export interface Container {
   fx: PaymentServices["fx"];
   transfers: PaymentServices["transfers"];
   requests: PaymentServices["requests"];
+  kyc: KycService;
+  compliance: ComplianceService;
   logger: Logger;
   db: Database;
   redis: Redis;
@@ -83,7 +88,8 @@ export function createContainer(config: ApiConfig, overrides: ContainerOverrides
   };
   const realtime = new RedisRealtimePublisher(redis);
   const accounting = buildAccountingServices(db, config.fieldKey);
-  const payments = buildPaymentServices({ db, config, ledger: accounting.ledger, accounts: accounting.accounts, transport: overrides.transport });
+  const kycServices = buildKycServices(db, config);
+  const payments = buildPaymentServices({ db, config, ledger: accounting.ledger, accounts: accounting.accounts, transport: overrides.transport, guard: kycServices.compliance });
 
   const email: EmailSender = overrides.email ?? (config.emailProvider === "capture" ? new CaptureSender() : new UnconfiguredSender("email"));
   const sms: SmsSender = overrides.sms ?? (config.smsProvider === "capture" ? new CaptureSender() : new UnconfiguredSender("sms"));
@@ -97,6 +103,8 @@ export function createContainer(config: ApiConfig, overrides: ContainerOverrides
     fx: payments.fx,
     transfers: payments.transfers,
     requests: payments.requests,
+    kyc: kycServices.kyc,
+    compliance: kycServices.compliance,
     logger,
     db,
     redis,

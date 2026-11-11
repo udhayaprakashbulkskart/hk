@@ -497,3 +497,92 @@ model PaymentRequest {
 
   @@index([accountId, createdAt])
 }
+
+// ---------------------------------------------------------------------------
+// Phase 7: KYC, compliance cases, screening and limits.
+// Identity numbers are envelope-encrypted; documents are encrypted before storage and only their
+// metadata lives here. Every read of an identity document is audited (see the KYC service).
+// ---------------------------------------------------------------------------
+
+model KycRecord {
+  id              String    @id @default(uuid(7))
+  userId          String    @unique
+  status          String    @db.VarChar(32)
+  tier            String    @db.VarChar(16)
+  providerRef     String?   @db.VarChar(128)
+  rejectionReason String?   @db.VarChar(200)
+  verifiedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  files           KycFile[]
+}
+
+model KycIdentity {
+  userId            String   @id
+  panEnc            String?
+  panMasked         String?  @db.VarChar(16)
+  passportEnc       String?
+  passportMasked    String?  @db.VarChar(16)
+  dateOfBirthEnc    String?
+  nationality       String?  @db.VarChar(2)
+  updatedAt         DateTime @updatedAt
+}
+
+model KycFile {
+  id              String    @id @default(uuid(7))
+  kycRecordId     String
+  kycRecord       KycRecord @relation(fields: [kycRecordId], references: [id], onDelete: Cascade)
+  kind            String    @db.VarChar(24)
+  storageKey      String    @unique @db.VarChar(160)
+  checksumSha256  String    @db.VarChar(64)
+  sizeBytes       Int
+  mimeType        String    @db.VarChar(64)
+  wrappedKey      String
+  scanStatus      String    @db.VarChar(16)
+  createdAt       DateTime  @default(now())
+
+  @@index([kycRecordId])
+}
+
+model ComplianceCase {
+  id              String    @id @default(uuid(7))
+  kind            String    @db.VarChar(32)
+  status          String    @db.VarChar(16)
+  severity        String    @db.VarChar(8)
+  blocking        Boolean
+  subjectType     String    @db.VarChar(16)
+  subjectId       String
+  accountId       String?
+  detail          Json
+  openedAt        DateTime  @default(now())
+  resolvedAt      DateTime?
+  resolvedBy      String?   @db.VarChar(64)
+  resolutionNote  String?   @db.VarChar(500)
+
+  @@index([subjectType, subjectId, status])
+  @@index([accountId, status])
+}
+
+model ScreeningResult {
+  id          String   @id @default(uuid(7))
+  subjectType String   @db.VarChar(16)
+  subjectId   String
+  provider    String   @db.VarChar(32)
+  hitCount    Int
+  detail      Json
+  screenedAt  DateTime @default(now())
+
+  @@index([subjectType, subjectId])
+}
+
+model LimitRule {
+  id          String   @id @default(uuid(7))
+  tier        String   @db.VarChar(16)
+  corridor    String   @db.VarChar(4)
+  scope       String   @db.VarChar(16)
+  currency    String   @db.VarChar(3)
+  amountMinor BigInt
+  updatedAt   DateTime @updatedAt
+
+  @@unique([tier, corridor, scope, currency])
+}

@@ -33,6 +33,11 @@ const schema = z.object({
   ADYEN_HMAC_KEY: z.string().regex(/^[0-9a-fA-F]*$/).optional(),
   ADYEN_MERCHANT_ACCOUNT: z.string().optional(),
   PAYMENT_RETURN_URL: z.string().url().default("https://app.hkfinhub.example/payments/return"),
+  KYC_MASTER_KEY: z.string().optional(),
+  KYC_WEBHOOK_SECRET: z.string().optional(),
+  KYC_DOCUMENT_BUCKET: z.string().optional(),
+  KMS_KEY_ID: z.string().optional(),
+  AWS_REGION: z.string().default("ap-east-1"),
 });
 
 export interface ApiConfig {
@@ -52,6 +57,7 @@ export interface ApiConfig {
   totpIssuer: string;
   sentryDsn: string | undefined;
   paymentEnvironment: "sandbox" | "live";
+  kyc: { masterKey: Buffer | undefined; webhookSecret: string | undefined; bucket: string | undefined; kmsKeyId: string | undefined; region: string };
   liveFeaturePayments: boolean;
   liveFeatureTransfers: boolean;
   providers: {
@@ -108,5 +114,12 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
         : {}),
     },
     paymentReturnUrl: e.PAYMENT_RETURN_URL,
+    kyc: {
+      masterKey: e.KYC_MASTER_KEY ? Buffer.from(e.KYC_MASTER_KEY, "base64") : undefined,
+      webhookSecret: e.KYC_WEBHOOK_SECRET,
+      bucket: e.KYC_DOCUMENT_BUCKET,
+      kmsKeyId: e.KMS_KEY_ID,
+      region: e.AWS_REGION,
+    },
   };
 }

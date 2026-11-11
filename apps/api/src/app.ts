@@ -51,6 +51,9 @@ export async function createApp(container: Container) {
   // Webhooks are verified against the exact bytes the provider signed, so they get a raw parser first.
   // The JSON parser then sees the body already read and leaves it alone.
   http.use("/v1/webhooks", express.raw({ type: () => true, limit: "256kb" }));
+  // Identity documents are raw bytes up to 10 MB (the service enforces the exact limit). KYC webhooks are signed raw bodies.
+  http.use("/v1/kyc/documents", express.raw({ type: () => true, limit: "11mb" }));
+  http.use("/v1/kyc/webhook", express.raw({ type: () => true, limit: "64kb" }));
   app.useBodyParser("json", { limit: "16kb" });
   app.setGlobalPrefix("v1");
   app.useGlobalFilters(new HttpErrorFilter());

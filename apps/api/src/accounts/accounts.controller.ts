@@ -7,6 +7,7 @@ import { AuthGuard, type AuthedRequest } from "../auth/auth.guard";
 import { ZodPipe } from "../common/zod-pipe";
 import { beneficiarySchema, openCurrencySchema, type BeneficiaryBody } from "./schemas";
 import { formatMinor } from "./format";
+import { mapDomainError } from "../common/domain-errors";
 
 const uuid = z.uuid();
 
@@ -68,11 +69,13 @@ export class DashboardController {
     const hkdRow = (await this.c.wallet.balances(rows.filter((r) => r.currency === "HKD")))[0];
     const totals = await this.c.wallet.totals(rows.flatMap((r) => [r.availableLedgerId, r.holdLedgerId]), "HKD");
     const activity = await this.c.wallet.activity(rows.map((r) => r.availableLedgerId), 10);
+    const kyc = await this.c.kyc.status(req.auth.userId);
     const cashMinor = hkdRow ? hkdRow.availableMinor + hkdRow.pendingMinor : 0n;
     return {
       baseCurrency: "HKD",
       cashTotal: { amountMinor: cashMinor.toString(), display: formatMinor(cashMinor, "HKD") },
       accounts: account.currencies.filter((c) => c.opened),
+      kyc: { status: kyc.status, tier: kyc.tier, verifiedAt: kyc.verifiedAt, missing: kyc.missing },
       // Outgoing money waiting on a provider. Not yet debited; shown so the customer sees it.
       pendingOutgoing: { amountMinor: (await this.c.transfers.reservedFor(account.accountId, "HKD")).toString(), currency: "HKD" },
       investmentValue: { marketValueMinor: "0", unrealisedPnlMinor: "0", source: "Investments are not yet connected" },
@@ -103,11 +106,16 @@ export class DashboardController {
   @HttpCode(201)
   @UseGuards(AuthGuard)
   async addBeneficiary(@Body(new ZodPipe(beneficiarySchema)) body: BeneficiaryBody, @Req() req: AuthedRequest) {
+    const created = await this.c.accounts.addBeneficiary(req.auth.userId, body).catch((err: unknown) => mapAccountError(err));
     try {
-      return await this.c.accounts.addBeneficiary(req.auth.userId, body);
+      // Screened on creation. A hit opens a blocking case, so payouts to this recipient are held.
+      await this.c.compliance.screenSubject({ subjectType: "BENEFICIARY", subjectId: created.id, accountId: null, name: body.name, dateOfBirth: null, country: body.country });
     } catch (err) {
-      return mapAccountError(err);
+      // Fail closed: if screening is unavailable, the recipient is removed again rather than left unscreened.
+      await this.c.accounts.removeBeneficiary(req.auth.userId, created.id);
+      return mapDomainError(err);
     }
+    return created;
   }
 
   @Delete("beneficiaries/:id")

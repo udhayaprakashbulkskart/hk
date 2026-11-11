@@ -98,3 +98,15 @@ export async function balanceOf(t: TestApp, accountId: string, currency: string,
   const row = await t.container.db.ledgerBalance.findUnique({ where: { ledgerAccountId: acct.id } });
   return row?.balanceMinor ?? 0n;
 }
+
+/** A customer whose KYC record is verified, for tests that move money. The record is written directly; the real path is the KYC flow. */
+export async function verifiedCustomer(t: TestApp, name: string): Promise<Customer> {
+  const c = await registerCustomer(t, name);
+  const now = new Date();
+  await t.container.db.kycRecord.upsert({
+    where: { userId: c.userId },
+    create: { userId: c.userId, status: "VERIFIED", tier: "STANDARD", verifiedAt: now },
+    update: { status: "VERIFIED", tier: "STANDARD", verifiedAt: now },
+  });
+  return c;
+}

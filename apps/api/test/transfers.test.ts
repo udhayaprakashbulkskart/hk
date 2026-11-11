@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { startTestApp, resetState, type TestApp } from "./helpers";
 import { createFakeProviders } from "./provider-fake";
-import { authed, balanceOf, fundHkd, fundInr, lastKey, razorpayXWebhook, registerCustomer, type Ctx, type Customer } from "./support";
+import { verifiedCustomer, authed, balanceOf, fundHkd, fundInr, lastKey, razorpayXWebhook, registerCustomer, type Ctx, type Customer } from "./support";
 
 let t: TestApp;
 let ctx: Ctx;
@@ -36,7 +36,7 @@ function payout(c: Customer, beneficiaryId: string, amountMinor: string, fxQuote
 
 describe("outbound transfers", () => {
   it("leaves balances unchanged while a transfer is pending, and reserves the amount against further spending", async () => {
-    const c = await registerCustomer(t, "pending-xfer");
+    const c = await verifiedCustomer(t, "pending-xfer");
     await fundHkd(ctx, c, "200000");
     const bene = await indianRecipient(c);
     const q = await quote(c, "100000");
@@ -57,7 +57,7 @@ describe("outbound transfers", () => {
   });
 
   it("posts the settlement only when the provider confirms, and then debits the customer", async () => {
-    const c = await registerCustomer(t, "confirm-xfer");
+    const c = await verifiedCustomer(t, "confirm-xfer");
     await fundHkd(ctx, c, "200000");
     const bene = await indianRecipient(c);
     const q = await quote(c, "100000");
@@ -81,7 +81,7 @@ describe("outbound transfers", () => {
   });
 
   it("releases the reservation when the provider rejects the payout, and nothing was ever debited", async () => {
-    const c = await registerCustomer(t, "rejected-xfer");
+    const c = await verifiedCustomer(t, "rejected-xfer");
     await fundHkd(ctx, c, "200000");
     const bene = await indianRecipient(c);
     const q = await quote(c, "50000");
@@ -100,7 +100,7 @@ describe("outbound transfers", () => {
   });
 
   it("refuses an idempotent replay with the same key without sending a second payout", async () => {
-    const c = await registerCustomer(t, "replay-xfer");
+    const c = await verifiedCustomer(t, "replay-xfer");
     await fundInr(ctx, c, "300000");
     const bene = await indianRecipient(c);
     const key = `same-${randomUUID()}`;
@@ -111,7 +111,7 @@ describe("outbound transfers", () => {
   });
 
   it("does not let two simultaneous payouts both spend the same money", async () => {
-    const c = await registerCustomer(t, "race-xfer");
+    const c = await verifiedCustomer(t, "race-xfer");
     await fundInr(ctx, c, "100000");
     const bene = await indianRecipient(c);
     const results = await Promise.allSettled([
@@ -124,7 +124,7 @@ describe("outbound transfers", () => {
   });
 
   it("refuses a route that is not enabled, reports it as not yet available, and sends nothing to a provider", async () => {
-    const c = await registerCustomer(t, "swift-xfer");
+    const c = await verifiedCustomer(t, "swift-xfer");
     await fundHkd(ctx, c, "200000");
     const res = await http().post("/v1/beneficiaries").set(authed(c)).send({ name: "David Wong", country: "SG", method: "swift", destination: "DBSSSGSG0000005521", currency: "SGD" }).expect(201);
     const q = await quote(c, "100000", "SGD");
@@ -136,7 +136,7 @@ describe("outbound transfers", () => {
   });
 
   it("requires a quote for a cross-currency payout and refuses a quote for a different amount", async () => {
-    const c = await registerCustomer(t, "quote-mismatch");
+    const c = await verifiedCustomer(t, "quote-mismatch");
     await fundHkd(ctx, c, "200000");
     const bene = await indianRecipient(c);
     const none = await payout(c, bene, "100000", null);
@@ -147,8 +147,8 @@ describe("outbound transfers", () => {
   });
 
   it("a customer cannot see another customer's transfer", async () => {
-    const a = await registerCustomer(t, "owner-xfer");
-    const b = await registerCustomer(t, "other-xfer");
+    const a = await verifiedCustomer(t, "owner-xfer");
+    const b = await verifiedCustomer(t, "other-xfer");
     await fundInr(ctx, a, "100000");
     const bene = await indianRecipient(a);
     const sent = await http().post("/v1/transfers").set(authed(a)).send({ beneficiaryId: bene, sourceCurrency: "INR", amountMinor: "10000", idempotencyKey: `own-${randomUUID()}` }).expect(201);
@@ -158,8 +158,8 @@ describe("outbound transfers", () => {
 
 describe("internal transfers", () => {
   it("moves money between HK FinHub accounts instantly, and refuses self-transfers and overdrafts", async () => {
-    const alice = await registerCustomer(t, "alice-int");
-    const bob = await registerCustomer(t, "bob-int");
+    const alice = await verifiedCustomer(t, "alice-int");
+    const bob = await verifiedCustomer(t, "bob-int");
     await fundHkd(ctx, alice, "100000");
     const bobRef = (await http().get("/v1/accounts").set(authed(bob)).expect(200)).body.accountRef as string;
     const aliceRef = (await http().get("/v1/accounts").set(authed(alice)).expect(200)).body.accountRef as string;
@@ -171,7 +171,7 @@ describe("internal transfers", () => {
 
     const self = await http().post("/v1/transfers/internal").set(authed(alice)).send({ toAccountRef: aliceRef, currency: "HKD", amountMinor: "1000", idempotencyKey: `self-${randomUUID()}` });
     expect(self.status).toBe(422);
-    const over = await http().post("/v1/transfers/internal").set(authed(alice)).send({ toAccountRef: bobRef, currency: "HKD", amountMinor: "9999999", idempotencyKey: `over-${randomUUID()}` });
+    const over = await http().post("/v1/transfers/internal").set(authed(alice)).send({ toAccountRef: bobRef, currency: "HKD", amountMinor: "80000", idempotencyKey: `over-${randomUUID()}` });
     expect(over.body.error.code).toBe("INSUFFICIENT_FUNDS");
     const unknown = await http().post("/v1/transfers/internal").set(authed(alice)).send({ toAccountRef: "HKA00000000", currency: "HKD", amountMinor: "100", idempotencyKey: `nope-${randomUUID()}` });
     expect(unknown.status).toBe(404);
