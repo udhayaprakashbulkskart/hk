@@ -9,6 +9,7 @@ import { Redis } from "ioredis";
  */
 export function startNotificationWorker(c: Container, opts: { relayIntervalMs?: number } = {}) {
   const relayIntervalMs = opts.relayIntervalMs ?? 1000;
+  if (!c.config.redisUrl) throw new Error("the notification worker needs REDIS_URL");
   const connection = new Redis(c.config.redisUrl, { maxRetriesPerRequest: null });
   const worker = new Worker<NotificationJob>(
     NOTIFICATION_QUEUE,

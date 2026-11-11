@@ -26,7 +26,7 @@ describe("notification pipeline on BullMQ", () => {
   it("relays outbox rows through the real queue and a real worker, then redacts them", async () => {
     const email = new CaptureSender();
     const sms = new CaptureSender();
-    const redis = new Redis(t.config.redisUrl, { maxRetriesPerRequest: null });
+    const redis = new Redis(t.config.redisUrl!, { maxRetriesPerRequest: null });
     const queue = new Queue(NOTIFICATION_QUEUE, { connection: redis.duplicate() });
     const worker = new Worker<NotificationJob>(
       NOTIFICATION_QUEUE,

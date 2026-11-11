@@ -33,7 +33,7 @@ export interface Container {
   sandboxBroker: InvestmentServices["sandboxBroker"];
   logger: Logger;
   db: Database;
-  redis: Redis;
+  redis: Redis | null;
   auth: AuthService;
   outbox: PrismaOutboxStore;
   limiter: RateLimiter;
@@ -52,25 +52,31 @@ export interface ContainerOverrides {
   transport?: import("@hkfinhub/payments").HttpTransport;
 }
 
-/** Redis-backed fixed-window limiter. One INCR per attempt, so it is cheap and safe across instances. */
-export class RedisRateLimiter implements RateLimiter {
-  constructor(private readonly redis: Redis, private readonly prefix = "rl:") {}
-
+/** Fixed-window limiter stored in Postgres. Each attempt is one upsert, so it is safe across instances. */
+export class PostgresRateLimiter implements RateLimiter {
+  constructor(private readonly db: Database) {}
   async hit(key: string, limit: number, windowSeconds: number): Promise<{ allowed: boolean; retryAfterSeconds: number }> {
-    const k = `${this.prefix}${key}`;
-    const count = await this.redis.incr(k);
-    if (count === 1) await this.redis.expire(k, windowSeconds);
-    if (count <= limit) return { allowed: true, retryAfterSeconds: 0 };
-    const ttl = await this.redis.ttl(k);
-    return { allowed: false, retryAfterSeconds: ttl > 0 ? ttl : windowSeconds };
+    const now = new Date();
+    const rows = await this.db.$queryRaw<{ count: number; resetAt: Date }[]>`
+      INSERT INTO "RateLimit" ("key", "count", "resetAt") VALUES (${key}, 1, ${new Date(now.getTime() + windowSeconds * 1000)})
+      ON CONFLICT ("key") DO UPDATE SET
+        "count" = CASE WHEN "RateLimit"."resetAt" > ${now} THEN "RateLimit"."count" + 1 ELSE 1 END,
+        "resetAt" = CASE WHEN "RateLimit"."resetAt" > ${now} THEN "RateLimit"."resetAt" ELSE ${new Date(now.getTime() + windowSeconds * 1000)} END
+      RETURNING "count", "resetAt"`;
+    const row = rows[0]!;
+    if (row.count <= limit) return { allowed: true, retryAfterSeconds: 0 };
+    return { allowed: false, retryAfterSeconds: Math.max(1, Math.ceil((row.resetAt.getTime() - now.getTime()) / 1000)) };
   }
 }
+
+/** Publisher used when no Redis is configured: live updates are not delivered. */
+const noRealtime: RealtimePublisher = { publish: async () => {} } as unknown as RealtimePublisher;
 
 export function createContainer(config: ApiConfig, overrides: ContainerOverrides = {}): Container {
   const logger = overrides.logger ?? createLogger(config.logLevel);
   const db = createDatabase(config.databaseUrl);
-  const redis = new Redis(config.redisUrl, { maxRetriesPerRequest: 2, enableReadyCheck: true });
-  const limiter = new RedisRateLimiter(redis);
+  const redis: Redis | null = config.redisUrl ? new Redis(config.redisUrl, { maxRetriesPerRequest: 2, enableReadyCheck: true }) : null;
+  const limiter = new PostgresRateLimiter(db);
   const authConfig: AuthConfig = {
     accessTokenSecret: config.accessTokenSecret,
     digestKey: config.digestKey,
@@ -80,10 +86,12 @@ export function createContainer(config: ApiConfig, overrides: ContainerOverrides
   };
   const auth = new AuthService(new PrismaAuthStore(db), limiter, authConfig);
   const outbox = new PrismaOutboxStore(db);
-  const bullConnection = new Redis(config.redisUrl, { maxRetriesPerRequest: null });
-  const queue = new Queue(NOTIFICATION_QUEUE, { connection: bullConnection });
+  const bullConnection = config.redisUrl ? new Redis(config.redisUrl, { maxRetriesPerRequest: null }) : null;
+  const queue = bullConnection ? new Queue(NOTIFICATION_QUEUE, { connection: bullConnection }) : null;
   const jobQueue: JobQueue = {
     add: async (jobId, data) => {
+      // Without Redis, notifications stay in the outbox table until a worker with Redis delivers them.
+      if (!queue) return;
       await queue.add("deliver", data, {
         jobId,
         attempts: 8,
@@ -93,7 +101,7 @@ export function createContainer(config: ApiConfig, overrides: ContainerOverrides
       });
     },
   };
-  const realtime = new RedisRealtimePublisher(redis);
+  const realtime = redis ? new RedisRealtimePublisher(redis) : noRealtime;
   const accounting = buildAccountingServices(db, config.fieldKey);
   const kycServices = buildKycServices(db, config);
   const adminServices = buildAdminServices(db, config.fieldKey, accounting.ledger);
@@ -130,9 +138,9 @@ export function createContainer(config: ApiConfig, overrides: ContainerOverrides
     email,
     sms,
     async close() {
-      await queue.close();
-      await bullConnection.quit();
-      await redis.quit();
+      await queue?.close();
+      await bullConnection?.quit();
+      await redis?.quit();
       await db.$disconnect();
     },
   };

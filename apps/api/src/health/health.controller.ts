@@ -19,7 +19,9 @@ export class HealthController {
   async ready() {
     const checks: Record<string, "ok" | "down"> = {};
     try { await this.c.db.$queryRaw`SELECT 1`; checks["postgres"] = "ok"; } catch { checks["postgres"] = "down"; }
-    try { await this.c.redis.ping(); checks["redis"] = "ok"; } catch { checks["redis"] = "down"; }
+    if (this.c.redis) {
+      try { await this.c.redis.ping(); checks["redis"] = "ok"; } catch { checks["redis"] = "down"; }
+    }
     const ok = Object.values(checks).every((v) => v === "ok");
     if (!ok) throw new HttpException({ status: "unavailable", checks }, HttpStatus.SERVICE_UNAVAILABLE);
     return { status: "ready", checks };

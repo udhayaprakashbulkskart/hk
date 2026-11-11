@@ -9,7 +9,7 @@ const schema = z.object({
   API_PORT: z.coerce.number().int().min(0).max(65535).default(4000), // 0 picks a free port (tests)
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
   DATABASE_URL: z.string().url(),
-  REDIS_URL: z.string().min(1),
+  REDIS_URL: z.string().optional(),
   JWT_ACCESS_SECRET: z.string().min(64, "must be at least 64 characters"),
   DIGEST_KEY: base64Key32,
   FIELD_ENCRYPTION_KEY: base64Key32,
@@ -50,7 +50,8 @@ export interface ApiConfig {
   port: number;
   logLevel: string;
   databaseUrl: string;
-  redisUrl: string;
+  /** Optional. Without it, live updates and the notification queue are off; login and everything else still work. */
+  redisUrl: string | undefined;
   accessTokenSecret: Uint8Array;
   digestKey: Uint8Array;
   fieldKey: Uint8Array;
@@ -95,7 +96,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
     port: e.API_PORT,
     logLevel: e.LOG_LEVEL,
     databaseUrl: e.DATABASE_URL,
-    redisUrl: e.REDIS_URL,
+    redisUrl: e.REDIS_URL && e.REDIS_URL.length > 0 ? e.REDIS_URL : undefined,
     accessTokenSecret: new TextEncoder().encode(e.JWT_ACCESS_SECRET),
     digestKey: Buffer.from(e.DIGEST_KEY, "base64"),
     fieldKey: Buffer.from(e.FIELD_ENCRYPTION_KEY, "base64"),

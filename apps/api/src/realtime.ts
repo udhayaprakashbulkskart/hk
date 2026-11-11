@@ -7,7 +7,9 @@ import type { Container } from "./container";
  * Socket.IO gateway. Clients connect with their access token in the handshake, and receive only
  * events for their own user. Events arrive from Redis pub/sub, so every API instance delivers them.
  */
-export function attachRealtime(httpServer: HttpServer, c: Container): { io: Server; close(): Promise<void> } {
+export function attachRealtime(httpServer: HttpServer, c: Container): { io: Server | null; close(): Promise<void> } {
+  // Live updates need Redis. Without it there is nothing to subscribe to, so no socket server is started.
+  if (!c.redis) return { io: null, close: async () => {} };
   const io = new Server(httpServer, {
     path: "/v1/realtime",
     cors: { origin: c.config.corsOrigins, credentials: true },

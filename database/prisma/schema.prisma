@@ -643,3 +643,12 @@ model InvestmentFill {
 
   @@index([orderId])
 }
+
+// Login and other throttles, stored in Postgres so no Redis is needed. Rows expire at resetAt.
+model RateLimit {
+  key     String   @id @db.VarChar(200)
+  count   Int
+  resetAt DateTime
+
+  @@index([resetAt])
+}
