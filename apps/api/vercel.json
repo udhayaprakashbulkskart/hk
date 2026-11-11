@@ -1,0 +1,5 @@
+{
+  "installCommand": "cd ../.. && npx -y pnpm@9.15.0 install --frozen-lockfile",
+  "buildCommand": "cd ../.. && npx -y pnpm@9.15.0 --filter @hkfinhub/database exec prisma generate",
+  "rewrites": [{ "source": "/(.*)", "destination": "/api" }]
+}
