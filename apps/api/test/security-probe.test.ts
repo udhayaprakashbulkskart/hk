@@ -42,6 +42,14 @@ describe("token forgery", () => {
     await http().get("/v1/accounts").set("Authorization", `Bearer ${h}.${edited}.${s}`).expect(401);
   });
 
+  it("rejects a forgery that reuses a real session id and user id but not the real signature", async () => {
+    const victim = await registerCustomer(t, "probe-real-claims");
+    const [, payloadPart] = victim.access.split(".");
+    const claims = JSON.parse(Buffer.from(payloadPart!, "base64url").toString("utf8")) as { sub: string; sid: string; did: string };
+    const forged = await forgeFrom(randomBytes(64), { sub: claims.sub, sid: claims.sid, did: claims.did });
+    await http().get("/v1/accounts").set("Authorization", `Bearer ${forged}`).expect(401);
+  });
+
   it("rejects an expired token", async () => {
     const c = await registerCustomer(t, "probe-expired");
     const { createHash } = await import("node:crypto");
@@ -55,6 +63,22 @@ describe("token forgery", () => {
     const c = await registerCustomer(t, "probe-ended");
     await http().post("/v1/auth/logout").set(authed(c)).expect(200);
     await http().get("/v1/accounts").set(authed(c)).expect(401);
+  });
+});
+
+describe("token type confusion", () => {
+  it("refuses a refresh token presented as an access token", async () => {
+    const c = await registerCustomer(t, "probe-refresh-as-access");
+    const login = await http().post("/v1/auth/login").send({ email: c.email, password: "correct-horse-battery-9", device: { name: "Probe", platform: "web" } }).expect(200);
+    const refresh = login.body.tokens.refreshToken as string;
+    await http().get("/v1/accounts").set("Authorization", `Bearer ${refresh}`).expect(401);
+  });
+
+  it("refuses an access token presented to the refresh endpoint", async () => {
+    const c = await registerCustomer(t, "probe-access-as-refresh");
+    const res = await http().post("/v1/auth/refresh").send({ refreshToken: c.access });
+    expect([400, 401, 422]).toContain(res.status);
+    await http().get("/v1/accounts").set(authed(c)).expect(200);
   });
 });
 

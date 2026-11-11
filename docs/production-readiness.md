@@ -13,6 +13,11 @@ live money. Every live path is refused by default and needs a human approval bef
 - Database: Neon project `hk-finhub` (Postgres 16, Singapore) holds the full schema, with migrations recorded.
 - Web: deployed to Vercel as a sandbox build with sandbox data. SSO protection is on.
 
+## Resolved in this pass
+- Neon owner password rotated. The previous credential is verified as rejected.
+- Vercel deployment protection set to SSO for all deployments.
+- Security probe extended: refresh-token confusion, and forgery reusing a real session and user (verified to fail when signature checking is disabled).
+
 ## Blockers (in order of who must act)
 | Blocker | Why it blocks | Owner / decision |
 |---|---|---|
@@ -22,13 +27,12 @@ live money. Every live path is refused by default and needs a human approval bef
 | Malware scanner | Document uploads refused in production until a real scanner exists | D15 |
 | Broker contracts (Zerodha, DriveWealth) | Investments refused in production | D8 to D10 |
 | Licensed market-data feed | No quotes or market values are shown | D9 |
-| Admin screens not yet built | `apps/admin` covers approvals, cases, identity, reveals and audit. Users, payments, transfers, currency, reports and settings screens are missing | Build work |
+| Admin screens not yet built | `apps/admin` covers approvals, cases, identity, reveals, customers, payments, transfers, reconciliation, currencies, settings and audit. Still missing: staff management, provider request screen, fraud monitoring, notifications | Build work |
 | Web and mobile on the real API | Both still use sandbox data. The web data boundary has no real endpoint for market quotes, price history, notifications or devices, and no market-value source for holdings | Build work plus D9 (market data) |
 | API hosting | No host exists for the NestJS API (Vercel is not a fit for Socket.IO and workers) | Infrastructure decision |
 | Admin network allow-list | `ADMIN_ALLOWED_IPS` must be set; production returns NOT_AVAILABLE for admin routes until it is | Ops |
 | Staff MFA enrolment | Staff members must have confirmed TOTP before a role takes effect | Ops |
-| Neon password rotation | The connection string appeared in a session transcript | Ops, now |
-| Vercel production alias | The sandbox web build was assigned the production target | Ops, now |
+| Vercel production target | The sandbox web build still carries the production target. SSO protection now covers every deployment, so only team members can open it. The target itself cannot be changed with the available tools | Ops: redeploy as preview and remove the production domain in Vercel settings |
 
 ## Deployment checklist (once blockers are cleared)
 1. Set every variable in `.env.example`. Secrets come from the secrets manager, never from the repo.

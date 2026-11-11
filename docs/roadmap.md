@@ -16,7 +16,7 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 | 8 | Broker and investment adapters | 🟡 | D8, D9, D10 for live brokers and market data; sandbox broker and ledger settlement complete |
 | 9 | Admin dashboard | 🟡 | Backend and staff console built (`apps/admin`); users, payments, transfers, currency, reports and settings screens not built |
 | 10 | Integrate all applications | 🟡 | API journey test complete; web and mobile still on sandbox data |
-| 11 | Tests, security checks and sandbox transactions | 🟡 | 162 API tests, unit suites, typechecks, clean dependency audit; no penetration test |
+| 11 | Tests, security checks and sandbox transactions | 🟡 | 178 API tests, 16 automated security probes (verified against a deliberate mutation), unit suites, typechecks, clean dependency audit; no penetration test |
 | 12 | Production deployment preparation | 🟡 | Readiness document written; not deployed. See docs/production-readiness.md |
 
 ---

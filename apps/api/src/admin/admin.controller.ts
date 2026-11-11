@@ -1,6 +1,7 @@
 import { BadRequestException, Body, Controller, Get, HttpCode, Inject, Param, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
 import type { Response } from "express";
 import { ROLE_PERMISSIONS, type Permission } from "@hkfinhub/admin";
+import { CURRENCY_META } from "@hkfinhub/shared";
 import { CONTAINER } from "../constants";
 import type { Container } from "../container";
 import { mapDomainError } from "../common/domain-errors";
@@ -168,6 +169,42 @@ export class AdminController {
   transfers(@Query("limit") limit: string | undefined, @Req() req: AdminRequest) {
     const n = Math.min(Math.max(Number(limit ?? 50) || 50, 1), 200);
     return this.run(req, "transfers.read", { type: "Transfer", id: null }, async () => ({ items: (await this.c.admin.listTransfers({ id: req.staff.id, role: req.staff.role }, n)).map((t) => ({ ...t, sourceMinor: t.sourceMinor.toString() })) }));
+  }
+
+  /** Ledger reconciliation: every account whose stored balance disagrees with its entries. Read-only. */
+  @Get("reports/reconciliation")
+  reconciliation(@Req() req: AdminRequest) {
+    return this.run(req, "finance.read", { type: "Report", id: "reconciliation" }, async () => {
+      const r = await this.c.ledger.reconcile(new Date());
+      return {
+        checked: r.checked,
+        mismatches: r.mismatches.map((m) => ({ accountId: m.accountId, expectedMinor: m.expectedMinor.toString(), recordedMinor: m.recordedMinor.toString() })),
+      };
+    });
+  }
+
+  /** Launch currencies and their minor-unit rules, from the shared metadata. */
+  @Get("currencies")
+  currencies(@Req() req: AdminRequest) {
+    return this.run(req, "finance.read", { type: "Currency", id: null }, async () => ({
+      items: Object.values(CURRENCY_META).map((m) => ({ code: m.code, name: m.name, symbol: m.symbol, minorUnitExponent: m.minorUnitExponent })),
+    }));
+  }
+
+  /** Feature flags and environment only. No secrets, keys or provider credentials are returned. */
+  @Get("settings")
+  settings(@Req() req: AdminRequest) {
+    return this.run(req, "settings.read", { type: "Settings", id: null }, async () => ({
+      appEnvironment: this.c.config.appEnv,
+      paymentEnvironment: this.c.config.paymentEnvironment,
+      liveFeatures: {
+        payments: this.c.config.liveFeaturePayments,
+        transfers: this.c.config.liveFeatureTransfers,
+        trading: false,
+      },
+      adminNetworkRestricted: this.c.config.adminAllowedIps.length > 0,
+      investmentBroker: this.c.sandboxBroker ? "sandbox" : "none",
+    }));
   }
 
   @Get("audit")

@@ -23,13 +23,14 @@ export const PERMISSIONS = [
   "provider.config.request",
   "provider.config.approve",
   "approvals.read",
+  "settings.read",
   "audit.read",
   "staff.manage",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
 export const ROLE_PERMISSIONS: Record<StaffRole, readonly Permission[]> = {
-  SUPER_ADMIN: ["customers.read", "provider.config.request", "provider.config.approve", "approvals.read", "audit.read", "staff.manage", "finance.read", "payments.read", "transfers.read"],
+  SUPER_ADMIN: ["customers.read", "provider.config.request", "provider.config.approve", "approvals.read", "audit.read", "staff.manage", "finance.read", "payments.read", "transfers.read", "settings.read"],
   FINANCE_ADMIN: ["customers.read", "finance.read", "payments.read", "transfers.read", "adjustments.request", "adjustments.approve", "approvals.read"],
   COMPLIANCE_ADMIN: ["customers.read", "customers.pii.reveal", "kyc.read", "kyc.decide", "kyc.document.read", "compliance.read", "compliance.clear", "limits.request", "limits.approve", "audit.read", "approvals.read"],
   SUPPORT_ADMIN: ["customers.read", "kyc.read", "payments.read", "transfers.read"],

@@ -127,6 +127,9 @@ export default function AdminConsole() {
         {can("customers.read") && <ListPanel title="Customers" path="/admin/users?limit=50" token={token} columns={[["When", "createdAt", "date"], ["Customer", "customerNumber", "text"], ["Email", "emailMasked", "text"], ["Status", "status", "text"]]} />}
         {can("payments.read") && <ListPanel title="Payments (monitoring)" path="/admin/payments?limit=50" token={token} columns={[["When", "createdAt", "date"], ["Direction", "direction", "text"], ["Provider", "providerId", "text"], ["Status", "status", "text"], ["Amount (minor units)", "amountMinor", "text"], ["Currency", "currency", "text"]]} />}
         {can("transfers.read") && <ListPanel title="Transfers" path="/admin/transfers?limit=50" token={token} columns={[["When", "createdAt", "date"], ["Kind", "kind", "text"], ["Status", "status", "text"], ["Amount (minor units)", "sourceMinor", "text"], ["From", "sourceCurrency", "text"], ["To", "recipientCurrency", "text"]]} />}
+        {can("finance.read") && <ReconciliationPanel token={token} />}
+        {can("finance.read") && <ListPanel title="Currencies" path="/admin/currencies" token={token} columns={[["Code", "code", "text"], ["Name", "name", "text"], ["Symbol", "symbol", "text"], ["Minor-unit digits", "minorUnitExponent", "text"]]} />}
+        {can("settings.read") && <SettingsPanel token={token} />}
         {can("audit.read") && <AuditPanel token={token} />}
       </div>
     </main>
@@ -404,6 +407,75 @@ function ListPanel({ title, path, token, columns }: { title: string; path: strin
                 ))}
               </tr>
             ))}
+          </tbody>
+        </table>
+      )}
+      {error && <p className="error" role="alert">{error}</p>}
+    </Panel>
+  );
+}
+
+interface Reconciliation {
+  checked: number;
+  mismatches: { accountId: string; expectedMinor: string; recordedMinor: string }[];
+}
+
+function ReconciliationPanel({ token }: { token: string }) {
+  const [report, setReport] = useState<Reconciliation | null>(null);
+  const { error, run } = useAction();
+  const load = () => run(async () => {
+    setReport(await api<Reconciliation>("/admin/reports/reconciliation", { token }));
+  });
+  return (
+    <Panel title="Ledger reconciliation">
+      <button type="button" onClick={load}>Run report</button>
+      {report && (
+        <>
+          <p className="muted">Accounts checked: {report.checked}. Mismatches: {report.mismatches.length}.</p>
+          {report.mismatches.length > 0 && (
+            <table>
+              <thead><tr><th>Account</th><th>Expected (minor)</th><th>Recorded (minor)</th></tr></thead>
+              <tbody>
+                {report.mismatches.map((m) => (
+                  <tr key={m.accountId}><td>{m.accountId.slice(0, 8)}</td><td>{m.expectedMinor}</td><td>{m.recordedMinor}</td></tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </>
+      )}
+      {error && <p className="error" role="alert">{error}</p>}
+    </Panel>
+  );
+}
+
+interface SettingsView {
+  appEnvironment: string;
+  paymentEnvironment: string;
+  liveFeatures: { payments: boolean; transfers: boolean; trading: boolean };
+  adminNetworkRestricted: boolean;
+  investmentBroker: string;
+}
+
+function SettingsPanel({ token }: { token: string }) {
+  const [settings, setSettings] = useState<SettingsView | null>(null);
+  const { error, run } = useAction();
+  const load = () => run(async () => {
+    setSettings(await api<SettingsView>("/admin/settings", { token }));
+  });
+  return (
+    <Panel title="Environment and feature flags">
+      <button type="button" onClick={load}>Load</button>
+      {settings && (
+        <table>
+          <tbody>
+            <tr><th>Application environment</th><td>{settings.appEnvironment}</td></tr>
+            <tr><th>Payment environment</th><td>{settings.paymentEnvironment}</td></tr>
+            <tr><th>Live payments</th><td>{settings.liveFeatures.payments ? "on" : "off"}</td></tr>
+            <tr><th>Live transfers</th><td>{settings.liveFeatures.transfers ? "on" : "off"}</td></tr>
+            <tr><th>Live trading</th><td>{settings.liveFeatures.trading ? "on" : "off"}</td></tr>
+            <tr><th>Admin network restricted</th><td>{settings.adminNetworkRestricted ? "yes" : "no"}</td></tr>
+            <tr><th>Investment broker</th><td>{settings.investmentBroker}</td></tr>
           </tbody>
         </table>
       )}

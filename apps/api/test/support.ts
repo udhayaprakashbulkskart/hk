@@ -6,6 +6,7 @@ import { createFakeProviders, signRazorpay, signStripe } from "./provider-fake";
 
 export interface Customer {
   name: string;
+  email: string;
   access: string;
   userId: string;
   accountId: string;
@@ -32,7 +33,7 @@ export async function registerCustomer(t: TestApp, name: string): Promise<Custom
   await http().get("/v1/accounts").set("Authorization", `Bearer ${access}`).expect(200);
   const me = await http().get("/v1/me").set("Authorization", `Bearer ${access}`).expect(200);
   const account = await t.container.db.account.findUniqueOrThrow({ where: { userId: me.body.id } });
-  return { name, access, userId: me.body.id, accountId: account.id };
+  return { name, email, access, userId: me.body.id, accountId: account.id };
 }
 
 export const authed = (c: Customer) => ({ Authorization: `Bearer ${c.access}` });
