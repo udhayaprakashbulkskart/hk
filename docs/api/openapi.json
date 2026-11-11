@@ -670,6 +670,231 @@
         ]
       }
     },
+    "/v1/accounts": {
+      "get": {
+        "summary": "Account reference and balances for each currency (available, pending, total).",
+        "responses": {
+          "200": {
+            "description": "Account summary."
+          },
+          "401": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/accounts/currencies": {
+      "post": {
+        "summary": "Open a currency account.",
+        "responses": {
+          "200": {
+            "description": "Opened or already open."
+          },
+          "401": {
+            "description": "Error response: { error: { code, message } }"
+          },
+          "422": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "currency": {
+                    "type": "string",
+                    "enum": [
+                      "HKD",
+                      "USD",
+                      "INR",
+                      "EUR",
+                      "GBP",
+                      "AED",
+                      "SGD",
+                      "CNY"
+                    ]
+                  }
+                },
+                "required": [
+                  "currency"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dashboard": {
+      "get": {
+        "summary": "Home screen data: cash total, investment value (separate), totals and recent activity.",
+        "responses": {
+          "200": {
+            "description": "Dashboard."
+          },
+          "401": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/transactions": {
+      "get": {
+        "summary": "Recent transactions on spendable accounts.",
+        "responses": {
+          "200": {
+            "description": "Transactions."
+          },
+          "401": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/beneficiaries": {
+      "get": {
+        "summary": "Saved recipients, with masked destinations.",
+        "responses": {
+          "200": {
+            "description": "Recipients."
+          },
+          "401": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Save a recipient. The destination is stored encrypted.",
+        "responses": {
+          "201": {
+            "description": "Saved."
+          },
+          "401": {
+            "description": "Error response: { error: { code, message } }"
+          },
+          "422": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 120
+                  },
+                  "country": {
+                    "type": "string",
+                    "pattern": "^[A-Z]{2}$"
+                  },
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "upi",
+                      "bank",
+                      "swift"
+                    ]
+                  },
+                  "destination": {
+                    "type": "string",
+                    "minLength": 4,
+                    "maxLength": 64
+                  },
+                  "currency": {
+                    "type": "string",
+                    "enum": [
+                      "HKD",
+                      "USD",
+                      "INR",
+                      "EUR",
+                      "GBP",
+                      "AED",
+                      "SGD",
+                      "CNY"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "country",
+                  "method",
+                  "destination",
+                  "currency"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/beneficiaries/{id}": {
+      "delete": {
+        "summary": "Remove a saved recipient.",
+        "responses": {
+          "200": {
+            "description": "Removed."
+          },
+          "404": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
     "/v1/health": {
       "get": {
         "summary": "Liveness.",

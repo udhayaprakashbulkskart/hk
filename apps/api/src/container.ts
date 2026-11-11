@@ -3,6 +3,7 @@ import { createDatabase, PrismaAuthStore, PrismaOutboxStore, type Database } fro
 import { CaptureSender, UnconfiguredSender, RedisRealtimePublisher, type EmailSender, type JobQueue, type RealtimePublisher, type SmsSender } from "@hkfinhub/notifications";
 import { Queue } from "bullmq";
 import { Redis } from "ioredis";
+import { buildAccountingServices } from "./container-services";
 import type { ApiConfig } from "./config";
 import { createLogger, type Logger } from "./logger";
 
@@ -10,6 +11,9 @@ export const NOTIFICATION_QUEUE = "notifications";
 
 export interface Container {
   config: ApiConfig;
+  ledger: ReturnType<typeof buildAccountingServices>["ledger"];
+  accounts: ReturnType<typeof buildAccountingServices>["accounts"];
+  wallet: ReturnType<typeof buildAccountingServices>["wallet"];
   logger: Logger;
   db: Database;
   redis: Redis;
@@ -71,12 +75,16 @@ export function createContainer(config: ApiConfig, overrides: ContainerOverrides
     },
   };
   const realtime = new RedisRealtimePublisher(redis);
+  const accounting = buildAccountingServices(db, config.fieldKey);
 
   const email: EmailSender = overrides.email ?? (config.emailProvider === "capture" ? new CaptureSender() : new UnconfiguredSender("email"));
   const sms: SmsSender = overrides.sms ?? (config.smsProvider === "capture" ? new CaptureSender() : new UnconfiguredSender("sms"));
 
   return {
     config,
+    ledger: accounting.ledger,
+    accounts: accounting.accounts,
+    wallet: accounting.wallet,
     logger,
     db,
     redis,

@@ -30,6 +30,8 @@ jobs:
         run: |
           npx -y pnpm@9.15.0 --filter @hkfinhub/authentication exec tsc --noEmit -p tsconfig.json
           npx -y pnpm@9.15.0 --filter @hkfinhub/notifications exec tsc --noEmit -p tsconfig.json
+          npx -y pnpm@9.15.0 --filter @hkfinhub/ledger exec tsc --noEmit -p tsconfig.json
+          npx -y pnpm@9.15.0 --filter @hkfinhub/accounts exec tsc --noEmit -p tsconfig.json
           npx -y pnpm@9.15.0 --filter @hkfinhub/database exec tsc --noEmit -p tsconfig.json
           npx -y pnpm@9.15.0 --filter @hkfinhub/api exec tsc --noEmit -p tsconfig.json
       - name: Typecheck web and mobile
@@ -72,5 +74,7 @@ jobs:
           npx -y pnpm@9.15.0 --filter @hkfinhub/database exec prisma migrate deploy
       - name: Authentication domain tests
         run: npx -y pnpm@9.15.0 --filter @hkfinhub/authentication test
+      - name: Ledger property tests
+        run: npx -y pnpm@9.15.0 --filter @hkfinhub/ledger test
       - name: API integration tests (real Postgres and Redis)
         run: npx -y pnpm@9.15.0 --filter @hkfinhub/api test

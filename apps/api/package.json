@@ -14,9 +14,13 @@
     "node": ">=22.0.0"
   },
   "dependencies": {
+    "@hkfinhub/accounts": "workspace:*",
     "@hkfinhub/authentication": "workspace:*",
     "@hkfinhub/database": "workspace:*",
+    "@hkfinhub/ledger": "workspace:*",
     "@hkfinhub/notifications": "workspace:*",
+    "@hkfinhub/shared": "workspace:*",
+    "@hkfinhub/wallet": "workspace:*",
     "@nestjs/common": "12.3.2",
     "@nestjs/core": "12.3.2",
     "@nestjs/platform-express": "12.3.2",

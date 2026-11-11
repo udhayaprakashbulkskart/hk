@@ -54,6 +54,7 @@ model User {
   recoveryCodes    RecoveryCode[]
   mfaChallenges    MfaChallenge[]
   notifications    Notification[]
+  account          Account?
 }
 
 model UserProfile {
@@ -197,4 +198,162 @@ model AuditLog {
 
   @@index([actorUserId, createdAt])
   @@index([action, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Phase 5: accounts and the double-entry ledger.
+// Entries and transactions are immutable (database triggers). Balances change only through
+// the posting function, which sets a transaction-local write flag. Each transaction's entries
+// must balance per currency at commit (deferred trigger). Customer balances cannot go negative.
+// ---------------------------------------------------------------------------
+
+enum LedgerOwnerType {
+  CUSTOMER
+  PLATFORM
+}
+
+enum LedgerSide {
+  DEBIT
+  CREDIT
+}
+
+enum LedgerTxKind {
+  DEPOSIT
+  WITHDRAWAL
+  TRANSFER_HOLD
+  TRANSFER_SETTLE
+  TRANSFER_RELEASE
+  FX_CONVERSION
+  FEE
+  REVERSAL
+  ADJUSTMENT
+  TRADE_SETTLEMENT
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Currency {
+  code              String  @id @db.VarChar(3)
+  name              String  @db.VarChar(64)
+  symbol            String  @db.VarChar(8)
+  minorUnitExponent Int
+  isEnabled         Boolean @default(true)
+}
+
+model Account {
+  id          String         @id @default(uuid(7))
+  userId      String         @unique
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountRef  String         @unique @db.VarChar(16)
+  status      String         @default("ACTIVE") @db.VarChar(16)
+  createdAt   DateTime       @default(now())
+  currencyAccounts CurrencyAccount[]
+  beneficiaries    Beneficiary[]
+}
+
+model CurrencyAccount {
+  id                String   @id @default(uuid(7))
+  accountId         String
+  account           Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  currency          String   @db.VarChar(3)
+  availableLedgerId String   @unique
+  holdLedgerId      String   @unique
+  createdAt         DateTime @default(now())
+
+  @@unique([accountId, currency])
+}
+
+model Beneficiary {
+  id             String    @id @default(uuid(7))
+  accountId      String
+  account        Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  name           String    @db.VarChar(120)
+  country        String    @db.VarChar(2)
+  method         String    @db.VarChar(8)
+  currency       String    @db.VarChar(3)
+  destinationEnc String
+  destinationMasked String @db.VarChar(64)
+  createdAt      DateTime  @default(now())
+  deletedAt      DateTime?
+
+  @@index([accountId])
+}
+
+model LedgerAccount {
+  id            String         @id @default(uuid(7))
+  ownerType     LedgerOwnerType
+  ownerId       String         @db.VarChar(64)
+  currency      String         @db.VarChar(3)
+  purpose       String         @db.VarChar(32)
+  normalSide    LedgerSide
+  allowNegative Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  balance       LedgerBalance?
+  entries       LedgerEntry[]
+
+  @@unique([ownerType, ownerId, currency, purpose])
+}
+
+model LedgerBalance {
+  ledgerAccountId String   @id
+  ledgerAccount   LedgerAccount @relation(fields: [ledgerAccountId], references: [id])
+  balanceMinor    BigInt
+  updatedAt       DateTime @default(now())
+}
+
+model LedgerTransaction {
+  id              String        @id @default(uuid(7))
+  kind            LedgerTxKind
+  idempotencyKey  String        @unique @db.VarChar(128)
+  requestHash     String        @db.VarChar(64)
+  description     String        @db.VarChar(200)
+  reference       String?       @db.VarChar(128)
+  reversesId      String?       @unique
+  createdBy       String?       @db.VarChar(64)
+  postedAt        DateTime      @default(now())
+  entries         LedgerEntry[]
+}
+
+model LedgerEntry {
+  id              String            @id @default(uuid(7))
+  transactionId   String
+  transaction     LedgerTransaction @relation(fields: [transactionId], references: [id])
+  ledgerAccountId String
+  ledgerAccount   LedgerAccount     @relation(fields: [ledgerAccountId], references: [id])
+  side            LedgerSide
+  amountMinor     BigInt
+  currency        String            @db.VarChar(3)
+  createdAt       DateTime          @default(now())
+
+  @@index([transactionId])
+  @@index([ledgerAccountId, createdAt])
+}
+
+model ReconciliationRecord {
+  id              String    @id @default(uuid(7))
+  runAt           DateTime  @default(now())
+  ledgerAccountId String
+  expectedMinor   BigInt
+  recordedMinor   BigInt
+  status          String    @db.VarChar(16)
+  resolvedAt      DateTime?
+
+  @@index([status, runAt])
+}
+
+// Maker-checker: a sensitive financial change is requested by one person and posted only when a
+// different person approves it. Admin roles arrive in phase 9; the check is enforced here already.
+model ApprovalRequest {
+  id           String         @id @default(uuid(7))
+  action       String         @db.VarChar(32)
+  payload      Json
+  requestedBy  String         @db.VarChar(64)
+  status       ApprovalStatus @default(PENDING)
+  decidedBy    String?        @db.VarChar(64)
+  decidedAt    DateTime?
+  createdAt    DateTime       @default(now())
 }

@@ -10,7 +10,7 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 | 2 | Design system and complete web UI | ✅ | — (sandbox data; live APIs come in Phase 4) |
 | 3 | Mobile app screens | ✅ | — (sandbox data; live APIs in Phase 4) |
 | 4 | Backend, database and authentication | ✅ | D12 (messaging providers), D13 (Sentry DSN) for live delivery |
-| 5 | Accounts and ledger | ⬜ | D6 (only if stored value is in scope) |
+| 5 | Accounts and ledger | ✅ | — (no partner needed: the wallet is a ledger view) |
 | 6 | Payment provider adapters, FX, transfers | ⬜ | D1, D3, D4, D5, D7 for live; sandbox can start earlier |
 | 7 | KYC and compliance modules | ⬜ | D2, D15 |
 | 8 | Broker and investment adapters | ⬜ | D8, D9, D10 |
@@ -119,7 +119,20 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 
 ---
 
-## Phase 5: Accounts and ledger
+## Phase 5: Accounts and ledger ✅
+
+**Result:** double-entry ledger in `services/ledger` with immutable records, idempotent postings, reversals, holds, settlement and release, maker-checker adjustments and reconciliation. Customer accounts, currency accounts and encrypted recipients in `services/accounts`. Ledger-derived balances, totals and activity in `services/wallet`. HTTP surface: `/v1/accounts`, `/v1/accounts/currencies`, `/v1/dashboard`, `/v1/transactions`, `/v1/beneficiaries`.
+
+**Enforced in the database, not only in code:** entries and transactions cannot be updated or deleted; balances can change only through the posting function; customer balances cannot go negative; each transaction must balance per currency at commit; entry currency must match the account.
+
+**Verified:** 20 database tests against real Postgres, including 100 concurrent holds (exactly 50 succeed, none overdraw), opposite-direction transfers in parallel without deadlock, a direct balance update being refused, idempotent replays under a race, a single reversal under a race, a balance altered outside the posting path being detected by reconciliation, and maker-checker self-approval being refused. Three property suites (fast-check, hundreds of random sequences each) check double entry, no negative balances, failed postings leaving no trace, and exact reversal. 11 HTTP tests cover accounts, the dashboard (cash and investments separate, no cross-customer leakage), and encrypted, masked recipients. Full backend: 87 API tests and 3 ledger properties pass.
+
+**Gaps carried forward:**
+- Deposits, withdrawals and transfers have no public endpoints yet. Phase 6 connects them through the payment adapters and verified webhooks.
+- The dashboard's cash total is HKD only. Conversion waits for the FX provider (Phase 6).
+- Linked payment accounts are not modelled. They arrive with the payment adapters.
+- The daily reconciliation job is a function, not yet a scheduled worker.
+- Balances use a 2-decimal exponent for every launch currency, which is correct for all eight. A currency with a different exponent needs a data change and a test.
 
 **Goal:** customer financial accounts and the immutable double-entry ledger.
 

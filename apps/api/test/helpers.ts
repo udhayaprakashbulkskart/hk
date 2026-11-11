@@ -82,7 +82,7 @@ export async function startTestApp(overrides: { logger?: boolean } = {}): Promis
 /** Clean slate: empties every table and the test Redis database. Only ever points at the test database. */
 export async function resetState(t: TestApp): Promise<void> {
   if (!t.config.databaseUrl.includes("_test")) throw new Error("refusing to reset a non-test database");
-  await t.container.db.$executeRawUnsafe(`TRUNCATE "User","UserProfile","Device","Session","RefreshToken","OtpChallenge","TotpFactor","RecoveryCode","MfaChallenge","OutboxEvent","Notification","AuditLog" RESTART IDENTITY CASCADE`);
+  await t.container.db.$executeRawUnsafe(`TRUNCATE "User","UserProfile","Device","Session","RefreshToken","OtpChallenge","TotpFactor","RecoveryCode","MfaChallenge","OutboxEvent","Notification","AuditLog","Account","CurrencyAccount","Beneficiary","LedgerEntry","LedgerBalance","LedgerTransaction","ReconciliationRecord","ApprovalRequest","LedgerAccount" RESTART IDENTITY CASCADE`);
   await t.container.redis.flushdb();
 }
 

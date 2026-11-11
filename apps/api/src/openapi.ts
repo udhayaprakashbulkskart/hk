@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { beneficiarySchema, openCurrencySchema } from "./accounts/schemas";
 import {
   changePasswordSchema, loginSchema, mfaLoginSchema, refreshSchema, registerSchema, resendOtpSchema,
   resetConfirmSchema, resetRequestSchema, totpCodeSchema, verifyOtpSchema,
@@ -34,6 +35,13 @@ export const ROUTES: Route[] = [
   { method: "get", path: "/auth/devices", summary: "List devices signed in to the account.", auth: true, responses: { "200": "Devices.", "401": ERR } },
   { method: "delete", path: "/auth/devices/{id}", summary: "Sign out a device and end its sessions.", auth: true, responses: { "200": "Signed out.", "404": ERR } },
   { method: "get", path: "/me", summary: "Current customer profile and verification status.", auth: true, responses: { "200": "Profile.", "401": ERR } },
+  { method: "get", path: "/accounts", summary: "Account reference and balances for each currency (available, pending, total).", auth: true, responses: { "200": "Account summary.", "401": ERR } },
+  { method: "post", path: "/accounts/currencies", summary: "Open a currency account.", auth: true, body: openCurrencySchema, responses: { "200": "Opened or already open.", "401": ERR, "422": ERR } },
+  { method: "get", path: "/dashboard", summary: "Home screen data: cash total, investment value (separate), totals and recent activity.", auth: true, responses: { "200": "Dashboard.", "401": ERR } },
+  { method: "get", path: "/transactions", summary: "Recent transactions on spendable accounts.", auth: true, responses: { "200": "Transactions.", "401": ERR } },
+  { method: "get", path: "/beneficiaries", summary: "Saved recipients, with masked destinations.", auth: true, responses: { "200": "Recipients.", "401": ERR } },
+  { method: "post", path: "/beneficiaries", summary: "Save a recipient. The destination is stored encrypted.", auth: true, body: beneficiarySchema, responses: { "201": "Saved.", "401": ERR, "422": ERR } },
+  { method: "delete", path: "/beneficiaries/{id}", summary: "Remove a saved recipient.", auth: true, responses: { "200": "Removed.", "404": ERR } },
   { method: "get", path: "/health", summary: "Liveness.", auth: false, responses: { "200": "Process is up." } },
   { method: "get", path: "/ready", summary: "Readiness: Postgres and Redis respond.", auth: false, responses: { "200": "Ready.", "503": "A dependency is down." } },
 ];
