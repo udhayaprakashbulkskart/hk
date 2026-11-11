@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { Copy } from "lucide-react";
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Field, Input, Badge } from "@hkfinhub/ui";
@@ -14,11 +14,16 @@ export function ReceivePanel() {
   const [memo, setMemo] = useState("");
   const [qr, setQr] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const reference = useMemo(() => `REQ-${Math.random().toString(36).slice(2, 8).toUpperCase()}`, []);
-  const link = `https://pay.hkfinhub.example/r/${reference}`;
+  // Generated after mount: random values in render would differ between server and client (hydration mismatch).
+  const [reference, setReference] = useState<string | null>(null);
+  useEffect(() => {
+    setReference(`REQ-${Math.random().toString(36).slice(2, 8).toUpperCase()}`);
+  }, []);
+  const link = reference ? `https://pay.hkfinhub.example/r/${reference}` : "";
   const minor = parseToMinor(amount, currency);
 
   useEffect(() => {
+    if (!link) return;
     let live = true;
     QRCode.toDataURL(link, { margin: 1, width: 224, errorCorrectionLevel: "M", color: { dark: "#11141a", light: "#ffffff" } })
       .then((url) => live && setQr(url))
@@ -75,13 +80,13 @@ export function ReceivePanel() {
         <Card>
           <CardHeader>
             <CardTitle>QR code</CardTitle>
-            <CardDescription>Reference {reference}</CardDescription>
+            <CardDescription>Reference {reference ?? "…"}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-4">
             <div className="rounded-2xl bg-white p-4">
-              {qr ? <img src={qr} width={224} height={224} alt={`QR code for payment request ${reference}`} /> : <div className="flex size-56 items-center justify-center text-sm text-[var(--muted-foreground)]">Generating…</div>}
+              {qr && reference ? <img src={qr} width={224} height={224} alt={`QR code for payment request ${reference}`} /> : <div className="flex size-56 items-center justify-center text-sm text-[var(--muted-foreground)]">Generating…</div>}
             </div>
-            <p className="break-all text-center font-mono text-xs text-[var(--muted-foreground)]">{link}</p>
+            <p className="break-all text-center font-mono text-xs text-[var(--muted-foreground)]">{link || "…"}</p>
           </CardContent>
         </Card>
 
@@ -93,7 +98,7 @@ export function ReceivePanel() {
           <CardContent>
             <dl className="grid gap-2 text-sm sm:grid-cols-2">
               <div><dt className="text-[var(--muted-foreground)]">Account name</dt><dd className="font-medium">HK FinHub Sample Customer</dd></div>
-              <div><dt className="text-[var(--muted-foreground)]">Reference to quote</dt><dd className="font-mono font-medium">{reference}</dd></div>
+              <div><dt className="text-[var(--muted-foreground)]">Reference to quote</dt><dd className="font-mono font-medium">{reference ?? "…"}</dd></div>
               <div><dt className="text-[var(--muted-foreground)]">Receiving account</dt><dd><Badge tone="gold">Issued after verification</Badge></dd></div>
               <div><dt className="text-[var(--muted-foreground)]">Incoming payments</dt><dd>Credited after partner confirmation</dd></div>
             </dl>
