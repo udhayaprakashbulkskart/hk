@@ -3,6 +3,7 @@ import { Badge, Card, CardContent, CardHeader, CardTitle, cn } from "@hkfinhub/u
 import { PageHeader, Section, TabLinks } from "@/components/page";
 import { TrendChart } from "@/components/charts";
 import { api } from "@/lib/api";
+import { ReferenceRatesCard } from "@/components/reference-rates-card";
 
 const MARKETS = [
   { key: "all", label: "All" }, { key: "HK", label: "Hong Kong" }, { key: "US", label: "United States" }, { key: "IN", label: "India" },
@@ -30,6 +31,7 @@ export default async function InvestPage({ searchParams }: { searchParams: SP })
             <Link href="/invest/orders?tab=open" className="inline-block pt-2 text-[var(--gold)] hover:underline">View my orders</Link>
           </CardContent>
         </Card>
+        <ReferenceRatesCard />
       </div>
     );
   }
@@ -102,6 +104,7 @@ export default async function InvestPage({ searchParams }: { searchParams: SP })
         </div>
 
         <div className="space-y-6">
+          <ReferenceRatesCard />
           <Card>
             <CardHeader><CardTitle>Watchlist</CardTitle></CardHeader>
             <CardContent className="space-y-2">
