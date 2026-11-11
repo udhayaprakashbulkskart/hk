@@ -9,7 +9,7 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 | 1 | Repository inspection and technical architecture | ✅ (this commit) | — |
 | 2 | Design system and complete web UI | ✅ | — (sandbox data; live APIs come in Phase 4) |
 | 3 | Mobile app screens | ✅ | — (sandbox data; live APIs in Phase 4) |
-| 4 | Backend, database and authentication | 🟡 | D12 (messaging providers), D13 (Sentry DSN); client wiring pending |
+| 4 | Backend, database and authentication | ✅ | D12 (messaging providers), D13 (Sentry DSN) for live delivery |
 | 5 | Accounts and ledger | ⬜ | D6 (only if stored value is in scope) |
 | 6 | Payment provider adapters, FX, transfers | ⬜ | D1, D3, D4, D5, D7 for live; sandbox can start earlier |
 | 7 | KYC and compliance modules | ⬜ | D2, D15 |
@@ -83,7 +83,7 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 
 ---
 
-## Phase 4: Backend, database and authentication 🟡
+## Phase 4: Backend, database and authentication ✅
 
 **Result (backend complete):** NestJS API in `apps/api` with OpenAPI at `/v1/openapi.json`, Socket.IO realtime, a Prisma 7 schema and migrations in `database/`, the authentication domain in `services/authentication`, and the notification pipeline (outbox, BullMQ worker, in-app inbox, Redis realtime) in `services/notifications`. CI runs typechecks and the backend suite against Postgres and Redis service containers.
 
@@ -91,9 +91,13 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 
 **Decisions taken:** in-house authentication (ADR-007 accepted, D14 to be confirmed); Argon2id passwords; OTPs, refresh tokens and recovery codes stored as keyed digests; TOTP secrets encrypted; no DI metadata, so tsx, vitest and tsc behave the same.
 
+**Client wiring (done):** `packages/api-client/src/auth-http.ts` is a typed client for `/v1/auth`. Web sign-in, registration, two-step verification, MFA and password reset call the API. Mobile does the same, and restores sessions from the device secure store on launch. Other domains still use the sandbox client until their endpoints exist in Phase 5 onwards. Web and mobile tests intercept the API at the browser boundary; the API itself is covered by its own suite. The web CSP now allows the configured API origin, which was blocking requests before.
+
 **Still open:**
-- Client wiring: web and mobile sign-in still use the sandbox client. The real HTTP client and its wiring are the remaining Phase 4 item.
 - D12: no email or SMS provider is approved, so messages fail closed until one is chosen.
+- Web keeps tokens in memory only: a reload ends the session. Persisting safely needs httpOnly cookies on a same-site API domain.
+- Login accepts email only. Mobile-number login is planned.
+- Mobile reaches the API through `EXPO_PUBLIC_API_URL`. A physical device needs the machine's LAN address, not localhost.
 - D13: Sentry is wired but inactive without a DSN.
 - Breached-password check (k-anonymity) is planned for Phase 7; the current list is short.
 - Container image and production build are Phase 12; the API currently runs under tsx.

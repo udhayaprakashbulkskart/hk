@@ -1,18 +1,69 @@
 import { test, expect } from "@playwright/test";
 
+const API = "http://localhost:4000";
+const TOKENS = { accessToken: "a".repeat(40), accessTokenExpiresIn: 900, refreshToken: "r".repeat(40), refreshTokenExpiresIn: 2592000 };
+
+/** Intercepts the customer API at the browser boundary. The API itself is covered by apps/api tests. */
+async function mockApi(page: import("@playwright/test").Page, routes: Record<string, (body: unknown) => { status: number; body: unknown }>) {
+  await page.route(`${API}/v1/**`, async (route) => {
+    const url = new URL(route.request().url());
+    const handler = routes[url.pathname];
+    const body = route.request().postDataJSON() as unknown;
+    if (!handler) return route.fulfill({ status: 404, contentType: "application/json", body: JSON.stringify({ error: { code: "NOT_FOUND", message: "No such endpoint." } }) });
+    const out = handler(body);
+    return route.fulfill({ status: out.status, contentType: "application/json", body: JSON.stringify(out.body) });
+  });
+}
+
 test.describe("authentication screens", () => {
-  test("login validates input and continues to verification", async ({ page }) => {
+  test("login asks for both fields, then signs in through the API", async ({ page }) => {
+    let sent: unknown = null;
+    await mockApi(page, { "/v1/auth/login": (b) => { sent = b; return { status: 200, body: { status: "authenticated", tokens: TOKENS, sessionId: "s", deviceId: "d" } }; } });
     await page.goto("/login", { waitUntil: "networkidle" });
     await page.getByRole("button", { name: "Log in" }).click();
-    await expect(page.locator("p[role=alert]")).toContainText("Enter your email or mobile number");
-    await page.getByLabel("Email or mobile number").fill("customer@example.com");
+    await expect(page.locator("p[role=alert]")).toContainText("Enter your email and password.");
+    await page.getByLabel("Email").fill("customer@example.com");
     await page.getByLabel("Password").fill("not-a-real-password");
     await page.getByRole("button", { name: "Log in" }).click();
-    await expect(page).toHaveURL(/\/verify\?purpose=login/);
+    await expect(page).toHaveURL(/\/dashboard$/);
+    expect(sent).toMatchObject({ email: "customer@example.com", device: { platform: "web" } });
   });
 
-  test("OTP accepts a pasted 6-digit code and moves to the dashboard", async ({ page }) => {
-    await page.goto("/verify?purpose=login", { waitUntil: "networkidle" });
+  test("login shows a rate-limit message from the API", async ({ page }) => {
+    await mockApi(page, { "/v1/auth/login": () => ({ status: 429, body: { error: { code: "RATE_LIMITED", message: "Too many attempts. Try again later.", retryAfterSeconds: 600 } } }) });
+    await page.goto("/login", { waitUntil: "networkidle" });
+    await page.getByLabel("Email").fill("customer@example.com");
+    await page.getByLabel("Password").fill("whatever-password-1");
+    await page.getByRole("button", { name: "Log in" }).click();
+    await expect(page.locator("p[role=alert]")).toContainText("Try again in 10 minute(s).");
+  });
+
+  test("login continues to the second step when two-factor is on", async ({ page }) => {
+    await mockApi(page, {
+      "/v1/auth/login": () => ({ status: 200, body: { status: "mfa_required", mfaToken: "m".repeat(40), mfaTokenExpiresIn: 300 } }),
+      "/v1/auth/login/mfa": () => ({ status: 200, body: { status: "authenticated", tokens: TOKENS, sessionId: "s", deviceId: "d" } }),
+    });
+    await page.goto("/login", { waitUntil: "networkidle" });
+    await page.getByLabel("Email").fill("customer@example.com");
+    await page.getByLabel("Password").fill("whatever-password-1");
+    await page.getByRole("button", { name: "Log in" }).click();
+    await expect(page.getByRole("heading", { name: "Two-step verification" })).toBeVisible();
+    await page.getByLabel("Authenticator code").fill("123456");
+    await page.getByRole("button", { name: "Continue" }).click();
+    await expect(page).toHaveURL(/\/dashboard$/);
+  });
+
+  test("OTP verifies the email code, then the mobile code, and returns to log in", async ({ page }) => {
+    const seen: { channel: string }[] = [];
+    await mockApi(page, {
+      "/v1/auth/otp/verify": (b) => {
+        const body = b as { channel: string };
+        seen.push({ channel: body.channel });
+        return { status: 200, body: { verified: true, channel: body.channel, accountActive: body.channel === "SMS" } };
+      },
+    });
+    await page.goto("/verify?email=customer%40example.com", { waitUntil: "networkidle" });
+    await expect(page.getByRole("heading", { name: "Enter the code sent to your email" })).toBeVisible();
     const first = page.getByLabel("Digit 1 of 6");
     await first.focus();
     await page.evaluate(() => {
@@ -22,18 +73,55 @@ test.describe("authentication screens", () => {
       el.dispatchEvent(new ClipboardEvent("paste", { clipboardData: dt, bubbles: true, cancelable: true }));
     });
     await expect(page.getByLabel("Digit 6 of 6")).toHaveValue("6");
-    await page.getByRole("button", { name: "Verify" }).click();
-    await expect(page).toHaveURL(/\/dashboard$/);
+    await page.getByRole("button", { name: "Continue" }).click();
+    await expect(page.getByRole("heading", { name: "Enter the code sent to your mobile" })).toBeVisible();
+    await page.getByLabel("Digit 1 of 6").focus();
+    await page.evaluate(() => {
+      const el = document.querySelector<HTMLInputElement>('input[aria-label="Digit 1 of 6"]')!;
+      const dt = new DataTransfer();
+      dt.setData("text", "654321");
+      el.dispatchEvent(new ClipboardEvent("paste", { clipboardData: dt, bubbles: true, cancelable: true }));
+    });
+    await page.getByRole("button", { name: "Verify and finish" }).click();
+    await expect(page).toHaveURL(/\/login\?verified=1$/);
+    expect(seen.map((s) => s.channel)).toEqual(["EMAIL", "SMS"]);
   });
 
-  test("registration blocks weak passwords", async ({ page }) => {
+  test("registration sends the details to the API and moves to verification", async ({ page }) => {
+    let sent: unknown = null;
+    await mockApi(page, { "/v1/auth/register": (b) => { sent = b; return { status: 202, body: { accepted: true } }; } });
+    await page.goto("/register", { waitUntil: "networkidle" });
+    await page.getByLabel("Full name").fill("Sample Customer");
+    await page.getByLabel("Email").fill("sample@example.com");
+    await page.getByLabel("Mobile number").fill("55550123");
+    await page.getByLabel("Password").fill("a-good-passphrase-1");
+    await page.getByRole("checkbox").check();
+    await page.getByRole("button", { name: "Continue" }).click();
+    await expect(page).toHaveURL(/\/verify\?email=/);
+    expect(sent).toMatchObject({ email: "sample@example.com", phone: "+852 55550123", countryCode: "HK", language: "en" });
+  });
+
+  test("registration blocks weak passwords before calling the API", async ({ page }) => {
+    let calls = 0;
+    await mockApi(page, { "/v1/auth/register": () => { calls++; return { status: 202, body: { accepted: true } }; } });
     await page.goto("/register", { waitUntil: "networkidle" });
     await page.getByLabel("Full name").fill("Sample Customer");
     await page.getByLabel("Email").fill("sample@example.com");
     await page.getByLabel("Mobile number").fill("55550123");
     await page.getByLabel("Password").fill("short");
+    await page.getByRole("checkbox").check();
     await page.getByRole("button", { name: "Continue" }).click();
     await expect(page.locator("p[role=alert]")).toContainText("at least 12 characters");
+    expect(calls).toBe(0);
+  });
+
+  test("password reset answers the same way and moves to the code step", async ({ page }) => {
+    await mockApi(page, { "/v1/auth/password/reset/request": () => ({ status: 202, body: { accepted: true } }) });
+    await page.goto("/reset-password", { waitUntil: "networkidle" });
+    await page.getByLabel("Email").fill("nobody@example.com");
+    await page.getByRole("button", { name: "Send reset code" }).click();
+    await expect(page.getByLabel("Code from email")).toBeVisible();
+    await expect(page.getByText("If an account exists for that address")).toBeVisible();
   });
 });
 

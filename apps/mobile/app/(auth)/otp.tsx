@@ -2,16 +2,20 @@ import { useEffect, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { Text } from "react-native";
 import { Button, Field, Muted, Screen, Title } from "@/components/ui";
-import { useSession } from "@/lib/session";
+import { authClient, messageFor } from "@/lib/auth";
 import { useTheme } from "@/theme/theme";
 
+type Step = "EMAIL" | "SMS";
+
+/** Two codes, one per channel: email first, then mobile. The account activates after both. */
 export default function OtpScreen() {
   const { colors } = useTheme();
-  const { purpose } = useLocalSearchParams<{ purpose?: string }>();
-  const { signIn } = useSession();
+  const { email = "" } = useLocalSearchParams<{ email?: string }>();
+  const [step, setStep] = useState<Step>("EMAIL");
   const [code, setCode] = useState("");
   const [seconds, setSeconds] = useState(30);
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     if (seconds <= 0) return;
@@ -22,27 +26,39 @@ export default function OtpScreen() {
   async function verify() {
     if (!/^\d{6}$/.test(code)) return setError("Enter the 6-digit code.");
     setError(null);
-    await signIn();
-    router.replace("/home");
+    setBusy(true);
+    try {
+      const out = await authClient.verifyOtp({ email: String(email), channel: step, code });
+      if (step === "EMAIL") {
+        setStep("SMS");
+        setCode("");
+        setSeconds(30);
+      } else if (out.accountActive) {
+        router.replace("/(auth)/login");
+      }
+    } catch (err) {
+      setError(messageFor(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function resend() {
+    try {
+      await authClient.resendOtp({ email: String(email), channel: step });
+      setSeconds(30);
+    } catch (err) {
+      setError(messageFor(err));
+    }
   }
 
   return (
     <Screen>
-      <Title eyebrow={purpose === "register" ? "Step 2 of 2" : "Verification"} title="Enter your code" description="We sent a 6-digit code to your email and mobile. Sandbox: any 6 digits continue." />
-      <Field
-        label="One-time code"
-        value={code}
-        onChangeText={(t) => setCode(t.replace(/\D/g, "").slice(0, 6))}
-        keyboardType="number-pad"
-        textContentType="oneTimeCode"
-        autoComplete="sms-otp"
-        maxLength={6}
-        accessibilityHint="Six digits"
-      />
+      <Title eyebrow={`Step ${step === "EMAIL" ? 1 : 2} of 2`} title={step === "EMAIL" ? "Enter the code sent to your email" : "Enter the code sent to your mobile"} description="Codes expire after five minutes. Never share them with anyone." />
+      <Field label="One-time code" value={code} onChangeText={(t) => setCode(t.replace(/\D/g, "").slice(0, 6))} keyboardType="number-pad" textContentType="oneTimeCode" autoComplete="sms-otp" maxLength={6} accessibilityHint="Six digits" />
       {error ? <Text accessibilityRole="alert" style={{ color: colors.destructive }}>{error}</Text> : null}
-      <Button onPress={verify} disabled={code.length !== 6}>Verify</Button>
-      <Muted>{seconds > 0 ? `Resend code in ${seconds}s` : "Didn't get it? Resend code"}</Muted>
-      {seconds <= 0 ? <Button variant="outline" onPress={() => setSeconds(30)}>Resend code</Button> : null}
+      <Button onPress={verify} disabled={code.length !== 6} loading={busy}>{step === "EMAIL" ? "Continue" : "Verify and finish"}</Button>
+      {seconds > 0 ? <Muted>Resend code in {seconds}s</Muted> : <Button variant="outline" onPress={resend}>Resend code</Button>}
     </Screen>
   );
 }

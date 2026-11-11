@@ -27,7 +27,7 @@ export default function MoreTab() {
   const { signOut } = useSession();
   async function onSignOut() {
     resetUnlock();
-    await signOut();
+    await signOut(); // ends the server session as well
     router.replace("/(auth)/login");
   }
   return (

@@ -24,14 +24,21 @@ async function navigate(page: Page, path: string) {
   }, path);
 }
 
+const API = "http://localhost:4000";
+const TOKENS = { accessToken: "a".repeat(40), accessTokenExpiresIn: 900, refreshToken: "r".repeat(40), refreshTokenExpiresIn: 2592000 };
+
+/** Signs in through the real login screen, with the API intercepted at the browser boundary. */
 async function signIn(page: Page) {
+  await page.route(`${API}/v1/**`, (route) => {
+    if (route.request().url().endsWith("/v1/auth/login")) {
+      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ status: "authenticated", tokens: TOKENS, sessionId: "s", deviceId: "d" }) });
+    }
+    return route.fulfill({ status: 404, contentType: "application/json", body: JSON.stringify({ error: { code: "NOT_FOUND", message: "No such endpoint." } }) });
+  });
   await page.goto("/login", { waitUntil: "networkidle" });
-  await page.getByLabel("Email or mobile number").fill("customer@example.com");
+  await page.getByLabel("Email").fill("customer@example.com");
   await page.getByLabel("Password").fill("not-a-real-password");
   await page.getByRole("button", { name: "Log in" }).click();
-  await page.getByLabel("One-time code").fill("123456");
-  await page.getByRole("button", { name: "Verify" }).click();
-  await expect(page.getByText("Your Global")).toBeVisible().catch(() => undefined);
   await expect(page.getByRole("link", { name: "View accounts" })).toBeVisible({ timeout: 20_000 });
 }
 
@@ -45,7 +52,7 @@ for (const theme of ["dark", "light"] as const) {
       const errors: string[] = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await signIn(page);
-      await expect(page).toHaveURL(/\/home/);
+      await expect(page).toHaveURL(/\/home$/);
       expect(errors, "no uncaught errors").toEqual([]);
     });
 

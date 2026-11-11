@@ -8,3 +8,5 @@ import { sandboxApi } from "./sandbox";
 export const api: FinHubApi = sandboxApi;
 export const DATA_MODE: "sandbox" | "live" = "sandbox";
 export * from "./money";
+
+export { createAuthClient, ApiError, type AuthClient, type LoginOutcome, type TokenPair, type DevicePayload } from "./auth-http";
