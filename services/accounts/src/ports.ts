@@ -28,6 +28,7 @@ export interface BeneficiaryRecord {
 
 /** Persistence for customer accounts and beneficiaries. Implemented by packages/database. */
 export interface AccountsStore {
+  findAccountIdByRef(accountRef: string): Promise<string | null>;
   findAccountByUser(userId: string): Promise<AccountRecord | null>;
   createAccount(userId: string, accountRef: string): Promise<AccountRecord>;
   listCurrencyAccounts(accountId: string): Promise<CurrencyAccountRecord[]>;

@@ -4,6 +4,7 @@ import { CaptureSender, UnconfiguredSender, RedisRealtimePublisher, type EmailSe
 import { Queue } from "bullmq";
 import { Redis } from "ioredis";
 import { buildAccountingServices } from "./container-services";
+import { buildPaymentServices, type PaymentServices } from "./container-payments";
 import type { ApiConfig } from "./config";
 import { createLogger, type Logger } from "./logger";
 
@@ -14,6 +15,10 @@ export interface Container {
   ledger: ReturnType<typeof buildAccountingServices>["ledger"];
   accounts: ReturnType<typeof buildAccountingServices>["accounts"];
   wallet: ReturnType<typeof buildAccountingServices>["wallet"];
+  payments: PaymentServices["payments"];
+  fx: PaymentServices["fx"];
+  transfers: PaymentServices["transfers"];
+  requests: PaymentServices["requests"];
   logger: Logger;
   db: Database;
   redis: Redis;
@@ -31,6 +36,8 @@ export interface ContainerOverrides {
   email?: EmailSender;
   sms?: SmsSender;
   logger?: Logger;
+  /** Provider HTTP transport. Tests supply a fake; production uses fetch. */
+  transport?: import("@hkfinhub/payments").HttpTransport;
 }
 
 /** Redis-backed fixed-window limiter. One INCR per attempt, so it is cheap and safe across instances. */
@@ -76,6 +83,7 @@ export function createContainer(config: ApiConfig, overrides: ContainerOverrides
   };
   const realtime = new RedisRealtimePublisher(redis);
   const accounting = buildAccountingServices(db, config.fieldKey);
+  const payments = buildPaymentServices({ db, config, ledger: accounting.ledger, accounts: accounting.accounts, transport: overrides.transport });
 
   const email: EmailSender = overrides.email ?? (config.emailProvider === "capture" ? new CaptureSender() : new UnconfiguredSender("email"));
   const sms: SmsSender = overrides.sms ?? (config.smsProvider === "capture" ? new CaptureSender() : new UnconfiguredSender("sms"));
@@ -85,6 +93,10 @@ export function createContainer(config: ApiConfig, overrides: ContainerOverrides
     ledger: accounting.ledger,
     accounts: accounting.accounts,
     wallet: accounting.wallet,
+    payments: payments.payments,
+    fx: payments.fx,
+    transfers: payments.transfers,
+    requests: payments.requests,
     logger,
     db,
     redis,

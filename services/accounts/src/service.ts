@@ -101,6 +101,19 @@ export class AccountsService {
     if (!ok) throw new AccountError("NOT_FOUND", "recipient not found");
   }
 
+  /** Resolves a customer's account reference to its account id. Returns null for unknown references. */
+  async resolveAccountRef(accountRef: string): Promise<string | null> {
+    return this.store.findAccountIdByRef(accountRef);
+  }
+
+  /** Everything a payout needs for one saved recipient. Decrypted; for the payment path only. */
+  async payoutDetails(userId: string, id: string): Promise<{ name: string; country: string; method: "upi" | "bank" | "swift"; currency: LaunchCurrency; destination: string }> {
+    const account = await this.ensureAccount(userId);
+    const b = await this.store.findBeneficiary(id, account.id);
+    if (!b) throw new AccountError("NOT_FOUND", "recipient not found");
+    return { name: b.name, country: b.country, method: b.method as "upi" | "bank" | "swift", currency: b.currency as LaunchCurrency, destination: decryptField(this.config.fieldKey, b.destinationEnc) };
+  }
+
   /** Full destination, decrypted. Only for the payment path, never for display lists. */
   async revealDestination(userId: string, id: string): Promise<string> {
     const account = await this.ensureAccount(userId);

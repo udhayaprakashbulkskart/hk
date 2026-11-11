@@ -8,7 +8,7 @@ export type Side = "DEBIT" | "CREDIT";
 export type OwnerType = "CUSTOMER" | "PLATFORM";
 export type TxKind =
   | "DEPOSIT" | "WITHDRAWAL" | "TRANSFER_HOLD" | "TRANSFER_SETTLE" | "TRANSFER_RELEASE"
-  | "FX_CONVERSION" | "FEE" | "REVERSAL" | "ADJUSTMENT" | "TRADE_SETTLEMENT";
+  | "FX_CONVERSION" | "FEE" | "REVERSAL" | "ADJUSTMENT" | "TRADE_SETTLEMENT" | "INTERNAL_TRANSFER";
 
 export interface AccountSpec {
   ownerType: OwnerType;

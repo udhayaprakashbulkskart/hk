@@ -48,6 +48,9 @@ export async function createApp(container: Container) {
     allowedHeaders: ["Content-Type", "Authorization", "X-Request-Id"],
     maxAge: 600,
   });
+  // Webhooks are verified against the exact bytes the provider signed, so they get a raw parser first.
+  // The JSON parser then sees the body already read and leaves it alone.
+  http.use("/v1/webhooks", express.raw({ type: () => true, limit: "256kb" }));
   app.useBodyParser("json", { limit: "16kb" });
   app.setGlobalPrefix("v1");
   app.useGlobalFilters(new HttpErrorFilter());

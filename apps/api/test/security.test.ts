@@ -71,12 +71,14 @@ describe("rate limiting", () => {
 });
 
 describe("contract", () => {
-  it("every documented route is mounted (never 404)", async () => {
+  it("every documented route is mounted: only a domain 404 is allowed, never the router's 404", async () => {
     for (const r of ROUTES) {
-      const path = `/v1${r.path.replace("{id}", "00000000-0000-7000-8000-000000000000")}`;
+      const path = `/v1${r.path.replace(/\{[^}]+\}/g, "00000000-0000-7000-8000-000000000000")}`;
       const req = r.method === "get" ? http().get(path) : r.method === "delete" ? http().delete(path) : http().post(path);
       const res = await req.send({});
-      expect(res.status, `${r.method.toUpperCase()} ${path}`).not.toBe(404);
+      // The router's own 404 says "No such endpoint." Any other response means the route exists.
+      const routerMiss = res.status === 404 && res.body?.error?.message === "No such endpoint.";
+      expect(routerMiss, `${r.method.toUpperCase()} ${path} is not mounted`).toBe(false);
     }
   });
 

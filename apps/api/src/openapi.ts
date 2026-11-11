@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { beneficiarySchema, openCurrencySchema } from "./accounts/schemas";
+import { depositSchema, fxConvertSchema, fxQuoteSchema, internalTransferSchema, payoutSchema, requestCreateSchema, requestPaySchema, withdrawalSchema } from "./payments/schemas";
 import {
   changePasswordSchema, loginSchema, mfaLoginSchema, refreshSchema, registerSchema, resendOtpSchema,
   resetConfirmSchema, resetRequestSchema, totpCodeSchema, verifyOtpSchema,
@@ -42,6 +43,22 @@ export const ROUTES: Route[] = [
   { method: "get", path: "/beneficiaries", summary: "Saved recipients, with masked destinations.", auth: true, responses: { "200": "Recipients.", "401": ERR } },
   { method: "post", path: "/beneficiaries", summary: "Save a recipient. The destination is stored encrypted.", auth: true, body: beneficiarySchema, responses: { "201": "Saved.", "401": ERR, "422": ERR } },
   { method: "delete", path: "/beneficiaries/{id}", summary: "Remove a saved recipient.", auth: true, responses: { "200": "Removed.", "404": ERR } },
+  { method: "post", path: "/deposits", summary: "Start a deposit into the account. Credited only after the provider confirms.", auth: true, body: depositSchema, responses: { "201": "Payment started.", "422": ERR, "503": ERR } },
+  { method: "post", path: "/transfers/internal", summary: "Send to another HK FinHub account. Posts immediately.", auth: true, body: internalTransferSchema, responses: { "201": "Sent.", "404": ERR, "422": ERR } },
+  { method: "post", path: "/transfers", summary: "Send to a saved recipient. Reserves the amount until the provider confirms.", auth: true, body: payoutSchema, responses: { "201": "Submitted.", "422": ERR, "503": ERR } },
+  { method: "post", path: "/transfers/withdrawals", summary: "Withdraw to the customer's own bank account.", auth: true, body: withdrawalSchema, responses: { "201": "Submitted.", "422": ERR, "503": ERR } },
+  { method: "get", path: "/transfers", summary: "Recent transfers.", auth: true, responses: { "200": "Transfers.", "401": ERR } },
+  { method: "get", path: "/transfers/{id}", summary: "One transfer and its status.", auth: true, responses: { "200": "Transfer.", "404": ERR } },
+  { method: "post", path: "/fx/quotes", summary: "Quote a currency conversion. Rate and fee are locked for 30 seconds.", auth: true, body: fxQuoteSchema, responses: { "201": "Quote.", "410": ERR, "422": ERR } },
+  { method: "post", path: "/fx/conversions", summary: "Convert using a quote. A quote can be used once.", auth: true, body: fxConvertSchema, responses: { "201": "Converted.", "409": ERR, "410": ERR, "422": ERR } },
+  { method: "get", path: "/fx/history", summary: "Sample rate history for a pair (labelled sample).", auth: true, responses: { "200": "Points.", "422": ERR } },
+  { method: "post", path: "/payment-requests", summary: "Create a payment request to share by link or QR code.", auth: true, body: requestCreateSchema, responses: { "201": "Request.", "422": ERR } },
+  { method: "get", path: "/payment-requests", summary: "Your payment requests.", auth: true, responses: { "200": "Requests.", "401": ERR } },
+  { method: "get", path: "/payment-requests/{ref}/public", summary: "What a payer sees: amount, memo and status. No account identifiers.", auth: false, responses: { "200": "Request.", "404": ERR } },
+  { method: "post", path: "/payment-requests/{ref}/pay", summary: "Pay an open request. Credited to the requester once confirmed.", auth: true, body: requestPaySchema, responses: { "201": "Payment started.", "409": ERR, "422": ERR, "503": ERR } },
+  { method: "post", path: "/payment-requests/{ref}/cancel", summary: "Cancel an open request you created.", auth: true, responses: { "200": "Cancelled.", "409": ERR } },
+  { method: "post", path: "/webhooks/{provider}", summary: "Provider webhook. Verified against the raw body before any change.", auth: false, responses: { "200": "Received.", "400": ERR, "401": "Signature did not verify." } },
+  { method: "get", path: "/config/currencies", summary: "Launch currencies.", auth: false, responses: { "200": "Currencies." } },
   { method: "get", path: "/health", summary: "Liveness.", auth: false, responses: { "200": "Process is up." } },
   { method: "get", path: "/ready", summary: "Readiness: Postgres and Redis respond.", auth: false, responses: { "200": "Ready.", "503": "A dependency is down." } },
 ];

@@ -19,15 +19,39 @@ importers:
       '@hkfinhub/database':
         specifier: workspace:*
         version: link:../../database
+      '@hkfinhub/fx':
+        specifier: workspace:*
+        version: link:../../services/fx
+      '@hkfinhub/integration-adyen':
+        specifier: workspace:*
+        version: link:../../integrations/adyen
+      '@hkfinhub/integration-partner-stubs':
+        specifier: workspace:*
+        version: link:../../integrations/partner-stubs
+      '@hkfinhub/integration-razorpay':
+        specifier: workspace:*
+        version: link:../../integrations/razorpay
+      '@hkfinhub/integration-razorpayx':
+        specifier: workspace:*
+        version: link:../../integrations/razorpayx
+      '@hkfinhub/integration-stripe':
+        specifier: workspace:*
+        version: link:../../integrations/stripe
       '@hkfinhub/ledger':
         specifier: workspace:*
         version: link:../../services/ledger
       '@hkfinhub/notifications':
         specifier: workspace:*
         version: link:../../services/notifications
+      '@hkfinhub/payments':
+        specifier: workspace:*
+        version: link:../../services/payments
       '@hkfinhub/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@hkfinhub/transfers':
+        specifier: workspace:*
+        version: link:../../services/transfers
       '@hkfinhub/wallet':
         specifier: workspace:*
         version: link:../../services/wallet
@@ -250,18 +274,30 @@ importers:
 
   database:
     dependencies:
+      '@hkfinhub/accounts':
+        specifier: workspace:*
+        version: link:../services/accounts
       '@hkfinhub/authentication':
         specifier: workspace:*
         version: link:../services/authentication
+      '@hkfinhub/fx':
+        specifier: workspace:*
+        version: link:../services/fx
       '@hkfinhub/ledger':
         specifier: workspace:*
         version: link:../services/ledger
       '@hkfinhub/notifications':
         specifier: workspace:*
         version: link:../services/notifications
+      '@hkfinhub/payments':
+        specifier: workspace:*
+        version: link:../services/payments
       '@hkfinhub/shared':
         specifier: workspace:*
         version: link:../packages/shared
+      '@hkfinhub/transfers':
+        specifier: workspace:*
+        version: link:../services/transfers
       '@prisma/adapter-pg':
         specifier: 7.10.1
         version: 7.10.1
@@ -284,6 +320,86 @@ importers:
       tsx:
         specifier: 4.23.15
         version: 4.23.15
+
+  integrations/adyen:
+    dependencies:
+      '@hkfinhub/payments':
+        specifier: workspace:*
+        version: link:../../services/payments
+    devDependencies:
+      '@types/node':
+        specifier: 22.20.5
+        version: 22.20.5
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: 5.0.5
+        version: 5.0.5(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(vite@8.3.8(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15))
+
+  integrations/partner-stubs:
+    dependencies:
+      '@hkfinhub/payments':
+        specifier: workspace:*
+        version: link:../../services/payments
+    devDependencies:
+      '@types/node':
+        specifier: 22.20.5
+        version: 22.20.5
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: 5.0.5
+        version: 5.0.5(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(vite@8.3.8(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15))
+
+  integrations/razorpay:
+    dependencies:
+      '@hkfinhub/payments':
+        specifier: workspace:*
+        version: link:../../services/payments
+    devDependencies:
+      '@types/node':
+        specifier: 22.20.5
+        version: 22.20.5
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: 5.0.5
+        version: 5.0.5(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(vite@8.3.8(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15))
+
+  integrations/razorpayx:
+    dependencies:
+      '@hkfinhub/payments':
+        specifier: workspace:*
+        version: link:../../services/payments
+    devDependencies:
+      '@types/node':
+        specifier: 22.20.5
+        version: 22.20.5
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: 5.0.5
+        version: 5.0.5(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(vite@8.3.8(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15))
+
+  integrations/stripe:
+    dependencies:
+      '@hkfinhub/payments':
+        specifier: workspace:*
+        version: link:../../services/payments
+    devDependencies:
+      '@types/node':
+        specifier: 22.20.5
+        version: 22.20.5
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: 5.0.5
+        version: 5.0.5(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(vite@8.3.8(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15))
 
   packages/api-client:
     dependencies:
@@ -369,6 +485,25 @@ importers:
         specifier: 5.0.5
         version: 5.0.5(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(vite@8.3.8(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15))
 
+  services/fx:
+    dependencies:
+      '@hkfinhub/ledger':
+        specifier: workspace:*
+        version: link:../ledger
+      '@hkfinhub/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+    devDependencies:
+      '@types/node':
+        specifier: 22.20.5
+        version: 22.20.5
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: 5.0.5
+        version: 5.0.5(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(vite@8.3.8(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15))
+
   services/ledger:
     dependencies:
       '@hkfinhub/shared':
@@ -399,6 +534,53 @@ importers:
       ioredis:
         specifier: 6.0.0
         version: 6.0.0
+    devDependencies:
+      '@types/node':
+        specifier: 22.20.5
+        version: 22.20.5
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: 5.0.5
+        version: 5.0.5(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(vite@8.3.8(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15))
+
+  services/payments:
+    dependencies:
+      '@hkfinhub/ledger':
+        specifier: workspace:*
+        version: link:../ledger
+      '@hkfinhub/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+    devDependencies:
+      '@types/node':
+        specifier: 22.20.5
+        version: 22.20.5
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: 5.0.5
+        version: 5.0.5(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(vite@8.3.8(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15))
+
+  services/transfers:
+    dependencies:
+      '@hkfinhub/accounts':
+        specifier: workspace:*
+        version: link:../accounts
+      '@hkfinhub/fx':
+        specifier: workspace:*
+        version: link:../fx
+      '@hkfinhub/ledger':
+        specifier: workspace:*
+        version: link:../ledger
+      '@hkfinhub/payments':
+        specifier: workspace:*
+        version: link:../payments
+      '@hkfinhub/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
     devDependencies:
       '@types/node':
         specifier: 22.20.5

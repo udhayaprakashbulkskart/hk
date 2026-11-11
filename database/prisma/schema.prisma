@@ -228,6 +228,7 @@ enum LedgerTxKind {
   REVERSAL
   ADJUSTMENT
   TRADE_SETTLEMENT
+  INTERNAL_TRANSFER
 }
 
 enum ApprovalStatus {
@@ -356,4 +357,143 @@ model ApprovalRequest {
   decidedBy    String?        @db.VarChar(64)
   decidedAt    DateTime?
   createdAt    DateTime       @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Phase 6: payment providers, FX, transfers and payment requests.
+// Live routes are disabled by default. Live money also needs a ProviderApproval row.
+// ---------------------------------------------------------------------------
+
+enum PaymentDirection {
+  COLLECTION
+  PAYOUT
+}
+
+enum PaymentStatusDb {
+  CREATED
+  PENDING
+  SUBMITTED
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+model ProviderCapability {
+  id          String  @id @default(uuid(7))
+  providerId  String  @db.VarChar(32)
+  environment String  @db.VarChar(8)
+  direction   PaymentDirection
+  country     String  @db.VarChar(2)
+  currency    String  @db.VarChar(3)
+  method      String  @db.VarChar(8)
+  enabled     Boolean @default(false)
+
+  @@unique([providerId, environment, direction, country, currency, method])
+}
+
+model ProviderApproval {
+  id          String   @id @default(uuid(7))
+  providerId  String   @db.VarChar(32)
+  environment String   @db.VarChar(8)
+  contractRef String   @db.VarChar(64)
+  approvedBy  String   @db.VarChar(64)
+  approvedAt  DateTime @default(now())
+
+  @@unique([providerId, environment])
+}
+
+model Payment {
+  id                  String           @id @default(uuid(7))
+  direction           PaymentDirection
+  providerId          String           @db.VarChar(32)
+  environment         String           @db.VarChar(8)
+  providerRef         String?          @db.VarChar(128)
+  reference           String           @unique @db.VarChar(64)
+  idempotencyKey      String           @unique @db.VarChar(128)
+  accountId           String
+  currency            String           @db.VarChar(3)
+  amountMinor         BigInt
+  method              String           @db.VarChar(8)
+  country             String           @db.VarChar(2)
+  status              PaymentStatusDb
+  transferId          String?          @unique
+  metadata            Json
+  ledgerTransactionId String?
+  failureReason       String?          @db.VarChar(200)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  @@unique([providerId, providerRef])
+  @@index([accountId, createdAt])
+}
+
+model ProviderWebhook {
+  id          String    @id @default(uuid(7))
+  providerId  String    @db.VarChar(32)
+  eventId     String    @db.VarChar(160)
+  type        String    @db.VarChar(64)
+  payload     Json
+  receivedAt  DateTime  @default(now())
+  processedAt DateTime?
+  outcome     String?   @db.VarChar(32)
+
+  @@unique([providerId, eventId])
+}
+
+model FxQuote {
+  id                  String    @id @default(uuid(7))
+  accountId           String
+  fromCurrency        String    @db.VarChar(3)
+  toCurrency          String    @db.VarChar(3)
+  amountMinor         BigInt
+  feeMinor            BigInt
+  recipientMinor      BigInt
+  rateScaled          BigInt
+  provider            String    @db.VarChar(32)
+  quotedAt            DateTime
+  expiresAt           DateTime
+  executedAt          DateTime?
+  ledgerTransactionId String?
+
+  @@index([accountId, quotedAt])
+}
+
+model Transfer {
+  id                  String    @id @default(uuid(7))
+  accountId           String
+  kind                String    @db.VarChar(16)
+  status              String    @db.VarChar(16)
+  sourceCurrency      String    @db.VarChar(3)
+  sourceMinor         BigInt
+  feeMinor            BigInt
+  recipientCurrency   String    @db.VarChar(3)
+  recipientMinor      BigInt
+  fxQuoteId           String?
+  recipientAccountId  String?
+  destinationMasked   String?   @db.VarChar(64)
+  method              String?   @db.VarChar(8)
+  country             String?   @db.VarChar(2)
+  paymentId           String?   @unique
+  ledgerTransactionId String?
+  failureReason       String?   @db.VarChar(200)
+  idempotencyKey      String    @unique @db.VarChar(128)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([accountId, createdAt])
+  @@index([accountId, sourceCurrency, status])
+}
+
+model PaymentRequest {
+  ref         String    @id @db.VarChar(16)
+  accountId   String
+  currency    String    @db.VarChar(3)
+  amountMinor BigInt?
+  memo        String    @db.VarChar(80)
+  status      String    @db.VarChar(16)
+  paymentId   String?
+  createdAt   DateTime  @default(now())
+  paidAt      DateTime?
+
+  @@index([accountId, createdAt])
 }

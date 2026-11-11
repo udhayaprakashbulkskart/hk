@@ -20,6 +20,19 @@ const schema = z.object({
   SMS_PROVIDER: z.enum(["none", "capture"]).default("none"),
   TOTP_ISSUER: z.string().default("HK FinHub"),
   SENTRY_DSN: z.string().optional(),
+  PAYMENT_ENVIRONMENT: z.enum(["sandbox", "live"]).default("sandbox"),
+  FEATURE_LIVE_PAYMENTS: z.enum(["true", "false"]).default("false"),
+  FEATURE_LIVE_TRANSFERS: z.enum(["true", "false"]).default("false"),
+  RAZORPAY_KEY_ID: z.string().optional(),
+  RAZORPAY_KEY_SECRET: z.string().optional(),
+  RAZORPAY_WEBHOOK_SECRET: z.string().optional(),
+  RAZORPAYX_ACCOUNT_NUMBER: z.string().optional(),
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  ADYEN_API_KEY: z.string().optional(),
+  ADYEN_HMAC_KEY: z.string().regex(/^[0-9a-fA-F]*$/).optional(),
+  ADYEN_MERCHANT_ACCOUNT: z.string().optional(),
+  PAYMENT_RETURN_URL: z.string().url().default("https://app.hkfinhub.example/payments/return"),
 });
 
 export interface ApiConfig {
@@ -38,6 +51,16 @@ export interface ApiConfig {
   smsProvider: "none" | "capture";
   totpIssuer: string;
   sentryDsn: string | undefined;
+  paymentEnvironment: "sandbox" | "live";
+  liveFeaturePayments: boolean;
+  liveFeatureTransfers: boolean;
+  providers: {
+    razorpay?: { keyId: string; keySecret: string; webhookSecret: string };
+    razorpayx?: { keyId: string; keySecret: string; webhookSecret: string; accountNumber: string };
+    stripe?: { secretKey: string; webhookSecret: string };
+    adyen?: { apiKey: string; hmacKeyHex: string; merchantAccount: string };
+  };
+  paymentReturnUrl: string;
 }
 
 /** Loads and validates configuration. Refuses to start with weak or contradictory settings. */
@@ -69,5 +92,21 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
     smsProvider: e.SMS_PROVIDER,
     totpIssuer: e.TOTP_ISSUER,
     sentryDsn: e.SENTRY_DSN,
+    paymentEnvironment: e.PAYMENT_ENVIRONMENT,
+    liveFeaturePayments: e.FEATURE_LIVE_PAYMENTS === "true",
+    liveFeatureTransfers: e.FEATURE_LIVE_TRANSFERS === "true",
+    providers: {
+      ...(e.RAZORPAY_KEY_ID && e.RAZORPAY_KEY_SECRET && e.RAZORPAY_WEBHOOK_SECRET
+        ? { razorpay: { keyId: e.RAZORPAY_KEY_ID, keySecret: e.RAZORPAY_KEY_SECRET, webhookSecret: e.RAZORPAY_WEBHOOK_SECRET } }
+        : {}),
+      ...(e.RAZORPAY_KEY_ID && e.RAZORPAY_KEY_SECRET && e.RAZORPAY_WEBHOOK_SECRET && e.RAZORPAYX_ACCOUNT_NUMBER
+        ? { razorpayx: { keyId: e.RAZORPAY_KEY_ID, keySecret: e.RAZORPAY_KEY_SECRET, webhookSecret: e.RAZORPAY_WEBHOOK_SECRET, accountNumber: e.RAZORPAYX_ACCOUNT_NUMBER } }
+        : {}),
+      ...(e.STRIPE_SECRET_KEY && e.STRIPE_WEBHOOK_SECRET ? { stripe: { secretKey: e.STRIPE_SECRET_KEY, webhookSecret: e.STRIPE_WEBHOOK_SECRET } } : {}),
+      ...(e.ADYEN_API_KEY && e.ADYEN_HMAC_KEY && e.ADYEN_MERCHANT_ACCOUNT
+        ? { adyen: { apiKey: e.ADYEN_API_KEY, hmacKeyHex: e.ADYEN_HMAC_KEY, merchantAccount: e.ADYEN_MERCHANT_ACCOUNT } }
+        : {}),
+    },
+    paymentReturnUrl: e.PAYMENT_RETURN_URL,
   };
 }

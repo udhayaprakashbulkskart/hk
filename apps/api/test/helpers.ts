@@ -20,6 +20,18 @@ export function testEnv(): NodeJS.ProcessEnv {
     SMS_PROVIDER: "capture",
     CORS_ORIGINS: "http://localhost:3000",
     API_PORT: "0",
+    PAYMENT_ENVIRONMENT: "sandbox",
+    FEATURE_LIVE_PAYMENTS: "false",
+    FEATURE_LIVE_TRANSFERS: "false",
+    RAZORPAY_KEY_ID: "rzp_test_fake",
+    RAZORPAY_KEY_SECRET: "fake-razorpay-secret",
+    RAZORPAY_WEBHOOK_SECRET: "whsec_razorpay_test",
+    RAZORPAYX_ACCOUNT_NUMBER: "2323230000000001",
+    STRIPE_SECRET_KEY: "sk_test_fake",
+    STRIPE_WEBHOOK_SECRET: "whsec_stripe_test",
+    ADYEN_API_KEY: "AQE-test-fake",
+    ADYEN_HMAC_KEY: "44782DEF547AAA06C910C43932B1EB0C71FC68D9D0C057550C48EC2ACF6BA056",
+    ADYEN_MERCHANT_ACCOUNT: "HKFinHubSandbox",
   };
 }
 
@@ -45,13 +57,13 @@ export function collectingQueue(): { queue: JobQueue; jobs: { id: string; data: 
 }
 
 /** Starts the real Nest application against the test database and Redis. */
-export async function startTestApp(overrides: { logger?: boolean } = {}): Promise<TestApp> {
+export async function startTestApp(overrides: { logger?: boolean; transport?: import("@hkfinhub/payments").HttpTransport } = {}): Promise<TestApp> {
   const env = testEnv();
   const config = loadConfig(env);
   const email = new CaptureSender();
   const sms = new CaptureSender();
   const logger = createLogger(overrides.logger ? "info" : "silent");
-  const container = createContainer(config, { email, sms, logger });
+  const container = createContainer(config, { email, sms, logger, ...(overrides.transport ? { transport: overrides.transport } : {}) });
   const app = await createApp(container);
   await app.init();
   await app.listen(0, "127.0.0.1");
@@ -82,7 +94,7 @@ export async function startTestApp(overrides: { logger?: boolean } = {}): Promis
 /** Clean slate: empties every table and the test Redis database. Only ever points at the test database. */
 export async function resetState(t: TestApp): Promise<void> {
   if (!t.config.databaseUrl.includes("_test")) throw new Error("refusing to reset a non-test database");
-  await t.container.db.$executeRawUnsafe(`TRUNCATE "User","UserProfile","Device","Session","RefreshToken","OtpChallenge","TotpFactor","RecoveryCode","MfaChallenge","OutboxEvent","Notification","AuditLog","Account","CurrencyAccount","Beneficiary","LedgerEntry","LedgerBalance","LedgerTransaction","ReconciliationRecord","ApprovalRequest","LedgerAccount" RESTART IDENTITY CASCADE`);
+  await t.container.db.$executeRawUnsafe(`TRUNCATE "User","UserProfile","Device","Session","RefreshToken","OtpChallenge","TotpFactor","RecoveryCode","MfaChallenge","OutboxEvent","Notification","AuditLog","Account","CurrencyAccount","Beneficiary","LedgerEntry","LedgerBalance","LedgerTransaction","ReconciliationRecord","ApprovalRequest","LedgerAccount","Payment","ProviderWebhook","FxQuote","Transfer","PaymentRequest","ProviderApproval" RESTART IDENTITY CASCADE`);
   await t.container.redis.flushdb();
 }
 

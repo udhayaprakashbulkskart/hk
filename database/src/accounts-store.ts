@@ -39,6 +39,11 @@ export class PrismaAccountsStore {
     return this.db as Tx;
   }
 
+  async findAccountIdByRef(accountRef: string): Promise<string | null> {
+    const r = await this.q.account.findUnique({ where: { accountRef }, select: { id: true } });
+    return r?.id ?? null;
+  }
+
   async findAccountByUser(userId: string): Promise<AccountRow | null> {
     return this.q.account.findUnique({ where: { userId } });
   }

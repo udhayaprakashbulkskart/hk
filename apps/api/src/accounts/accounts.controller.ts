@@ -73,6 +73,8 @@ export class DashboardController {
       baseCurrency: "HKD",
       cashTotal: { amountMinor: cashMinor.toString(), display: formatMinor(cashMinor, "HKD") },
       accounts: account.currencies.filter((c) => c.opened),
+      // Outgoing money waiting on a provider. Not yet debited; shown so the customer sees it.
+      pendingOutgoing: { amountMinor: (await this.c.transfers.reservedFor(account.accountId, "HKD")).toString(), currency: "HKD" },
       investmentValue: { marketValueMinor: "0", unrealisedPnlMinor: "0", source: "Investments are not yet connected" },
       totals: {
         deposits: { amountMinor: totals.depositsMinor.toString(), display: formatMinor(totals.depositsMinor, "HKD") },

@@ -11,7 +11,7 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 | 3 | Mobile app screens | ✅ | — (sandbox data; live APIs in Phase 4) |
 | 4 | Backend, database and authentication | ✅ | D12 (messaging providers), D13 (Sentry DSN) for live delivery |
 | 5 | Accounts and ledger | ✅ | — (no partner needed: the wallet is a ledger view) |
-| 6 | Payment provider adapters, FX, transfers | ⬜ | D1, D3, D4, D5, D7 for live; sandbox can start earlier |
+| 6 | Payment provider adapters, FX, transfers | 🟡 | D1, D3, D4, D5, D7 for live; sandbox complete |
 | 7 | KYC and compliance modules | ⬜ | D2, D15 |
 | 8 | Broker and investment adapters | ⬜ | D8, D9, D10 |
 | 9 | Admin dashboard | ⬜ | Phases 4–8 for full coverage |
@@ -154,7 +154,26 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 
 ---
 
-## Phase 6: Payment provider adapters, FX and transfers
+## Phase 6: Payment provider adapters, FX and transfers 🟡
+
+**Status: sandbox complete. Live is not enabled and cannot be enabled without the inputs below.**
+
+**Built:**
+- `services/payments`: routing from a capability table, collections and payouts, webhook verification, deduplication, provider confirmation before any change, refunds, and two live gates (flag plus a provider approval row).
+- `integrations/razorpay`, `razorpayx`, `stripe`, `adyen`: adapters with signature verification and status lookup (Adyen status lookup is not built, so Adyen cannot move money). `partner-stubs` for the UPI and bank, international and PPI partners, all refusing.
+- `services/fx`: integer quotes with a 0.20% fee, 30-second locks, single use, and one balanced ledger leg per currency. Sample rates only.
+- `services/transfers`: pending transfers reserve funds without moving balances; settlement posts once on confirmation; failure releases the reservation. Internal transfers, withdrawals, and payment requests with QR and link.
+- HTTP: `/v1/deposits`, `/v1/transfers`, `/v1/transfers/internal`, `/v1/transfers/withdrawals`, `/v1/fx/*`, `/v1/payment-requests/*`, `/v1/webhooks/{provider}`, `/v1/config/currencies`.
+
+**Verified (131 API tests against real Postgres and Redis):** webhook valid, invalid, forged, stale, replayed, redelivered, unmatched and out-of-order cases, each checked against balances. Refund reversal. A pending transfer leaves balances unchanged and blocks overspend, including two simultaneous payouts. Settlement only after provider confirmation. Failed payout releases funds. The sandbox journey from the exit criteria (collection, posting, payout, posting, reconciled books) and its failure path. Live refused with no provider call while the flag is off, and still refused with the flag on but no approval. Quotes: exact integer fee and rounding, single use, expiry. Payment requests: payer view without account identifiers, payment closes the request, cancel rules. Pinned signature vectors for each provider.
+
+**Not done, and why:**
+- Provider request shapes are unverified against live sandboxes (D7), and the signature vectors are regression vectors from the documented algorithms, not provider recordings. Both must be replaced before go-live.
+- Provider credentials are not held. No network call has ever been made to a provider.
+- D1, D3 (FX rates are illustrative), D4, D5 and D6 are open. Their stub adapters refuse everything.
+- Provider statement reconciliation is planned, not built.
+- Web and mobile send, receive and deposit screens still use the sandbox client. Wiring them to these endpoints is part of Phase 10.
+- Adyen cannot move money until its status lookup is built.
 
 **Goal:** provider adapters behind one port, FX quotes, and transfer workflows. Sandbox first. Live disabled.
 

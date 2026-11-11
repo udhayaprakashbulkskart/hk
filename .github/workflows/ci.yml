@@ -31,6 +31,9 @@ jobs:
           npx -y pnpm@9.15.0 --filter @hkfinhub/authentication exec tsc --noEmit -p tsconfig.json
           npx -y pnpm@9.15.0 --filter @hkfinhub/notifications exec tsc --noEmit -p tsconfig.json
           npx -y pnpm@9.15.0 --filter @hkfinhub/ledger exec tsc --noEmit -p tsconfig.json
+          npx -y pnpm@9.15.0 --filter @hkfinhub/payments exec tsc --noEmit -p tsconfig.json
+          npx -y pnpm@9.15.0 --filter @hkfinhub/fx exec tsc --noEmit -p tsconfig.json
+          npx -y pnpm@9.15.0 --filter @hkfinhub/transfers exec tsc --noEmit -p tsconfig.json
           npx -y pnpm@9.15.0 --filter @hkfinhub/accounts exec tsc --noEmit -p tsconfig.json
           npx -y pnpm@9.15.0 --filter @hkfinhub/database exec tsc --noEmit -p tsconfig.json
           npx -y pnpm@9.15.0 --filter @hkfinhub/api exec tsc --noEmit -p tsconfig.json

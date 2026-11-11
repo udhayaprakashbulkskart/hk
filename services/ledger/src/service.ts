@@ -128,9 +128,9 @@ export class LedgerService {
   }
 
   /** Platform account. SETTLEMENT is an asset (debit normal) and may run negative while partners settle. */
-  platformAccount(currency: string, purpose: "SETTLEMENT" | "FEES" | "SUSPENSE" | "RESERVE"): Promise<LedgerAccountRecord> {
+  platformAccount(currency: string, purpose: "SETTLEMENT" | "FEES" | "SUSPENSE" | "RESERVE" | "FX_POSITION"): Promise<LedgerAccountRecord> {
     assertCurrency(currency);
-    const normalSide: Side = purpose === "SETTLEMENT" || purpose === "RESERVE" ? "DEBIT" : "CREDIT";
+    const normalSide: Side = purpose === "SETTLEMENT" || purpose === "RESERVE" || purpose === "FX_POSITION" ? "DEBIT" : "CREDIT";
     return this.store.getOrCreateAccount({ ownerType: "PLATFORM", ownerId: "platform", currency, purpose, normalSide, allowNegative: true });
   }
 

@@ -15,10 +15,14 @@
     "seed": "tsx src/seed.ts"
   },
   "dependencies": {
+    "@hkfinhub/accounts": "workspace:*",
     "@hkfinhub/authentication": "workspace:*",
+    "@hkfinhub/fx": "workspace:*",
     "@hkfinhub/ledger": "workspace:*",
     "@hkfinhub/notifications": "workspace:*",
+    "@hkfinhub/payments": "workspace:*",
     "@hkfinhub/shared": "workspace:*",
+    "@hkfinhub/transfers": "workspace:*",
     "@prisma/adapter-pg": "7.10.1",
     "@prisma/client": "7.10.1",
     "pg": "8.23.1"

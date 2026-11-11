@@ -895,6 +895,657 @@
         ]
       }
     },
+    "/v1/deposits": {
+      "post": {
+        "summary": "Start a deposit into the account. Credited only after the provider confirms.",
+        "responses": {
+          "201": {
+            "description": "Payment started."
+          },
+          "422": {
+            "description": "Error response: { error: { code, message } }"
+          },
+          "503": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "currency": {
+                    "type": "string",
+                    "enum": [
+                      "HKD",
+                      "USD",
+                      "INR",
+                      "EUR",
+                      "GBP",
+                      "AED",
+                      "SGD",
+                      "CNY"
+                    ]
+                  },
+                  "amountMinor": {
+                    "type": "string",
+                    "pattern": "^[1-9]\\d{0,14}$"
+                  },
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "upi",
+                      "card",
+                      "bank"
+                    ]
+                  },
+                  "country": {
+                    "type": "string",
+                    "pattern": "^[A-Z]{2}$"
+                  },
+                  "idempotencyKey": {
+                    "type": "string",
+                    "minLength": 8,
+                    "maxLength": 128
+                  }
+                },
+                "required": [
+                  "currency",
+                  "amountMinor",
+                  "method",
+                  "country",
+                  "idempotencyKey"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/transfers/internal": {
+      "post": {
+        "summary": "Send to another HK FinHub account. Posts immediately.",
+        "responses": {
+          "201": {
+            "description": "Sent."
+          },
+          "404": {
+            "description": "Error response: { error: { code, message } }"
+          },
+          "422": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "toAccountRef": {
+                    "type": "string",
+                    "pattern": "^HKA\\d{8}$"
+                  },
+                  "currency": {
+                    "type": "string",
+                    "enum": [
+                      "HKD",
+                      "USD",
+                      "INR",
+                      "EUR",
+                      "GBP",
+                      "AED",
+                      "SGD",
+                      "CNY"
+                    ]
+                  },
+                  "amountMinor": {
+                    "type": "string",
+                    "pattern": "^[1-9]\\d{0,14}$"
+                  },
+                  "idempotencyKey": {
+                    "type": "string",
+                    "minLength": 8,
+                    "maxLength": 128
+                  }
+                },
+                "required": [
+                  "toAccountRef",
+                  "currency",
+                  "amountMinor",
+                  "idempotencyKey"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/transfers": {
+      "post": {
+        "summary": "Send to a saved recipient. Reserves the amount until the provider confirms.",
+        "responses": {
+          "201": {
+            "description": "Submitted."
+          },
+          "422": {
+            "description": "Error response: { error: { code, message } }"
+          },
+          "503": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "beneficiaryId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  "sourceCurrency": {
+                    "type": "string",
+                    "enum": [
+                      "HKD",
+                      "USD",
+                      "INR",
+                      "EUR",
+                      "GBP",
+                      "AED",
+                      "SGD",
+                      "CNY"
+                    ]
+                  },
+                  "amountMinor": {
+                    "type": "string",
+                    "pattern": "^[1-9]\\d{0,14}$"
+                  },
+                  "fxQuoteId": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "idempotencyKey": {
+                    "type": "string",
+                    "minLength": 8,
+                    "maxLength": 128
+                  }
+                },
+                "required": [
+                  "beneficiaryId",
+                  "sourceCurrency",
+                  "amountMinor",
+                  "idempotencyKey"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Recent transfers.",
+        "responses": {
+          "200": {
+            "description": "Transfers."
+          },
+          "401": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/transfers/withdrawals": {
+      "post": {
+        "summary": "Withdraw to the customer's own bank account.",
+        "responses": {
+          "201": {
+            "description": "Submitted."
+          },
+          "422": {
+            "description": "Error response: { error: { code, message } }"
+          },
+          "503": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "beneficiaryId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  "sourceCurrency": {
+                    "type": "string",
+                    "enum": [
+                      "HKD",
+                      "USD",
+                      "INR",
+                      "EUR",
+                      "GBP",
+                      "AED",
+                      "SGD",
+                      "CNY"
+                    ]
+                  },
+                  "amountMinor": {
+                    "type": "string",
+                    "pattern": "^[1-9]\\d{0,14}$"
+                  },
+                  "idempotencyKey": {
+                    "type": "string",
+                    "minLength": 8,
+                    "maxLength": 128
+                  }
+                },
+                "required": [
+                  "beneficiaryId",
+                  "sourceCurrency",
+                  "amountMinor",
+                  "idempotencyKey"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/transfers/{id}": {
+      "get": {
+        "summary": "One transfer and its status.",
+        "responses": {
+          "200": {
+            "description": "Transfer."
+          },
+          "404": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/fx/quotes": {
+      "post": {
+        "summary": "Quote a currency conversion. Rate and fee are locked for 30 seconds.",
+        "responses": {
+          "201": {
+            "description": "Quote."
+          },
+          "410": {
+            "description": "Error response: { error: { code, message } }"
+          },
+          "422": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "string",
+                    "enum": [
+                      "HKD",
+                      "USD",
+                      "INR",
+                      "EUR",
+                      "GBP",
+                      "AED",
+                      "SGD",
+                      "CNY"
+                    ]
+                  },
+                  "to": {
+                    "type": "string",
+                    "enum": [
+                      "HKD",
+                      "USD",
+                      "INR",
+                      "EUR",
+                      "GBP",
+                      "AED",
+                      "SGD",
+                      "CNY"
+                    ]
+                  },
+                  "amountMinor": {
+                    "type": "string",
+                    "pattern": "^[1-9]\\d{0,14}$"
+                  }
+                },
+                "required": [
+                  "from",
+                  "to",
+                  "amountMinor"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/fx/conversions": {
+      "post": {
+        "summary": "Convert using a quote. A quote can be used once.",
+        "responses": {
+          "201": {
+            "description": "Converted."
+          },
+          "409": {
+            "description": "Error response: { error: { code, message } }"
+          },
+          "410": {
+            "description": "Error response: { error: { code, message } }"
+          },
+          "422": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "quoteId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  "idempotencyKey": {
+                    "type": "string",
+                    "minLength": 8,
+                    "maxLength": 128
+                  }
+                },
+                "required": [
+                  "quoteId",
+                  "idempotencyKey"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/fx/history": {
+      "get": {
+        "summary": "Sample rate history for a pair (labelled sample).",
+        "responses": {
+          "200": {
+            "description": "Points."
+          },
+          "422": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/payment-requests": {
+      "post": {
+        "summary": "Create a payment request to share by link or QR code.",
+        "responses": {
+          "201": {
+            "description": "Request."
+          },
+          "422": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "currency": {
+                    "type": "string",
+                    "enum": [
+                      "HKD",
+                      "USD",
+                      "INR",
+                      "EUR",
+                      "GBP",
+                      "AED",
+                      "SGD",
+                      "CNY"
+                    ]
+                  },
+                  "amountMinor": {
+                    "type": "string",
+                    "pattern": "^[1-9]\\d{0,14}$"
+                  },
+                  "memo": {
+                    "default": "",
+                    "type": "string",
+                    "maxLength": 80
+                  }
+                },
+                "required": [
+                  "currency"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Your payment requests.",
+        "responses": {
+          "200": {
+            "description": "Requests."
+          },
+          "401": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/payment-requests/{ref}/public": {
+      "get": {
+        "summary": "What a payer sees: amount, memo and status. No account identifiers.",
+        "responses": {
+          "200": {
+            "description": "Request."
+          },
+          "404": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        }
+      }
+    },
+    "/v1/payment-requests/{ref}/pay": {
+      "post": {
+        "summary": "Pay an open request. Credited to the requester once confirmed.",
+        "responses": {
+          "201": {
+            "description": "Payment started."
+          },
+          "409": {
+            "description": "Error response: { error: { code, message } }"
+          },
+          "422": {
+            "description": "Error response: { error: { code, message } }"
+          },
+          "503": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "upi",
+                      "card",
+                      "bank"
+                    ]
+                  },
+                  "country": {
+                    "type": "string",
+                    "pattern": "^[A-Z]{2}$"
+                  },
+                  "amountMinor": {
+                    "type": "string",
+                    "pattern": "^[1-9]\\d{0,14}$"
+                  },
+                  "idempotencyKey": {
+                    "type": "string",
+                    "minLength": 8,
+                    "maxLength": 128
+                  }
+                },
+                "required": [
+                  "method",
+                  "country",
+                  "idempotencyKey"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/payment-requests/{ref}/cancel": {
+      "post": {
+        "summary": "Cancel an open request you created.",
+        "responses": {
+          "200": {
+            "description": "Cancelled."
+          },
+          "409": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/webhooks/{provider}": {
+      "post": {
+        "summary": "Provider webhook. Verified against the raw body before any change.",
+        "responses": {
+          "200": {
+            "description": "Received."
+          },
+          "400": {
+            "description": "Error response: { error: { code, message } }"
+          },
+          "401": {
+            "description": "Signature did not verify."
+          }
+        }
+      }
+    },
+    "/v1/config/currencies": {
+      "get": {
+        "summary": "Launch currencies.",
+        "responses": {
+          "200": {
+            "description": "Currencies."
+          }
+        }
+      }
+    },
     "/v1/health": {
       "get": {
         "summary": "Liveness.",
