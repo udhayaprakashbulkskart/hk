@@ -14,7 +14,7 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 | 6 | Payment provider adapters, FX, transfers | 🟡 | D1, D3, D4, D5, D7 for live; sandbox complete |
 | 7 | KYC and compliance modules | 🟡 | D2, D15 for live; D11 for KMS and S3 verification; sandbox complete |
 | 8 | Broker and investment adapters | 🟡 | D8, D9, D10 for live brokers and market data; sandbox broker and ledger settlement complete |
-| 9 | Admin dashboard | 🟡 | Backend complete (RBAC, maker-checker, audited reveals); `apps/admin` UI not built |
+| 9 | Admin dashboard | 🟡 | Backend and staff console built (`apps/admin`); users, payments, transfers, currency, reports and settings screens not built |
 | 10 | Integrate all applications | 🟡 | API journey test complete; web and mobile still on sandbox data |
 | 11 | Tests, security checks and sandbox transactions | 🟡 | 162 API tests, unit suites, typechecks, clean dependency audit; no penetration test |
 | 12 | Production deployment preparation | 🟡 | Readiness document written; not deployed. See docs/production-readiness.md |
@@ -333,7 +333,9 @@ Phase 2 can start without any of these. Phase 4 needs D14 settled first.
   market data, daily portfolio snapshots, investment screens.
 - **Phase 9**: `services/admin` (permission matrix, audited denials, maker-checker for provider approvals, PII reveals
   with reason codes), staff role model, and `/v1/admin/*` behind a staff guard (TOTP and optional IP allow-list).
-  The permission matrix test covers 16 endpoints across 4 roles. Not built: the admin UI in `apps/admin`.
+  The permission matrix test covers 16 endpoints across 4 roles. `apps/admin` is a staff console for approvals, cases,
+  identity decisions, audited document views, logged reveals and the audit log. Not built: user, payment, transfer,
+  currency, report and settings screens.
 - **Phase 10**: one cross-application journey test through the real API (KYC, funding, receiving, investing,
   sending, dashboard). Not built: moving web and mobile off sandbox data.
 - **Phase 11**: all typechecks and unit suites pass; 162 API tests pass; the production dependency audit is clean

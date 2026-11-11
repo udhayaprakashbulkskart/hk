@@ -22,8 +22,8 @@ live money. Every live path is refused by default and needs a human approval bef
 | Malware scanner | Document uploads refused in production until a real scanner exists | D15 |
 | Broker contracts (Zerodha, DriveWealth) | Investments refused in production | D8 to D10 |
 | Licensed market-data feed | No quotes or market values are shown | D9 |
-| Admin app (`apps/admin`) | Only the API exists; no staff UI yet | Build work |
-| Web and mobile on the real API | Both still use sandbox data | Build work (Phase 10 remainder) |
+| Admin screens not yet built | `apps/admin` covers approvals, cases, identity, reveals and audit. Users, payments, transfers, currency, reports and settings screens are missing | Build work |
+| Web and mobile on the real API | Both still use sandbox data. The web data boundary has no real endpoint for market quotes, price history, notifications or devices, and no market-value source for holdings | Build work plus D9 (market data) |
 | API hosting | No host exists for the NestJS API (Vercel is not a fit for Socket.IO and workers) | Infrastructure decision |
 | Admin network allow-list | `ADMIN_ALLOWED_IPS` must be set; production returns NOT_AVAILABLE for admin routes until it is | Ops |
 | Staff MFA enrolment | Staff members must have confirmed TOTP before a role takes effect | Ops |

@@ -10,7 +10,7 @@ const apiOrigin = (() => {
 })();
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@hkfinhub/ui", "@hkfinhub/types"],
+  transpilePackages: [],
   reactStrictMode: true,
   poweredByHeader: false,
   typedRoutes: false,
