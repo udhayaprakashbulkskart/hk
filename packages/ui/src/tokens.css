@@ -1,0 +1,96 @@
+/*
+ * HK FinHub design tokens.
+ * Dark is the default brand theme. Light is available via data-theme="light".
+ * Components reference only these variables, never raw hex values.
+ */
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #080b10;
+  --card: #141821;
+  --secondary: #202631;
+  --popover: #1a1f2a;
+  --foreground: #f5f5f5;
+  --muted-foreground: #a8adb8;
+  --primary: #b5121b;
+  --primary-foreground: #fff7f7;
+  --primary-hover: #cc1c25;
+  --gold: #c6a34a;
+  --gold-foreground: #1a1405;
+  --success: #159b70;
+  --success-foreground: #04150e;
+  --destructive: #e04444;
+  --destructive-foreground: #1c0505;
+  --border: rgb(255 255 255 / 0.09);
+  --ring: #c6a34a;
+  --chart-1: #c6a34a;
+  --chart-2: #b5121b;
+  --chart-3: #159b70;
+  --chart-4: #7d8798;
+  --skyline: #1b212d;
+  --gradient-hero: linear-gradient(180deg, rgb(8 11 16 / 0.2) 0%, rgb(8 11 16 / 0.95) 100%);
+  --shadow-card: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 12px 32px -16px rgb(0 0 0 / 0.6);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --background: #f6f4ef;
+  --card: #ffffff;
+  --secondary: #efece5;
+  --popover: #ffffff;
+  --foreground: #11141a;
+  --muted-foreground: #5a6070;
+  --primary: #b5121b;
+  --primary-foreground: #fff7f7;
+  --primary-hover: #9c0f17;
+  --gold: #8a6a22;
+  --gold-foreground: #ffffff;
+  --success: #0e7a57;
+  --success-foreground: #ffffff;
+  --destructive: #c42b2b;
+  --destructive-foreground: #ffffff;
+  --border: rgb(17 20 26 / 0.1);
+  --ring: #8a6a22;
+  --chart-1: #8a6a22;
+  --chart-2: #b5121b;
+  --chart-3: #0e7a57;
+  --chart-4: #6b7280;
+  --skyline: #d9d4c7;
+  --gradient-hero: linear-gradient(180deg, rgb(246 244 239 / 0.1) 0%, rgb(246 244 239 / 0.95) 100%);
+  --shadow-card: 0 1px 2px rgb(17 20 26 / 0.06), 0 10px 24px -18px rgb(17 20 26 / 0.25);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --background: #f6f4ef;
+    --card: #ffffff;
+    --secondary: #efece5;
+    --popover: #ffffff;
+    --foreground: #11141a;
+    --muted-foreground: #5a6070;
+    --primary: #b5121b;
+    --primary-foreground: #fff7f7;
+    --primary-hover: #9c0f17;
+    --gold: #8a6a22;
+    --gold-foreground: #ffffff;
+    --success: #0e7a57;
+    --success-foreground: #ffffff;
+    --destructive: #c42b2b;
+    --destructive-foreground: #ffffff;
+    --border: rgb(17 20 26 / 0.1);
+    --ring: #8a6a22;
+    --chart-1: #8a6a22;
+    --chart-2: #b5121b;
+    --chart-3: #0e7a57;
+    --chart-4: #6b7280;
+    --skyline: #d9d4c7;
+    --gradient-hero: linear-gradient(180deg, rgb(246 244 239 / 0.1) 0%, rgb(246 244 239 / 0.95) 100%);
+    --shadow-card: 0 1px 2px rgb(17 20 26 / 0.06), 0 10px 24px -18px rgb(17 20 26 / 0.25);
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}

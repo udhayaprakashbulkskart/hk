@@ -34,3 +34,10 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 .idea/
+
+# Test and framework output
+test-results/
+playwright-report/
+blob-report/
+next-env.d.ts
+.vercel/
