@@ -25,7 +25,7 @@ export default function InvestTab() {
 
   return (
     <Screen>
-      <Title eyebrow="Investments" title="Trade" description="Hong Kong, United States and India markets through licensed brokerage partners." />
+      <Title eyebrow="Investments" title="Markets" description="Hong Kong, United States and India markets. Market data appears once it is licensed and connected." />
       <Notice>Market data is not connected yet. Trading is not yet enabled.</Notice>
       <TextInput
         accessibilityLabel="Search stocks, funds or symbols"

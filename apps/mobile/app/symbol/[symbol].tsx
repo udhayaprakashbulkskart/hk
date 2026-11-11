@@ -2,7 +2,7 @@ import { useLocalSearchParams } from "expo-router";
 import { Text } from "react-native";
 import { api } from "@hkfinhub/api-client";
 import { AreaChart } from "@/components/chart";
-import { Button, Card, ErrorBox, Loading, Muted, Row, Screen, Notice, Stat } from "@/components/ui";
+import { Card, ErrorBox, Loading, Muted, Row, Screen, Notice, Stat } from "@/components/ui";
 import { useAsync } from "@/lib/useAsync";
 import { useTheme } from "@/theme/theme";
 
@@ -25,16 +25,10 @@ export default function SymbolScreen() {
       <Stat label={`${q.symbol} · ${q.market}`} value={`${q.price.toLocaleString("en-US", { minimumFractionDigits: 2 })} ${q.currency}`} sub={`${q.changePct >= 0 ? "+" : ""}${q.changePct.toFixed(2)}% · delayed sample`} tone={q.changePct >= 0 ? "up" : "down"} />
       <Text accessibilityRole="header" style={{ color: colors.foreground, fontSize: 18, fontWeight: "700" }}>{q.name}</Text>
       <Card>
-        <AreaChart values={series.map((p) => p.value)} height={180} tone={q.changePct >= 0 ? "up" : "down"} label={`Sample 30-day price chart for ${q.symbol}. Not market data.`} />
-        <Muted>Sample chart, not market data. Live charts need a licensed data feed.</Muted>
+        <AreaChart values={series.map((p) => p.value)} height={180} tone={q.changePct >= 0 ? "up" : "down"} label={`30-day price chart for ${q.symbol}. Not market data.`} />
+        <Muted>Charts appear once a licensed market data feed is connected.</Muted>
       </Card>
-      <Notice>Trading is not yet enabled. No order is placed.</Notice>
-      <Card>
-        <Row label="Order type" value="Market or limit" />
-        <Row label="Status" value="Not yet enabled" />
-        <Button disabled>Buy {q.symbol}</Button>
-        <Button variant="outline" disabled>Sell {q.symbol}</Button>
-      </Card>
+      <Notice>Market data only. Trading is not available in this app.</Notice>
     </Screen>
   );
 }

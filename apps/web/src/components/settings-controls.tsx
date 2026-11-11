@@ -30,7 +30,6 @@ export function ThemeSettings() {
 
 const PREFS = [
   { id: "p-pay", label: "Payments received and transfers", locked: false },
-  { id: "p-trade", label: "Trade execution", locked: false },
   { id: "p-kyc", label: "Verification updates", locked: false },
   { id: "p-marketing", label: "Product news", locked: false },
   { id: "p-security", label: "Security alerts (always on)", locked: true },

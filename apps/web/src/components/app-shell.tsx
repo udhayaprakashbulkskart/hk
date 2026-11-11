@@ -10,7 +10,7 @@ import { NAV } from "@/lib/nav";
 
 const BOTTOM = [
   { href: "/dashboard", label: "Home", icon: Home },
-  { href: "/invest", label: "Trade", icon: LineChart },
+  { href: "/invest", label: "Markets", icon: LineChart },
   { href: "/send", label: "Transfer", icon: ArrowLeftRight },
   { href: "/portfolio", label: "Portfolio", icon: PieChart },
   { href: "/more", label: "More", icon: MoreHorizontal },

@@ -108,9 +108,9 @@ test.describe("money screens", () => {
     }
   });
 
-  test("trade ticket cannot place an order in this app", async ({ page }) => {
+  test("investments page offers no order controls", async ({ page }) => {
     await page.goto("/invest", { waitUntil: "networkidle" });
-    await expect(page.getByRole("button", { name: /Place (buy|sell) order/ })).toBeDisabled();
+    await expect(page.getByRole("button", { name: /Place (buy|sell) order/ })).toHaveCount(0);
   });
 });
 

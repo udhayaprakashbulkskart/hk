@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Badge, Card, CardContent, CardHeader, CardTitle, cn } from "@hkfinhub/ui";
 import { PageHeader, Section, TabLinks } from "@/components/page";
 import { TrendChart } from "@/components/charts";
-import { OrderTicket } from "@/components/order-ticket";
 import { api } from "@/lib/api";
 
 const MARKETS = [
@@ -103,7 +102,6 @@ export default async function InvestPage({ searchParams }: { searchParams: SP })
         </div>
 
         <div className="space-y-6">
-          <OrderTicket symbol={selected.symbol} price={selected.price} currency={selected.currency} />
           <Card>
             <CardHeader><CardTitle>Watchlist</CardTitle></CardHeader>
             <CardContent className="space-y-2">

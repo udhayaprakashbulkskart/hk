@@ -5,7 +5,6 @@ import { useTheme, type ThemeChoice } from "@/theme/theme";
 
 const PREFS = [
   ["Payments received and transfers", true],
-  ["Trade execution", true],
   ["Verification updates", true],
   ["Product news", false],
 ] as const;

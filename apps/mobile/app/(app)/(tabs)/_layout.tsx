@@ -29,7 +29,7 @@ export default function TabsLayout() {
       })}
     >
       <Tabs.Screen name="home" options={{ title: "Home" }} />
-      <Tabs.Screen name="invest" options={{ title: "Trade" }} />
+      <Tabs.Screen name="invest" options={{ title: "Markets" }} />
       <Tabs.Screen name="send" options={{ title: "Transfer" }} />
       <Tabs.Screen name="portfolio" options={{ title: "Portfolio" }} />
       <Tabs.Screen name="more" options={{ title: "More" }} />
