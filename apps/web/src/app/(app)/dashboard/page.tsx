@@ -61,10 +61,9 @@ export default async function DashboardPage() {
                 <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Total cash balance</p>
                 <p className="mt-2 text-3xl font-semibold tabular-nums sm:text-4xl">{formatMoney(cash)}</p>
                 <p className="mt-1 text-sm text-[var(--muted-foreground)] tabular-nums">
-                  ≈ {formatMoney(cashUsd.recipientAmount)} at sample rate · excludes investments
+                  {cashUsd ? `≈ ${formatMoney(cashUsd.recipientAmount)} at the quoted rate` : "USD equivalent appears once live rates are connected"} · excludes investments
                 </p>
               </div>
-              <Badge tone="gold">Sample data</Badge>
             </div>
             <div className="flex flex-wrap gap-2">
               <Link href="/deposit" className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)]"><ArrowDownToLine className="size-4" aria-hidden="true" />Deposit</Link>
@@ -97,7 +96,7 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <TrendChart
-              ariaLabel="Portfolio value over the last 30 days, sample data"
+              ariaLabel="Portfolio value over the last 30 days"
               data={history.map((p) => ({ label: p.date.slice(5), value: p.value }))}
               format={{ kind: "money-major", currency: "HKD" }}
             />
@@ -174,14 +173,14 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             {[
-              { pair: "USD → HKD", rate: (1 / fxUsd.rate).toFixed(4) },
-              { pair: "HKD → INR", rate: fxInr.rate.toFixed(2) },
-              { pair: "EUR → HKD", rate: fxEur.rate.toFixed(4) },
-              { pair: "GBP → HKD", rate: fxGbp.rate.toFixed(4) },
+              { pair: "USD → HKD", rate: fxUsd ? (1 / fxUsd.rate).toFixed(4) : null },
+              { pair: "HKD → INR", rate: fxInr ? fxInr.rate.toFixed(2) : null },
+              { pair: "EUR → HKD", rate: fxEur ? fxEur.rate.toFixed(4) : null },
+              { pair: "GBP → HKD", rate: fxGbp ? fxGbp.rate.toFixed(4) : null },
             ].map((r) => (
-              <div key={r.pair} className="flex justify-between tabular-nums"><span className="text-[var(--muted-foreground)]">{r.pair}</span><span className="font-medium">{r.rate}</span></div>
+              <div key={r.pair} className="flex justify-between tabular-nums"><span className="text-[var(--muted-foreground)]">{r.pair}</span><span className="font-medium">{r.rate ?? "Not connected"}</span></div>
             ))}
-            <p className="pt-2 text-xs text-[var(--muted-foreground)]">Sample rates, not live. Live quotes come from our FX provider before any transfer.</p>
+            <p className="pt-2 text-xs text-[var(--muted-foreground)]">Rates appear once our FX provider is connected. Every transfer shows a live quote first.</p>
           </CardContent>
         </Card>
 
@@ -191,6 +190,7 @@ export default async function DashboardPage() {
             <Link href="/invest" className="inline-flex items-center gap-1 text-sm font-medium text-[var(--gold)] hover:underline">Investments <ArrowRight className="size-3.5" aria-hidden="true" /></Link>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {market.length === 0 && <p className="text-sm text-[var(--muted-foreground)] sm:col-span-2 lg:col-span-4">Market data is not connected yet.</p>}
             {market.slice(0, 4).map((q) => (
               <div key={q.symbol} className="rounded-xl bg-[var(--secondary)] p-3">
                 <p className="text-xs text-[var(--muted-foreground)]">{q.symbol}</p>
@@ -198,7 +198,7 @@ export default async function DashboardPage() {
                 <p className={cn("text-xs tabular-nums", q.changePct >= 0 ? "text-[var(--success)]" : "text-[var(--destructive)]")}>{q.changePct >= 0 ? "+" : ""}{q.changePct.toFixed(2)}%</p>
               </div>
             ))}
-            <p className="text-xs text-[var(--muted-foreground)] sm:col-span-2 lg:col-span-4">Sample quotes, delayed. Market data is not yet licensed for live display.</p>
+            <p className="text-xs text-[var(--muted-foreground)] sm:col-span-2 lg:col-span-4">Market data is shown only once it is licensed and connected.</p>
           </CardContent>
         </Card>
       </div>

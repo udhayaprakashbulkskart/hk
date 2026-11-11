@@ -72,7 +72,7 @@ export function ReceivePanel() {
             <Button variant="outline" onClick={copy} className="sm:flex-1"><Copy className="size-4" aria-hidden="true" />{copied ? "Copied" : "Copy link"}</Button>
             <Button variant="gold" className="sm:flex-1" disabled title="Available when live payment collection is enabled">Share request</Button>
           </div>
-          <p className="text-xs text-[var(--muted-foreground)]">Sandbox link. It is not yet a live payment page.</p>
+          <p className="text-xs text-[var(--muted-foreground)]">This is not yet a live payment page.</p>
         </CardContent>
       </Card>
 
@@ -93,11 +93,11 @@ export function ReceivePanel() {
         <Card>
           <CardHeader>
             <CardTitle>Bank transfer instructions</CardTitle>
-            <CardDescription>Sample only. Your own receiving details are issued when your account is verified.</CardDescription>
+            <CardDescription>Your receiving details are issued when your account is verified.</CardDescription>
           </CardHeader>
           <CardContent>
             <dl className="grid gap-2 text-sm sm:grid-cols-2">
-              <div><dt className="text-[var(--muted-foreground)]">Account name</dt><dd className="font-medium">HK FinHub Sample Customer</dd></div>
+              <div><dt className="text-[var(--muted-foreground)]">Account name</dt><dd className="font-medium">Issued after verification</dd></div>
               <div><dt className="text-[var(--muted-foreground)]">Reference to quote</dt><dd className="font-mono font-medium">{reference ?? "…"}</dd></div>
               <div><dt className="text-[var(--muted-foreground)]">Receiving account</dt><dd><Badge tone="gold">Issued after verification</Badge></dd></div>
               <div><dt className="text-[var(--muted-foreground)]">Incoming payments</dt><dd>Credited after partner confirmation</dd></div>

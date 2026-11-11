@@ -26,7 +26,7 @@ export default async function InvestPage({ searchParams }: { searchParams: SP })
       <PageHeader
         eyebrow="Investments"
         title="Invest in global markets"
-        description="Hong Kong, United States and India through licensed brokerage partners. Quotes are sample values and delayed."
+        description="Hong Kong, United States and India through licensed brokerage partners. Market data appears once it is licensed and connected."
         actions={<Link href="/invest/orders?tab=open" className="inline-flex min-h-10 items-center rounded-lg border border-[var(--gold)] px-4 text-sm font-medium text-[var(--gold)] hover:bg-[var(--gold)] hover:text-[var(--gold-foreground)]">My orders</Link>}
       />
 
@@ -52,12 +52,12 @@ export default async function InvestPage({ searchParams }: { searchParams: SP })
             </CardHeader>
             <CardContent>
               <TrendChart
-                ariaLabel={`Sample 30-day price chart for ${selected.symbol}. Not market data.`}
+                ariaLabel={`30-day price chart for ${selected.symbol}`}
                 data={series.map((p) => ({ label: p.date.slice(5), value: p.value }))}
                 format={{ kind: "number", decimals: 2 }}
                 height={240}
               />
-              <p className="mt-2 text-xs text-[var(--muted-foreground)]">Sample chart, not market data. Live charts need a licensed data feed.</p>
+              <p className="mt-2 text-xs text-[var(--muted-foreground)]">Charts need a licensed market data feed.</p>
             </CardContent>
           </Card>
 

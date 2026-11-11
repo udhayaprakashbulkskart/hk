@@ -34,7 +34,7 @@ export function ExchangeTool({ initialHistory }: { initialHistory: PortfolioPoin
     let live = true;
     setErr(null);
     api.getFxQuote(from, to, minor)
-      .then((q) => live && setQuote(q))
+      .then((q) => live && (setQuote(q), setErr(q ? null : "Live rates are not connected yet.")))
       .catch((e: unknown) => live && (setQuote(null), setErr(e instanceof Error ? e.message : "No quote available for this pair.")));
     return () => { live = false; };
   }, [minor, from, to]);
@@ -52,7 +52,7 @@ export function ExchangeTool({ initialHistory }: { initialHistory: PortfolioPoin
       <Card className="lg:col-span-2">
         <CardHeader>
           <CardTitle>Convert currency</CardTitle>
-          <CardDescription>Quotes come from our FX provider. Rates are sample values until that provider is connected.</CardDescription>
+          <CardDescription>Quotes come from our FX provider. Rates appear once that provider is connected.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Field id="fx-amount" label="Amount"><Input id="fx-amount" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} className="text-lg tabular-nums" /></Field>
@@ -68,11 +68,11 @@ export function ExchangeTool({ initialHistory }: { initialHistory: PortfolioPoin
       <Card className="lg:col-span-3">
         <CardHeader>
           <CardTitle>Rate history · {from}/{to}</CardTitle>
-          <CardDescription>Last 30 days, sample series. Each quote shows its provider and timestamp.</CardDescription>
+          <CardDescription>Last 30 days. Each quote shows its provider and timestamp.</CardDescription>
         </CardHeader>
         <CardContent>
           <TrendChart
-            ariaLabel={`Sample exchange rate history for ${from} to ${to}`}
+            ariaLabel={`Exchange rate history for ${from} to ${to}`}
             data={history.map((p) => ({ label: p.date.slice(5), value: p.value }))}
             format={{ kind: "rate", to }}
             height={260}
@@ -96,7 +96,7 @@ export function GlobalTransferTool() {
     let live = true;
     setErr(null);
     api.getFxQuote("HKD", to, minor)
-      .then((q) => live && setQuote(q))
+      .then((q) => live && (setQuote(q), setErr(q ? null : "Live rates are not connected yet.")))
       .catch((e: unknown) => live && (setQuote(null), setErr(e instanceof Error ? e.message : "No quote available.")));
     return () => { live = false; };
   }, [minor, to]);

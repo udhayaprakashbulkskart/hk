@@ -26,7 +26,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
       <PageHeader eyebrow="Investments" title="Orders and trades" description="Every order and its status, from the brokerage partner." />
       <TabLinks tabs={[...TABS]} active={tab} basePath="/invest/orders" />
       {rows.length === 0 ? (
-        <EmptyState title="Nothing here yet" body="Orders appear here after you place them. Trading is not yet enabled in this sandbox." />
+        <EmptyState title="Nothing here yet" body="Orders appear here after you place them. Trading is not yet enabled." />
       ) : (
         <ul className="divide-y divide-[var(--border)] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)]">
           {rows.map((o) => (

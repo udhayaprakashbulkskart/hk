@@ -28,7 +28,7 @@ export default function ReportsPage() {
           </li>
         ))}
       </ul>
-      <Card><CardContent className="p-4 text-sm text-[var(--muted-foreground)]">Sandbox list. No statements are generated from sample data.</CardContent></Card>
+      <Card><CardContent className="p-4 text-sm text-[var(--muted-foreground)]">No statements are available yet.</CardContent></Card>
     </div>
   );
 }

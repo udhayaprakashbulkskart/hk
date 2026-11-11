@@ -19,7 +19,7 @@ export default async function LandingPage() {
 
       <section className="relative mx-auto max-w-6xl px-4 pt-10 sm:px-6 sm:pt-16">
         <div className="max-w-2xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gold)]">Sandbox preview</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gold)]">Not a bank</p>
           <h1 className="mt-3 text-4xl font-semibold leading-tight tracking-tight sm:text-6xl">
             Your Global <span className="text-[var(--primary)]">Wealth Hub</span>
           </h1>
@@ -40,14 +40,14 @@ export default async function LandingPage() {
       </div>
 
       <section className="relative mx-auto mt-12 max-w-6xl px-4 pb-16 sm:px-6">
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4" aria-label="Sample market overview">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4" aria-label="Market overview">
           {market.map((q) => (
             <Card key={q.symbol} className="p-4">
               <CardContent className="p-0">
                 <p className="text-xs text-[var(--muted-foreground)]">{q.symbol} · {q.name}</p>
                 <p className="mt-1 text-lg font-semibold tabular-nums">{q.price.toLocaleString("en-US", { minimumFractionDigits: 2 })}</p>
                 <p className={q.changePct >= 0 ? "text-xs text-[var(--success)]" : "text-xs text-[var(--destructive)]"}>
-                  {q.changePct >= 0 ? "+" : ""}{q.changePct.toFixed(2)}% · sample, delayed
+                  {q.changePct >= 0 ? "+" : ""}{q.changePct.toFixed(2)}% · delayed
                 </p>
               </CardContent>
             </Card>
@@ -73,8 +73,8 @@ export default async function LandingPage() {
         <div className="mt-10 flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 text-sm text-[var(--muted-foreground)]">
           <ShieldCheck className="mt-0.5 size-5 shrink-0 text-[var(--success)]" aria-hidden="true" />
           <p>
-            HK FinHub is not a bank. Payments, FX, brokerage and custody are provided by authorised partners. This sandbox preview shows sample
-            figures only, and live money movement is not yet enabled.
+            HK FinHub is not a bank. Payments, FX, brokerage and custody are provided by authorised partners. Live money movement and trading are
+            not yet enabled.
           </p>
         </div>
       </section>

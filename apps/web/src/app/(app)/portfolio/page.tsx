@@ -27,7 +27,7 @@ export default async function PortfolioPage() {
       <Card>
         <CardHeader><CardTitle>Performance · 30 days</CardTitle></CardHeader>
         <CardContent>
-          <TrendChart ariaLabel="Portfolio value over 30 days, sample data" data={history.map((p) => ({ label: p.date.slice(5), value: p.value }))} format={{ kind: "money-major", currency: "HKD" }} height={260} />
+          <TrendChart ariaLabel="Portfolio value over 30 days" data={history.map((p) => ({ label: p.date.slice(5), value: p.value }))} format={{ kind: "money-major", currency: "HKD" }} height={260} />
         </CardContent>
       </Card>
 
@@ -53,7 +53,7 @@ export default async function PortfolioPage() {
             );
           })}
         </div>
-        <p className="text-xs text-[var(--muted-foreground)]">Sample holdings. Real holdings come from your brokerage partner and are never shown before confirmation. Values are in each holding&apos;s own currency.</p>
+        <p className="text-xs text-[var(--muted-foreground)]">Holdings come from your brokerage partner once investments are connected. Values are in each holding&apos;s own currency.</p>
       </Section>
     </div>
   );

@@ -58,7 +58,7 @@ export function AppShell({ children, unread = 0 }: { children: ReactNode; unread
           })}
         </nav>
         <div className="border-t border-[var(--border)] p-4 text-xs text-[var(--muted-foreground)]">
-          Sandbox preview · not a bank account
+          Not a bank account
         </div>
       </aside>
 
@@ -89,7 +89,7 @@ export function AppShell({ children, unread = 0 }: { children: ReactNode; unread
                 {unread > 0 ? <span className="absolute right-2 top-2 size-2 rounded-full bg-[var(--primary)]" aria-hidden="true" /> : null}
               </Link>
               <Link href="/profile" aria-label="Your profile" className="inline-flex size-9 items-center justify-center rounded-full border border-[var(--gold)] bg-[var(--secondary)] text-xs font-semibold text-[var(--gold)]">
-                AC
+                HK
               </Link>
             </div>
           </div>

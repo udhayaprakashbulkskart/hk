@@ -20,7 +20,7 @@ export function PaymentEntry({ mode }: { mode: "deposit" | "withdraw" }) {
       <PageHeader eyebrow="Payments" title={isDeposit ? "Deposit funds" : "Withdraw funds"} description={isDeposit ? "Add money from a linked bank or card." : "Move money from your wallet to a verified bank account."} />
       <div className="flex items-start gap-3 rounded-2xl border border-[var(--gold)]/40 bg-[var(--gold)]/10 p-4 text-sm">
         <Info className="mt-0.5 size-5 shrink-0 text-[var(--gold)]" aria-hidden="true" />
-        <p>Live {isDeposit ? "deposits" : "withdrawals"} are not yet enabled. Amounts and methods below show how the flow will work. Nothing is processed in this sandbox.</p>
+        <p>Live {isDeposit ? "deposits" : "withdrawals"} are not yet enabled. Amounts and methods below show how the flow will work. Nothing is processed yet.</p>
       </div>
       <Card>
         <CardHeader>

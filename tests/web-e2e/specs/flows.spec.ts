@@ -74,8 +74,7 @@ test.describe("money screens", () => {
     await page.getByLabel("Authenticator code").fill("123456");
     await page.getByRole("checkbox").check();
     await page.getByRole("button", { name: "Submit transfer" }).click();
-    await expect(page.getByText("Transfer pending confirmation")).toBeVisible();
-    await expect(page.getByText("Sandbox: no money has moved")).toBeVisible();
+    await expect(page.getByText("No money has moved")).toBeVisible();
     await expect(page.getByText("Completed")).toHaveCount(0);
   });
 

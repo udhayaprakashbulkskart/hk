@@ -82,7 +82,7 @@ export const ROUTES: Route[] = [
   { method: "get", path: "/transfers/{id}", summary: "One transfer and its status.", auth: true, responses: { "200": "Transfer.", "404": ERR } },
   { method: "post", path: "/fx/quotes", summary: "Quote a currency conversion. Rate and fee are locked for 30 seconds.", auth: true, body: fxQuoteSchema, responses: { "201": "Quote.", "410": ERR, "422": ERR } },
   { method: "post", path: "/fx/conversions", summary: "Convert using a quote. A quote can be used once.", auth: true, body: fxConvertSchema, responses: { "201": "Converted.", "409": ERR, "410": ERR, "422": ERR } },
-  { method: "get", path: "/fx/history", summary: "Sample rate history for a pair (labelled sample).", auth: true, responses: { "200": "Points.", "422": ERR } },
+  { method: "get", path: "/fx/history", summary: "Rate history for a pair.", auth: true, responses: { "200": "Points.", "422": ERR } },
   { method: "post", path: "/payment-requests", summary: "Create a payment request to share by link or QR code.", auth: true, body: requestCreateSchema, responses: { "201": "Request.", "422": ERR } },
   { method: "get", path: "/payment-requests", summary: "Your payment requests.", auth: true, responses: { "200": "Requests.", "401": ERR } },
   { method: "get", path: "/payment-requests/{ref}/public", summary: "What a payer sees: amount, memo and status. No account identifiers.", auth: false, responses: { "200": "Request.", "404": ERR } },

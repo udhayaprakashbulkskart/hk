@@ -14,8 +14,8 @@ export default async function ProfilePage() {
         <CardContent className="flex flex-col gap-5 p-6 sm:flex-row sm:items-center">
           <div className="flex size-20 shrink-0 items-center justify-center rounded-full border-2 border-[var(--gold)] bg-[var(--secondary)] text-2xl font-semibold text-[var(--gold)]" aria-hidden="true">SC</div>
           <div className="min-w-0 flex-1">
-            <p className="text-xl font-semibold">Sample Customer</p>
-            <p className="text-sm text-[var(--muted-foreground)]">Customer ID HKF-•••• 0001 · Sandbox</p>
+            <p className="text-xl font-semibold">Your profile</p>
+            <p className="text-sm text-[var(--muted-foreground)]">Customer details appear once your account is verified</p>
           </div>
           <Badge tone={KYC_TONE[dash.kyc]}>{KYC_LABEL[dash.kyc]}</Badge>
         </CardContent>

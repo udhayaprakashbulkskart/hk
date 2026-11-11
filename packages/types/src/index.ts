@@ -36,7 +36,7 @@ export interface InvestmentValuation {
   unrealisedPnl: Money;
   unrealisedPnlPct: number;
   asOf: string;
-  /** Source label, e.g. broker name or "Sample data". */
+  /** Source label, e.g. the broker name, or "Not connected". */
   source: string;
 }
 
@@ -48,7 +48,7 @@ export interface DashboardSummary {
   accounts: CashAccount[];
   totals: { deposits: Money; withdrawals: Money; transfers: Money };
   kyc: KycStatus;
-  dataSource: "sandbox" | "live";
+  dataSource: "unavailable" | "live";
 }
 
 export type TransactionKind = "received" | "sent" | "deposit" | "withdrawal" | "trade" | "fx" | "fee";
@@ -169,7 +169,7 @@ export interface TransferReceipt {
 export interface FinHubApi {
   getDashboard(): Promise<DashboardSummary>;
   listTransactions(): Promise<Transaction[]>;
-  getFxQuote(from: CurrencyCode, to: CurrencyCode, amountMinor: string): Promise<FxQuote>;
+  getFxQuote(from: CurrencyCode, to: CurrencyCode, amountMinor: string): Promise<FxQuote | null>;
   getFxHistory(from: CurrencyCode, to: CurrencyCode): Promise<PortfolioPoint[]>;
   listBeneficiaries(): Promise<Beneficiary[]>;
   submitTransfer(req: TransferRequest): Promise<TransferReceipt>;

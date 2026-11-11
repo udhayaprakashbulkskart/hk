@@ -40,7 +40,7 @@ export function SendWizard({ beneficiaries }: { beneficiaries: Beneficiary[] }) 
     let live = true;
     setQuoteError(null);
     api.getFxQuote("HKD", currency, amountMinor)
-      .then((q) => live && setQuote(q))
+      .then((q) => live && (setQuote(q), setQuoteError(q ? null : "Live rates are not connected yet.")))
       .catch((e: unknown) => live && (setQuote(null), setQuoteError(e instanceof Error ? e.message : "Quote unavailable")));
     return () => { live = false; };
   }, [amountMinor, currency]);
@@ -81,8 +81,12 @@ export function SendWizard({ beneficiaries }: { beneficiaries: Beneficiary[] }) 
     return (
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-2 text-[var(--gold)]"><Clock3 className="size-5" aria-hidden="true" /><span className="text-sm font-semibold">Instruction recorded</span></div>
-          <CardTitle className="text-xl">Transfer pending confirmation</CardTitle>
+          {receipt.status === "failed" ? (
+            <div className="flex items-center gap-2 text-[var(--destructive)]"><span className="text-sm font-semibold">Transfer not sent</span></div>
+          ) : (
+            <div className="flex items-center gap-2 text-[var(--gold)]"><Clock3 className="size-5" aria-hidden="true" /><span className="text-sm font-semibold">Instruction recorded</span></div>
+          )}
+          <CardTitle className="text-xl">{receipt.status === "failed" ? "No money has moved" : "Transfer pending confirmation"}</CardTitle>
           <CardDescription>{receipt.message}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -93,7 +97,7 @@ export function SendWizard({ beneficiaries }: { beneficiaries: Beneficiary[] }) 
             <div><dt className="text-[var(--muted-foreground)]">You send</dt><dd className="font-medium tabular-nums">{formatMoney({ amountMinor: amountMinor!, currency: "HKD" })}</dd></div>
             <div><dt className="text-[var(--muted-foreground)]">Recipient gets</dt><dd className="font-medium tabular-nums">{quote ? formatMoney(quote.recipientAmount) : "—"}</dd></div>
           </dl>
-          <p className="text-xs text-[var(--muted-foreground)]">Sandbox: no money has moved. Your balance updates only after the payment partner confirms the transfer.</p>
+          <p className="text-xs text-[var(--muted-foreground)]">No money has moved. Your balance updates only after the payment partner confirms the transfer.</p>
           <div className="flex flex-col gap-2 sm:flex-row">
             <a href="/history" className="inline-flex min-h-11 items-center justify-center rounded-lg bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)]">View transaction</a>
             <a href="/send" className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[var(--border)] px-4 text-sm font-medium">Send another</a>
@@ -192,7 +196,7 @@ export function SendWizard({ beneficiaries }: { beneficiaries: Beneficiary[] }) 
 
         {step === "confirm" && (
           <>
-            <Field id="otp" label="Authenticator code" hint="Enter the 6-digit code from your authenticator app. Sandbox: any 6 digits.">
+            <Field id="otp" label="Authenticator code" hint="Enter the 6-digit code from your authenticator app.">
               <Input id="otp" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))} className="tracking-[0.4em] tabular-nums" />
             </Field>
             <label className="flex items-start gap-3 text-sm">
@@ -214,7 +218,7 @@ export function SendWizard({ beneficiaries }: { beneficiaries: Beneficiary[] }) 
             <Button onClick={next}>Continue</Button>
           )}
         </div>
-        {step === "confirm" ? <p className="flex items-center gap-2 text-xs text-[var(--muted-foreground)]"><CheckCircle2 className="size-4 text-[var(--success)]" aria-hidden="true" />Live transfers are not yet enabled. This submits a sandbox instruction only.</p> : null}
+        {step === "confirm" ? <p className="flex items-center gap-2 text-xs text-[var(--muted-foreground)]"><CheckCircle2 className="size-4 text-[var(--success)]" aria-hidden="true" />Live transfers are not yet enabled. This submits an instruction only.</p> : null}
       </CardContent>
     </Card>
   );

@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: { default: "HK FinHub", template: "%s · HK FinHub" },
-  description: "HK FinHub: banking, trading, investing and global transfers. Sandbox preview.",
+  description: "HK FinHub: banking, trading, investing and global transfers.",
   applicationName: "HK FinHub",
   robots: { index: false, follow: false },
 };

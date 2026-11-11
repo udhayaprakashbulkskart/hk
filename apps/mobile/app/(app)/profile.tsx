@@ -22,7 +22,7 @@ export default function ProfileScreen() {
           <Text style={{ color: colors.gold, fontWeight: "700", fontSize: 20 }}>SC</Text>
         </View>
         <View style={{ flex: 1, gap: 4 }}>
-          <Title title="Sample Customer" />
+          <Title title="Your profile" />
           <Muted>Customer ID HKF-•••• 0001 · Sandbox</Muted>
           <Badge tone={k.tone}>{k.label}</Badge>
         </View>

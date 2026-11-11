@@ -61,7 +61,7 @@ for (const vp of VIEWPORTS) {
           }));
           expect(overflow.scroll, `no horizontal page scroll at ${vp.width}px`).toBeLessThanOrEqual(overflow.client + 1);
 
-          // Sample-data notice is always visible on the customer app.
+          // The live-trading notice is always visible on the customer app.
           if (route.startsWith("/dashboard") || route === "/send") {
             await expect(page.getByRole("note").first()).toBeVisible();
           }

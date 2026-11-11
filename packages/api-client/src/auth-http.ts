@@ -1,7 +1,7 @@
 /**
  * HTTP client for the customer authentication endpoints (apps/api, /v1/auth).
  * Used by web and mobile for sign-in, registration, verification and password reset.
- * Other domains still use the sandbox client until their endpoints exist.
+ * Other domains read from the unavailable (empty) data client until their screens are wired to the API.
  */
 
 export interface DevicePayload {
