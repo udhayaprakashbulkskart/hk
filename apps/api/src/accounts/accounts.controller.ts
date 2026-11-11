@@ -41,6 +41,15 @@ export class AccountsController {
     };
   }
 
+  /** The receiving account for transfers into HK FinHub. Login required; never public. */
+  @Get("receiving-account")
+  @UseGuards(AuthGuard)
+  receivingAccount() {
+    const acct = this.c.config.receivingAccount;
+    if (!acct) return { configured: false };
+    return { configured: true, ...acct };
+  }
+
   @Post("currencies")
   @HttpCode(200)
   @UseGuards(AuthGuard)

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowDownToLine, ArrowUpFromLine, Send, Download, TrendingUp, TrendingDown, Globe2, Briefcase, ArrowRight } from "lucide-react";
 import { Badge, Card, CardContent, CardHeader, CardTitle, Stat, cn } from "@hkfinhub/ui";
+import { ReceivingAccountCard } from "@/components/receiving-account";
 import { PageHeader, Section } from "@/components/page";
 import { TrendChart, Sparkline } from "@/components/charts";
 import { api } from "@/lib/api";
@@ -129,6 +130,10 @@ export default async function DashboardPage() {
           ))}
         </div>
       </Section>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <ReceivingAccountCard />
+      </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">

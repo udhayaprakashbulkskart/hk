@@ -41,6 +41,9 @@ const schema = z.object({
   LOGIN_USER_PHONE: z.string().optional(),
   LOGIN_USER_PASSWORD: z.string().optional(),
   LOGIN_USER_NAME: z.string().optional(),
+  RECEIVING_ACCOUNT_NAME: z.string().optional(),
+  RECEIVING_ACCOUNT_NUMBER: z.string().optional(),
+  RECEIVING_BANK_NAME: z.string().optional(),
   KYC_MASTER_KEY: z.string().optional(),
   KYC_WEBHOOK_SECRET: z.string().optional(),
   KYC_DOCUMENT_BUCKET: z.string().optional(),
@@ -49,6 +52,8 @@ const schema = z.object({
 });
 
 export interface ApiConfig {
+  /** The operator's own receiving account. Read from environment only; never committed. Null when unset. */
+  receivingAccount: { accountName: string; accountNumber: string; bankName: string } | null;
   appEnv: "local" | "test" | "sandbox" | "staging" | "production";
   port: number;
   logLevel: string;
@@ -130,6 +135,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
     paymentReturnUrl: e.PAYMENT_RETURN_URL,
     adminAllowedIps: e.ADMIN_ALLOWED_IPS.split(",").map((s) => s.trim()).filter(Boolean),
     loginUser: loginUserFrom(e),
+    receivingAccount: e.RECEIVING_ACCOUNT_NUMBER
+      ? { accountName: e.RECEIVING_ACCOUNT_NAME ?? "", accountNumber: e.RECEIVING_ACCOUNT_NUMBER, bankName: e.RECEIVING_BANK_NAME ?? "" }
+      : null,
     kyc: {
       masterKey: e.KYC_MASTER_KEY ? Buffer.from(e.KYC_MASTER_KEY, "base64") : undefined,
       webhookSecret: e.KYC_WEBHOOK_SECRET,
