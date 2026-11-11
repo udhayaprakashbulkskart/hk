@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BULKSKART kinetic ad</title>
+<style>
+html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:#10021f}
+#stage{position:absolute;left:0;top:0;width:1080px;height:1920px;overflow:hidden;perspective:1500px;
+  background:radial-gradient(ellipse 90% 62% at 50% 44%,#9a63ff 0%,#5b22c9 36%,#2b0a72 66%,#10021f 100%);
+  font-family:Inter,"Inter Display",sans-serif}
+#glow{position:absolute;left:540px;top:880px;width:1500px;height:1500px;margin:-750px 0 0 -750px;border-radius:50%;
+  background:radial-gradient(circle,rgba(226,204,255,.6) 0%,rgba(160,100,255,.22) 34%,rgba(160,100,255,0) 62%)}
+#beam{position:absolute;left:-600px;top:-260px;width:2280px;height:2280px;border-radius:50%;
+  background:conic-gradient(rgba(255,255,255,0) 0deg,rgba(255,255,255,.12) 10deg,rgba(255,255,255,0) 22deg,rgba(255,255,255,0) 90deg,rgba(255,255,255,.09) 100deg,rgba(255,255,255,0) 112deg,rgba(255,255,255,0) 180deg,rgba(255,255,255,.12) 190deg,rgba(255,255,255,0) 202deg,rgba(255,255,255,0) 270deg,rgba(255,255,255,.09) 280deg,rgba(255,255,255,0) 292deg,rgba(255,255,255,0) 360deg)}
+.dot{position:absolute;left:0;top:0;border-radius:50%;background:#fff}
+.t{position:absolute;left:0;top:0;transform-style:preserve-3d;font-weight:900;line-height:1;white-space:nowrap}
+.t .l{position:absolute;left:0;top:0;white-space:nowrap;font-weight:900;line-height:1;padding:.1em .05em .16em;letter-spacing:-.012em}
+.t .face{-webkit-background-clip:text;background-clip:text;color:transparent}
+.pl{position:absolute;left:0;top:0;width:100%;height:100%;border-radius:22%}
+.pf{background:linear-gradient(145deg,#d8b5ff 0%,#8f4dff 48%,#4a18b8 100%);box-shadow:inset 0 0 0 4px rgba(255,255,255,.22)}
+.pf svg{position:absolute;left:17%;top:17%;width:66%;height:66%;overflow:visible}
+.rig{position:absolute;left:540px;top:0;width:0;height:0;perspective:1500px;opacity:0}
+.str{position:absolute;left:-2px;top:0;width:4px;height:390px;background:linear-gradient(#ffffff88,#c9a6ff)}
+.card{position:absolute;left:0;top:0;width:780px;height:170px;display:flex;align-items:center;gap:30px;padding:0 40px;box-sizing:border-box;
+  border-radius:44px;background:linear-gradient(135deg,#ffffff 0%,#efe6ff 100%);box-shadow:0 40px 70px rgba(12,0,40,.5),inset 0 -6px 0 rgba(120,70,220,.18);
+  color:#1a0540;opacity:0}
+.ic{flex:none;width:104px;height:104px;border-radius:30px;background:linear-gradient(135deg,#bd8fff,#5a1fdc);display:flex;align-items:center;justify-content:center}
+.ic svg{width:62px;height:62px}
+.ttl{font-weight:900;font-size:58px;letter-spacing:-.01em;line-height:1.1}
+.sb{font-weight:600;font-size:36px;color:#6a4ea6;margin-top:6px;line-height:1.2}
+.pill{position:absolute;left:0;top:0;padding:26px 60px;border-radius:999px;background:linear-gradient(90deg,#ffffff,#e9dcff);color:#2b0a6e;
+  font-weight:900;font-size:62px;line-height:1;white-space:nowrap;box-shadow:0 24px 50px rgba(0,0,0,.35);opacity:0}
+.sweep{position:absolute;left:0;top:-600px;width:380px;height:3100px;opacity:0;
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.6),rgba(255,255,255,0))}
+#flash{position:absolute;left:0;top:0;width:1080px;height:1920px;background:#fff;opacity:0;pointer-events:none}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+(function () {
+  const stage = document.getElementById('stage');
+  const CHK = '<svg viewBox="0 0 100 100"><path d="M22 53 L41 71 L79 31" fill="none" stroke="#fff" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  // Face + extrusion palettes (purple / black / white brand system)
+  const PAL = {
+    white:  { face: 'linear-gradient(180deg,#ffffff 0%,#f5eeff 58%,#cdb0ff 100%)', near: [125, 63, 230], far: [29, 5, 83] },
+    purple: { face: 'linear-gradient(180deg,#e7d6ff 0%,#b98bff 45%,#7a36ff 100%)', near: [60, 16, 130], far: [16, 2, 52] },
+    dark:   { face: 'linear-gradient(180deg,#3a1080 0%,#1d0553 100%)', near: [201, 162, 255], far: [106, 47, 214] }
+  };
+
+  const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+  const lerp = (a, b, p) => a + (b - a) * p;
+  const TAU = Math.PI * 2;
+  const eOutExpo = p => (p >= 1 ? 1 : 1 - Math.pow(2, -10 * p));
+  const eOutBack = p => { const s = 1.5, q = p - 1; return 1 + (s + 1) * q * q * q + s * q * q; };
+  const eInCubic = p => p * p * p;
+  const wob = (d, amp, freq, decay) => (d <= 0 ? 0 : amp * Math.exp(-decay * d) * Math.sin(TAU * freq * d));
+  const mixc = (a, b, p) => [0, 1, 2].map(k => Math.round(lerp(a[k], b[k], p)));
+
+  let seed = 20260;
+  function rnd() { // deterministic PRNG (mulberry32)
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  }
+
+  const items = [];
+  const BASE = { x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0, s: 1, o: 1 };
+
+  // Keyframe-like animation: enter (s,d,ease,from), wobble, sway, exit (e,ed,out)
+  function anim(t, c) {
+    const st = Object.assign({}, BASE);
+    if (c.s !== undefined) {
+      const from = Object.assign({ o: 0 }, c.from || {}), to = c.to || {};
+      const p = clamp((t - c.s) / (c.d || 0.8));
+      const e = (c.ease || eOutExpo)(p);
+      for (const k of Object.keys(BASE)) {
+        const a = from[k] !== undefined ? from[k] : BASE[k];
+        const b = to[k] !== undefined ? to[k] : BASE[k];
+        st[k] = lerp(a, b, e);
+      }
+    } else {
+      Object.assign(st, c.to || {});
+    }
+    if (c.wob && c.s !== undefined) st.rz += wob(t - c.s, c.wob.amp, c.wob.freq, c.wob.decay);
+    if (c.sway !== false) {
+      st.ry += 3.5 * Math.sin(t * 1.5 + (c.ph || 0));
+      st.rx += 1.5 * Math.sin(t * 1.1 + (c.ph || 0) * 1.3);
+    }
+    if (c.e !== undefined && t > c.e) {
+      const e = eInCubic(clamp((t - c.e) / (c.ed || 0.25)));
+      const out = c.out || { o: 0, z: 900 };
+      for (const k of Object.keys(out)) st[k] = lerp(st[k], out[k], e);
+    }
+    return st;
+  }
+
+  function place(o, st) {
+    o.el.style.transform =
+      `translate3d(${(o.cx - o.w / 2 + st.x).toFixed(2)}px,${(o.cy - o.h / 2 + st.y).toFixed(2)}px,${st.z.toFixed(2)}px) ` +
+      `rotateX(${st.rx.toFixed(2)}deg) rotateY(${st.ry.toFixed(2)}deg) rotateZ(${st.rz.toFixed(2)}deg) scale(${Math.max(0, st.s).toFixed(4)})`;
+    o.el.style.opacity = clamp(st.o).toFixed(3);
+  }
+
+  // ---- 3D extruded type -------------------------------------------------
+  function measure(o) {
+    const f = o.el.querySelector('.face');
+    o.w = f.offsetWidth; o.h = f.offsetHeight;
+    o.el.style.width = o.w + 'px'; o.el.style.height = o.h + 'px';
+  }
+  function resize(o, size) { o.size = size; o.el.style.fontSize = size + 'px'; measure(o); }
+
+  function makeWord(text, opt) {
+    const face = PAL[opt.face || 'white'];
+    const el = document.createElement('div');
+    el.className = 't';
+    el.style.fontSize = opt.size + 'px';
+    const N = 14; // extrusion layers, depth ~31px
+    for (let i = 1; i <= N; i++) {
+      const d = document.createElement('div');
+      d.className = 'l';
+      d.textContent = text;
+      d.style.color = 'rgb(' + mixc(face.near, face.far, (i - 1) / (N - 1)).join(',') + ')';
+      d.style.transform = 'translateZ(' + (-i * 2.2) + 'px)';
+      el.appendChild(d);
+    }
+    const f = document.createElement('div');
+    f.className = 'l face';
+    f.textContent = text;
+    f.style.backgroundImage = face.face;
+    el.appendChild(f);
+    stage.appendChild(el);
+    const o = { el, cx: opt.cx === undefined ? 540 : opt.cx, cy: opt.cy, size: opt.size, w: 0, h: 0 };
+    measure(o);
+    return o;
+  }
+
+  function fitWidth(o, maxW) { if (o.w > maxW) resize(o, o.size * maxW / o.w); }
+
+  function addWord(text, opt, cfg) {
+    const o = makeWord(text, opt);
+    fitWidth(o, opt.maxW || 980);
+    cfg.ph = cfg.ph !== undefined ? cfg.ph : rnd() * 6;
+    items.push({ o, cfg });
+    return o;
+  }
+
+  // A horizontal line of words, centred, auto-fitted to maxW
+  function addLine(parts, opt, cfgs) {
+    const objs = parts.map(p => makeWord(p.t, { face: p.face, size: opt.size, cy: opt.cy }));
+    const gap = 0.2 * opt.size, maxW = opt.maxW || 980;
+    const total0 = objs.reduce((a, o) => a + o.w, 0) + gap * (objs.length - 1);
+    const k = Math.min(1, maxW / total0);
+    if (k < 1) objs.forEach(o => resize(o, opt.size * k));
+    const g = gap * k;
+    const total = objs.reduce((a, o) => a + o.w, 0) + g * (objs.length - 1);
+    let x = 540 - total / 2;
+    objs.forEach((o, i) => {
+      o.cx = x + o.w / 2;
+      x += o.w + g;
+      items.push({ o, cfg: Object.assign({ ph: rnd() * 6 }, cfgs[i]) });
+    });
+    return objs;
+  }
+
+  // 3D check tile (extruded plates + check mark) — the reference's swinging tile motif
+  function makeTile(S, cx, cy, parent) {
+    const el = document.createElement('div');
+    el.className = 't';
+    el.style.width = S + 'px'; el.style.height = S + 'px';
+    const N = 8;
+    for (let i = N - 1; i >= 1; i--) {
+      const p = document.createElement('div');
+      p.className = 'pl';
+      p.style.background = 'rgb(' + mixc([60, 18, 170], [20, 4, 80], (i - 1) / (N - 2)).join(',') + ')';
+      p.style.transform = 'translateZ(' + (-i * S * 0.016) + 'px)';
+      el.appendChild(p);
+    }
+    const f = document.createElement('div');
+    f.className = 'pl pf';
+    f.innerHTML = CHK;
+    el.appendChild(f);
+    (parent || stage).appendChild(el);
+    return { el, cx, cy, w: S, h: S };
+  }
+
+  function addCard(title, sub, cy, s) {
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.innerHTML = '<div class="ic">' + CHK + '</div><div><div class="ttl">' + title + '</div><div class="sb">' + sub + '</div></div>';
+    stage.appendChild(el);
+    items.push({ o: { el, cx: 540, cy, w: 780, h: 170 },
+      cfg: { s, d: 0.6, from: { x: 1000, ry: -40 }, e: 8.7, out: { x: -500, o: 0 }, sway: false } });
+  }
+
+  // ---- scene build --------------------------------------------------------
+  const glow = document.createElement('div'); glow.id = 'glow'; stage.appendChild(glow);
+  const beam = document.createElement('div'); beam.id = 'beam'; stage.appendChild(beam);
+
+  const dots = [];
+  for (let i = 0; i < 44; i++) {
+    const el = document.createElement('div');
+    el.className = 'dot';
+    const s = 3 + rnd() * 7;
+    el.style.width = s + 'px'; el.style.height = s + 'px';
+    stage.appendChild(el);
+    dots.push({ el, x: rnd() * 1080, y0: rnd() * 1920, v: 18 + rnd() * 46, ph: rnd() * 6 });
+  }
+
+  let rig, pill, sweeps = [], flash;
+
+  function build() {
+    // 0–2s  NEED BULK ORDERS?
+    addWord('NEED', { face: 'dark', size: 236, cy: 560 },
+      { s: 0.1, d: 0.9, from: { z: -1500, rx: -85, ry: -75 }, e: 1.8, wob: { amp: 6, freq: 1.2, decay: 2.5 } });
+    addLine([{ t: 'BULK', face: 'purple' }, { t: 'ORDERS?', face: 'white' }], { size: 210, cy: 790 }, [
+      { s: 0.3, d: 0.9, from: { z: -1500, ry: 70, rx: 60 }, e: 1.8, wob: { amp: 5, freq: 1.0, decay: 2.5 } },
+      { s: 0.42, d: 0.9, from: { z: -1500, ry: -70, rx: 60 }, e: 1.8, wob: { amp: 5, freq: 1.0, decay: 2.5 } }
+    ]);
+
+    // 2–4s  WE GOT YOU!
+    addWord('WE GOT', { face: 'white', size: 330, cy: 700 },
+      { s: 2.0, d: 0.6, from: { z: -2000 }, e: 3.72, wob: { amp: 5, freq: 1.1, decay: 3 } });
+    addWord('YOU!', { face: 'purple', size: 400, cy: 940 },
+      { s: 2.18, d: 0.7, ease: eOutBack, from: { rx: 95, z: -700 }, e: 3.72 });
+
+    // 4–6s  ARE YOU A MANUFACTURER? (words rotate and assemble)
+    addLine([{ t: 'ARE', face: 'white' }, { t: 'YOU', face: 'white' }, { t: 'A', face: 'purple' }], { size: 200, cy: 470 }, [
+      { s: 4.0, d: 0.8, from: { x: -900, y: -500, z: -1400, rx: 150, ry: -90, rz: -60 }, e: 5.72 },
+      { s: 4.12, d: 0.8, from: { y: -900, z: -1000, rx: -120, ry: 60, rz: 70 }, e: 5.72 },
+      { s: 4.24, d: 0.8, from: { x: 900, y: 500, z: -1400, rx: 90, ry: 120, rz: -40 }, e: 5.72 }
+    ]);
+    addWord('MANUFACTURER?', { face: 'purple', size: 180, cy: 690 },
+      { s: 4.45, d: 0.8, from: { y: 700, z: -1500, rx: -90, ry: -80, rz: 30 }, e: 5.72 });
+
+    // 6–9s  GET BULK ORDERS 24×7 + notification cards + 3D checks
+    addWord('GET BULK', { face: 'white', size: 200, cy: 500 }, { s: 6.0, d: 0.8, from: { rx: 80, z: -900 }, e: 8.7 });
+    addWord('ORDERS', { face: 'purple', size: 200, cy: 740 }, { s: 6.15, d: 0.8, from: { rx: -80, z: -900 }, e: 8.7 });
+    addWord('24×7', { face: 'white', size: 280, cy: 990 },
+      { s: 6.4, d: 0.7, ease: eOutBack, from: { z: -1000 }, e: 8.7, wob: { amp: 4, freq: 0.9, decay: 2 } });
+    addCard('New bulk enquiry', 'Requirement received', 1200, 6.7);
+    addCard('Quote request', 'Sent to suppliers', 1385, 7.3);
+    addCard('Order request', 'Posted to BULKSKART', 1570, 7.9);
+    [[965, 860, 160, 6.5], [120, 1790, 130, 6.85], [120, 300, 130, 7.3]].forEach(([x, y, S, s]) => {
+      const tile = makeTile(S, x, y, null);
+      items.push({ o: tile, cfg: { s, d: 0.7, from: { s: 0, rz: -120, ry: -60 }, ease: eOutBack, e: 8.7, out: { o: 0, z: 900 }, ph: rnd() * 6 } });
+    });
+
+    // 9–12s  CHINA HAS ALIBABA. / INDIA HAS BULKSKART.
+    addWord('CHINA HAS', { face: 'white', size: 200, cy: 800 }, { s: 9.0, d: 0.65, from: { x: -1100, ry: 70 }, e: 10.5 });
+    addWord('ALIBABA.', { face: 'purple', size: 260, cy: 1010 }, { s: 9.35, d: 0.5, from: { z: -1500 }, e: 10.5 });
+    addWord('INDIA HAS', { face: 'white', size: 200, cy: 800 }, { s: 10.9, d: 0.65, from: { x: 1100, ry: -70 }, e: 11.9, ed: 0.2 });
+    addWord('BULKSKART.', { face: 'white', size: 260, cy: 1010 }, { s: 11.2, d: 0.5, from: { z: -1500 }, e: 11.92, ed: 0.2 });
+
+    // 12–15s  BULKSKART logo reveal + CTA
+    rig = document.createElement('div');
+    rig.className = 'rig';
+    stage.appendChild(rig);
+    const str = document.createElement('div');
+    str.className = 'str';
+    rig.appendChild(str);
+    const logo = makeTile(260, 0, 520, rig);
+    items.push({ o: logo, cfg: { s: 12.0, d: 0.6, from: { s: 0, ry: 180 }, ease: eOutBack, sway: false } });
+    addWord('BULK', { face: 'white', size: 300, cy: 830 }, { s: 12.55, d: 0.8, from: { z: -1400, ry: 60, rx: 40 } });
+    addWord('SKART', { face: 'purple', size: 270, cy: 1040 }, { s: 12.8, d: 0.8, from: { z: -1400, ry: -60, rx: -40 } });
+    addWord('JOIN NOW.', { face: 'white', size: 130, cy: 1240 }, { s: 13.6, d: 0.6, from: { rx: 70, z: -500 } });
+    addWord('GROW YOUR BUSINESS.', { face: 'purple', size: 92, cy: 1370 }, { s: 13.85, d: 0.6, from: { y: 60 } });
+
+    pill = document.createElement('div');
+    pill.className = 'pill';
+    pill.textContent = 'www.bulkskart.com';
+    stage.appendChild(pill);
+    items.push({ o: { el: pill, cx: 540, cy: 1530, w: pill.offsetWidth, h: pill.offsetHeight },
+      cfg: { s: 14.2, d: 0.55, ease: eOutBack, from: { s: 0.5 }, sway: false } });
+
+    // overlays on top of everything
+    for (let i = 0; i < 2; i++) {
+      const sw = document.createElement('div');
+      sw.className = 'sweep';
+      stage.appendChild(sw);
+      sweeps.push(sw);
+    }
+    flash = document.createElement('div');
+    flash.id = 'flash';
+    stage.appendChild(flash);
+  }
+
+  const flashCuts = [2.0, 3.72, 4.0, 6.0, 8.7, 9.0, 9.35, 10.9, 11.2, 12.0, 12.55];
+  const sweepStarts = [11.2, 12.9];
+
+  // Frame renderer: window.render(t) draws the exact frame at time t (seconds)
+  window.render = function (t) {
+    glow.style.transform = `scale(${(1 + 0.05 * Math.sin(t * 2.1)).toFixed(4)})`;
+    beam.style.transform = `rotate(${(t * 6).toFixed(3)}deg)`;
+
+    let f = 0;
+    for (const c of flashCuts) { const d = t - c; if (d >= 0 && d < 0.22) f = Math.max(f, (1 - d / 0.22) * 0.45); }
+    flash.style.opacity = f.toFixed(3);
+
+    sweepStarts.forEach((s, i) => {
+      const p = (t - s) / 0.6;
+      const el = sweeps[i];
+      if (p < 0 || p > 1) { el.style.opacity = '0'; return; }
+      el.style.transform = `translate3d(${lerp(-600, 1300, p).toFixed(1)}px,0,0) rotate(18deg)`;
+      el.style.opacity = (Math.sin(Math.PI * p) * 0.9).toFixed(3);
+    });
+
+    for (const d of dots) {
+      const y = ((d.y0 - d.v * t) % 1920 + 1920) % 1920;
+      d.el.style.transform = `translate3d(${d.x.toFixed(1)}px,${y.toFixed(1)}px,-200px)`;
+      d.el.style.opacity = (0.25 + 0.35 * Math.sin(t * 2 + d.ph)).toFixed(3);
+    }
+
+    for (const it of items) place(it.o, anim(t, it.cfg));
+
+    // pendulum rig holding the logo tile
+    const dr = t - 12.0;
+    rig.style.opacity = clamp(dr / 0.2).toFixed(3);
+    const rz = (dr > 0 ? wob(dr, 24, 0.8, 0.9) : 0) + 1.5 * Math.sin(t * 1.3);
+    rig.style.transform = `rotateZ(${rz.toFixed(3)}deg)`;
+  };
+
+  (document.fonts && document.fonts.load ? document.fonts.load('900 100px Inter') : Promise.resolve())
+    .catch(() => {})
+    .then(() => { build(); window.ready = true; });
+})();
+</script>
+</body>
+</html>
