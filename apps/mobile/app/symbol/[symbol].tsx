@@ -2,7 +2,7 @@ import { useLocalSearchParams } from "expo-router";
 import { Text } from "react-native";
 import { api } from "@hkfinhub/api-client";
 import { AreaChart } from "@/components/chart";
-import { Button, Card, ErrorBox, Loading, Muted, Row, Screen, SandboxNotice, Stat } from "@/components/ui";
+import { Button, Card, ErrorBox, Loading, Muted, Row, Screen, Notice, Stat } from "@/components/ui";
 import { useAsync } from "@/lib/useAsync";
 import { useTheme } from "@/theme/theme";
 
@@ -28,7 +28,7 @@ export default function SymbolScreen() {
         <AreaChart values={series.map((p) => p.value)} height={180} tone={q.changePct >= 0 ? "up" : "down"} label={`Sample 30-day price chart for ${q.symbol}. Not market data.`} />
         <Muted>Sample chart, not market data. Live charts need a licensed data feed.</Muted>
       </Card>
-      <SandboxNotice>Trading is not yet enabled. No order is placed in this sandbox.</SandboxNotice>
+      <Notice>Trading is not yet enabled. No order is placed.</Notice>
       <Card>
         <Row label="Order type" value="Market or limit" />
         <Row label="Status" value="Not yet enabled" />

@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from "expo-router";
-import { Muted, Screen, Card, Row, Title, Button, SandboxNotice } from "@/components/ui";
+import { Muted, Screen, Card, Row, Title, Button, Notice } from "@/components/ui";
 
 export default function PayRequestScreen() {
   const { ref } = useLocalSearchParams<{ ref: string }>();
@@ -14,7 +14,7 @@ export default function PayRequestScreen() {
         <Row label="Amount" value="Set by the requester" />
         <Row label="Status" value="Not yet payable" />
       </Card>
-      <SandboxNotice>Live payments are not yet enabled. Nothing is paid from this sandbox.</SandboxNotice>
+      <Notice>Live payments are not yet enabled. Nothing is paid.</Notice>
       <Button disabled>Pay request</Button>
       <Button variant="outline" onPress={() => router.replace("/home")}>Back to home</Button>
     </Screen>

@@ -3,7 +3,7 @@ import { Link } from "expo-router";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { api } from "@hkfinhub/api-client";
 import type { MarketQuote } from "@hkfinhub/types";
-import { Chip, Card, ErrorBox, Loading, Muted, Screen, SandboxNotice, Title, Button } from "@/components/ui";
+import { Chip, Card, ErrorBox, Loading, Muted, Screen, Notice, Title, Button } from "@/components/ui";
 import { useAsync } from "@/lib/useAsync";
 import { useTheme } from "@/theme/theme";
 
@@ -26,7 +26,7 @@ export default function InvestTab() {
   return (
     <Screen>
       <Title eyebrow="Investments" title="Trade" description="Hong Kong, United States and India markets through licensed brokerage partners." />
-      <SandboxNotice>Quotes are sample values and delayed. Trading is not yet enabled.</SandboxNotice>
+      <Notice>Market data is not connected yet. Trading is not yet enabled.</Notice>
       <TextInput
         accessibilityLabel="Search stocks, funds or symbols"
         placeholder="Search stocks, funds or symbols"

@@ -144,12 +144,12 @@ export function Chip({ label, selected, onPress }: { label: string; selected: bo
   );
 }
 
-export function SandboxNotice({ children }: { children?: ReactNode }) {
+export function Notice({ children }: { children?: ReactNode }) {
   const { colors } = useTheme();
   return (
     <View accessibilityRole="none" style={[styles.notice, { borderColor: colors.gold, backgroundColor: "rgba(198,163,74,0.1)" }]}>
       <Text style={[styles.small, { color: colors.foreground }]}>
-        {children ?? "Sandbox preview. Figures are sample data. Live payments and trading are not yet enabled."}
+        {children ?? "Live payments and trading are not yet enabled."}
       </Text>
     </View>
   );

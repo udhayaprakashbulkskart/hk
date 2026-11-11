@@ -32,7 +32,7 @@ export default function ReceiveScreen() {
       </Card>
       <Heading>Share</Heading>
       <Button variant="outline" disabled={!link} onPress={() => Share.share({ message: `Pay me with HK FinHub: ${link}` })}>Share payment link</Button>
-      <Muted>Sandbox link. It becomes a live payment page after payment collection is approved.</Muted>
+      <Muted>This is not yet a live payment page.</Muted>
     </Screen>
   );
 }

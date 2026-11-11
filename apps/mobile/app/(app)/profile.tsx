@@ -23,7 +23,7 @@ export default function ProfileScreen() {
         </View>
         <View style={{ flex: 1, gap: 4 }}>
           <Title title="Your profile" />
-          <Muted>Customer ID HKF-•••• 0001 · Sandbox</Muted>
+          <Muted>Customer details appear once your account is verified</Muted>
           <Badge tone={k.tone}>{k.label}</Badge>
         </View>
       </Card>

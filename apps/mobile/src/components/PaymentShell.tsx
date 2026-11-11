@@ -1,12 +1,12 @@
 import { Text } from "react-native";
-import { Badge, Button, Card, Muted, Row, Screen, SandboxNotice, Title } from "@/components/ui";
+import { Badge, Button, Card, Muted, Row, Screen, Notice, Title } from "@/components/ui";
 
 export function PaymentShell({ mode }: { mode: "deposit" | "withdraw" }) {
   const isDeposit = mode === "deposit";
   return (
     <Screen>
       <Title eyebrow="Payments" title={isDeposit ? "Deposit funds" : "Withdraw funds"} description={isDeposit ? "Add money from a linked bank or card." : "Move money from your wallet to a verified bank account."} />
-      <SandboxNotice>Live {isDeposit ? "deposits" : "withdrawals"} are not yet enabled. Nothing is processed in this sandbox.</SandboxNotice>
+      <Notice>Live {isDeposit ? "deposits" : "withdrawals"} are not yet enabled. Nothing is processed yet.</Notice>
       <Card>
         <Row label="Currency" value="HKD" />
         <Row label="Fees" value="Shown before you confirm" />

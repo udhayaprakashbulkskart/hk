@@ -7,7 +7,6 @@ import { Bell, Search, Home, LineChart, ArrowLeftRight, PieChart, MoreHorizontal
 import { Logo, cn } from "@hkfinhub/ui";
 import { ThemeToggle } from "./theme-toggle";
 import { NAV } from "@/lib/nav";
-import { SandboxBanner } from "./sandbox-banner";
 
 const BOTTOM = [
   { href: "/dashboard", label: "Home", icon: Home },
@@ -93,7 +92,6 @@ export function AppShell({ children, unread = 0 }: { children: ReactNode; unread
               </Link>
             </div>
           </div>
-          <SandboxBanner />
         </header>
 
         <main id="main" className="mx-auto w-full max-w-6xl px-4 pb-28 pt-6 sm:px-6 lg:pb-12 lg:pt-8">

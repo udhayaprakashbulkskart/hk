@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { api, formatMoney } from "@hkfinhub/api-client";
 import type { Transaction } from "@hkfinhub/types";
 import { AreaChart } from "@/components/chart";
-import { Badge, Button, Card, ErrorBox, Heading, Loading, Muted, Row, SandboxNotice, Screen, Stat } from "@/components/ui";
+import { Badge, Button, Card, ErrorBox, Heading, Loading, Muted, Row, Notice, Screen, Stat } from "@/components/ui";
 import { useAsync } from "@/lib/useAsync";
 import { useTheme } from "@/theme/theme";
 
@@ -53,7 +53,7 @@ export default function HomeScreen() {
         </Link>
       </View>
 
-      <SandboxNotice />
+      <Notice />
 
       <Card style={{ backgroundColor: colors.card }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>

@@ -23,7 +23,7 @@ export default function ReportsScreen() {
           <Badge>Not yet issued</Badge>
         </Card>
       ))}
-      <Muted>Sandbox list. No statements are generated from sample data.</Muted>
+      <Muted>No statements are available yet.</Muted>
     </Screen>
   );
 }

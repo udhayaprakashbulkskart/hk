@@ -91,7 +91,7 @@ export function SendWizard({ initialAmount }: { initialAmount?: string }) {
           <Row label="Recipient" value={recipient} />
           <Row label="You send" value={formatMoney({ amountMinor: minor!, currency: "HKD" })} />
           {quote ? <Row label="Recipient gets" value={formatMoney(quote.recipientAmount)} strong /> : null}
-          <Muted>Sandbox: no money has moved. Your balance updates only after the payment partner confirms.</Muted>
+          <Muted>No money has moved. Your balance updates only after the payment partner confirms.</Muted>
         </Card>
         <Button variant="outline" onPress={() => { setStep("recipient"); setReceipt(null); setOtp(""); setConfirmed(false); setAmount(""); }}>Send another</Button>
       </Screen>
@@ -176,7 +176,7 @@ export function SendWizard({ initialAmount }: { initialAmount?: string }) {
       {step === "confirm" && (
         <>
           <Heading>Confirm and authorise</Heading>
-          <Field label="Authenticator code" value={otp} onChangeText={(t) => setOtp(t.replace(/\D/g, "").slice(0, 6))} keyboardType="number-pad" maxLength={6} hint="Sandbox: any 6 digits." />
+          <Field label="Authenticator code" value={otp} onChangeText={(t) => setOtp(t.replace(/\D/g, "").slice(0, 6))} keyboardType="number-pad" maxLength={6} hint="Enter the 6-digit code from your authenticator app." />
           <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
             <Switch value={confirmed} onValueChange={setConfirmed} accessibilityLabel="I have checked the recipient and amount" />
             <Muted>I have checked the recipient and amount. The transfer stays pending until our payment partner confirms it.</Muted>
