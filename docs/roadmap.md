@@ -7,7 +7,7 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 | # | Phase | Status | Blocked by |
 |---|---|---|---|
 | 1 | Repository inspection and technical architecture | ✅ (this commit) | — |
-| 2 | Design system and complete web UI | ⬜ | D16 (brand assets; placeholders acceptable) |
+| 2 | Design system and complete web UI | ✅ | — (sandbox data; live APIs come in Phase 4) |
 | 3 | Mobile app screens | ⬜ | Phase 2 tokens |
 | 4 | Backend, database and authentication | ⬜ | D12, D13, D14 |
 | 5 | Accounts and ledger | ⬜ | D6 (only if stored value is in scope) |
@@ -44,7 +44,11 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 
 ---
 
-## Phase 2: Design system and complete web UI
+## Phase 2: Design system and complete web UI ✅
+
+**Result:** 23 customer screens in `apps/web`, a shared design system in `packages/ui`, and a Playwright suite in `tests/web-e2e` (153 tests passing: flows plus a layout matrix at 360, 768 and 1440 px in both themes, with no horizontal scroll, one `h1` per screen, and no console errors). All data is labelled sample data behind the `FinHubApi` boundary.
+
+**Known gaps carried forward:** CSP allows inline scripts (move to hashes in Phase 4); dashboard and account pages are statically prerendered (must become dynamic with the real API); cash card has spare vertical space on desktop.
 
 **Goal:** a responsive Next.js customer app with the Hong Kong-inspired design system, using the spec palette.
 
