@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false,
+    "verbatimModuleSyntax": false
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts"]
+}

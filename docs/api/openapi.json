@@ -1,0 +1,697 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "HK FinHub customer API",
+    "version": "0.1.0",
+    "description": "Sandbox preview. Live money movement is not yet enabled."
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "paths": {
+    "/v1/auth/register": {
+      "post": {
+        "summary": "Create an account. Sends verification codes to email and mobile.",
+        "responses": {
+          "202": {
+            "description": "Accepted. Same response whether or not the details are already registered."
+          },
+          "422": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "maxLength": 254,
+                    "format": "email",
+                    "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "minLength": 6,
+                    "maxLength": 24
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "fullName": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 120
+                  },
+                  "countryCode": {
+                    "type": "string",
+                    "pattern": "^[A-Z]{2}$"
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "en",
+                      "zh-HK",
+                      "zh-CN",
+                      "hi"
+                    ]
+                  }
+                },
+                "required": [
+                  "email",
+                  "phone",
+                  "password",
+                  "fullName",
+                  "countryCode",
+                  "language"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/otp/resend": {
+      "post": {
+        "summary": "Send a new verification code.",
+        "responses": {
+          "202": {
+            "description": "Accepted."
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "maxLength": 254,
+                    "format": "email",
+                    "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                  },
+                  "channel": {
+                    "type": "string",
+                    "enum": [
+                      "EMAIL",
+                      "SMS"
+                    ]
+                  }
+                },
+                "required": [
+                  "email",
+                  "channel"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/otp/verify": {
+      "post": {
+        "summary": "Verify the email or mobile code.",
+        "responses": {
+          "200": {
+            "description": "Verified."
+          },
+          "400": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "maxLength": 254,
+                    "format": "email",
+                    "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                  },
+                  "channel": {
+                    "type": "string",
+                    "enum": [
+                      "EMAIL",
+                      "SMS"
+                    ]
+                  },
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{6}$"
+                  }
+                },
+                "required": [
+                  "email",
+                  "channel",
+                  "code"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/login": {
+      "post": {
+        "summary": "Log in with email and password. Returns tokens, or an MFA challenge when 2FA is on.",
+        "responses": {
+          "200": {
+            "description": "Tokens or mfa_required."
+          },
+          "401": {
+            "description": "Error response: { error: { code, message } }"
+          },
+          "403": {
+            "description": "Error response: { error: { code, message } }"
+          },
+          "429": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "maxLength": 254,
+                    "format": "email",
+                    "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "device": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "platform": {
+                        "type": "string",
+                        "enum": [
+                          "web",
+                          "ios",
+                          "android"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "platform"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "email",
+                  "password",
+                  "device"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/login/mfa": {
+      "post": {
+        "summary": "Complete login with an authenticator or recovery code.",
+        "responses": {
+          "200": {
+            "description": "Tokens."
+          },
+          "401": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "mfaToken": {
+                    "type": "string",
+                    "minLength": 20,
+                    "maxLength": 200
+                  },
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{6}$"
+                  },
+                  "recoveryCode": {
+                    "type": "string",
+                    "minLength": 8,
+                    "maxLength": 32
+                  },
+                  "device": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "platform": {
+                        "type": "string",
+                        "enum": [
+                          "web",
+                          "ios",
+                          "android"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "platform"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "mfaToken",
+                  "device"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/refresh": {
+      "post": {
+        "summary": "Rotate the refresh token and receive a new access token. Reuse ends the session.",
+        "responses": {
+          "200": {
+            "description": "New token pair."
+          },
+          "401": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refreshToken": {
+                    "type": "string",
+                    "minLength": 20,
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "refreshToken"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/logout": {
+      "post": {
+        "summary": "End the current session.",
+        "responses": {
+          "200": {
+            "description": "Signed out."
+          },
+          "401": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/auth/password/reset/request": {
+      "post": {
+        "summary": "Request a password reset code. Same response for every email.",
+        "responses": {
+          "202": {
+            "description": "Accepted."
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "maxLength": 254,
+                    "format": "email",
+                    "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                  }
+                },
+                "required": [
+                  "email"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/password/reset/confirm": {
+      "post": {
+        "summary": "Set a new password with the reset code. Ends all sessions.",
+        "responses": {
+          "200": {
+            "description": "Password reset."
+          },
+          "400": {
+            "description": "Error response: { error: { code, message } }"
+          },
+          "422": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "maxLength": 254,
+                    "format": "email",
+                    "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                  },
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{6}$"
+                  },
+                  "newPassword": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  }
+                },
+                "required": [
+                  "email",
+                  "code",
+                  "newPassword"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/password/change": {
+      "post": {
+        "summary": "Change password. Other sessions are ended.",
+        "responses": {
+          "200": {
+            "description": "Changed."
+          },
+          "401": {
+            "description": "Error response: { error: { code, message } }"
+          },
+          "422": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "current": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "next": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  }
+                },
+                "required": [
+                  "current",
+                  "next"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/2fa/totp/enroll": {
+      "post": {
+        "summary": "Start authenticator app setup. Returns the secret and an otpauth URI.",
+        "responses": {
+          "200": {
+            "description": "Secret and URI."
+          },
+          "409": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/auth/2fa/totp/confirm": {
+      "post": {
+        "summary": "Confirm setup with a code. Returns recovery codes once.",
+        "responses": {
+          "200": {
+            "description": "Recovery codes."
+          },
+          "401": {
+            "description": "Error response: { error: { code, message } }"
+          },
+          "409": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{6}$"
+                  }
+                },
+                "required": [
+                  "code"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/2fa/totp/disable": {
+      "post": {
+        "summary": "Turn off two-factor authentication with a current code.",
+        "responses": {
+          "200": {
+            "description": "Disabled."
+          },
+          "401": {
+            "description": "Error response: { error: { code, message } }"
+          },
+          "409": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{6}$"
+                  }
+                },
+                "required": [
+                  "code"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/devices": {
+      "get": {
+        "summary": "List devices signed in to the account.",
+        "responses": {
+          "200": {
+            "description": "Devices."
+          },
+          "401": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/auth/devices/{id}": {
+      "delete": {
+        "summary": "Sign out a device and end its sessions.",
+        "responses": {
+          "200": {
+            "description": "Signed out."
+          },
+          "404": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/v1/me": {
+      "get": {
+        "summary": "Current customer profile and verification status.",
+        "responses": {
+          "200": {
+            "description": "Profile."
+          },
+          "401": {
+            "description": "Error response: { error: { code, message } }"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/health": {
+      "get": {
+        "summary": "Liveness.",
+        "responses": {
+          "200": {
+            "description": "Process is up."
+          }
+        }
+      }
+    },
+    "/v1/ready": {
+      "get": {
+        "summary": "Readiness: Postgres and Redis respond.",
+        "responses": {
+          "200": {
+            "description": "Ready."
+          },
+          "503": {
+            "description": "A dependency is down."
+          }
+        }
+      }
+    }
+  }
+}

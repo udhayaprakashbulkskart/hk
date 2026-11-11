@@ -1,0 +1,30 @@
+{
+  "name": "@hkfinhub/database",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "generate": "prisma generate",
+    "migrate:dev": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy",
+    "seed": "tsx src/seed.ts"
+  },
+  "dependencies": {
+    "@hkfinhub/authentication": "workspace:*",
+    "@hkfinhub/notifications": "workspace:*",
+    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/client": "7.10.1",
+    "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@types/pg": "8.23.1",
+    "prisma": "7.10.1",
+    "tsx": "4.23.15",
+    "@types/node": "22.20.5"
+  }
+}

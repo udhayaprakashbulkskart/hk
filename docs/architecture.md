@@ -381,6 +381,6 @@ Each table has a primary key (UUID v7 for time ordering), explicit foreign keys,
 | ADR-004 | Production features disabled by default; flag plus approval record required | Accepted |
 | ADR-005 | Provider capabilities stored as data, not hard-coded | Accepted |
 | ADR-006 | Admin app deployed separately on a private network | Accepted |
-| ADR-007 | In-house authentication on NestJS (D14 may reverse this) | Proposed |
+| ADR-007 | In-house authentication on NestJS (D14 may reverse this) | Accepted for Phase 4 |
 | ADR-008 | Web on Vercel, API and admin on AWS | Accepted |
 | ADR-009 | Transactional outbox for events | Accepted |

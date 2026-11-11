@@ -44,3 +44,6 @@ next-env.d.ts
 
 # Expo generated
 expo-env.d.ts
+
+# Prisma client (generated; run prisma generate)
+database/src/generated/

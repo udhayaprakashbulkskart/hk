@@ -1,0 +1,76 @@
+name: ci
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npx -y pnpm@9.15.0 install --frozen-lockfile
+      - name: Generate Prisma client
+        run: npx -y pnpm@9.15.0 --filter @hkfinhub/database exec prisma generate
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      - name: Typecheck backend packages
+        run: |
+          npx -y pnpm@9.15.0 --filter @hkfinhub/authentication exec tsc --noEmit -p tsconfig.json
+          npx -y pnpm@9.15.0 --filter @hkfinhub/notifications exec tsc --noEmit -p tsconfig.json
+          npx -y pnpm@9.15.0 --filter @hkfinhub/database exec tsc --noEmit -p tsconfig.json
+          npx -y pnpm@9.15.0 --filter @hkfinhub/api exec tsc --noEmit -p tsconfig.json
+      - name: Typecheck web and mobile
+        run: |
+          npx -y pnpm@9.15.0 --filter @hkfinhub/web exec tsc --noEmit
+          npx -y pnpm@9.15.0 --filter @hkfinhub/mobile exec tsc --noEmit
+
+  backend-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: hkfinhub
+          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_DB: hkfinhub_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U hkfinhub -d hkfinhub_test"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql://hkfinhub:ci-only-password@localhost:5432/hkfinhub_test
+      TEST_REDIS_URL: redis://localhost:6379/15
+      DATABASE_URL: postgresql://hkfinhub:ci-only-password@localhost:5432/hkfinhub_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npx -y pnpm@9.15.0 install --frozen-lockfile
+      - name: Generate Prisma client and apply migrations
+        run: |
+          npx -y pnpm@9.15.0 --filter @hkfinhub/database exec prisma generate
+          npx -y pnpm@9.15.0 --filter @hkfinhub/database exec prisma migrate deploy
+      - name: Authentication domain tests
+        run: npx -y pnpm@9.15.0 --filter @hkfinhub/authentication test
+      - name: API integration tests (real Postgres and Redis)
+        run: npx -y pnpm@9.15.0 --filter @hkfinhub/api test

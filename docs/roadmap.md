@@ -9,7 +9,7 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 | 1 | Repository inspection and technical architecture | ✅ (this commit) | — |
 | 2 | Design system and complete web UI | ✅ | — (sandbox data; live APIs come in Phase 4) |
 | 3 | Mobile app screens | ✅ | — (sandbox data; live APIs in Phase 4) |
-| 4 | Backend, database and authentication | ⬜ | D12, D13, D14 |
+| 4 | Backend, database and authentication | 🟡 | D12 (messaging providers), D13 (Sentry DSN); client wiring pending |
 | 5 | Accounts and ledger | ⬜ | D6 (only if stored value is in scope) |
 | 6 | Payment provider adapters, FX, transfers | ⬜ | D1, D3, D4, D5, D7 for live; sandbox can start earlier |
 | 7 | KYC and compliance modules | ⬜ | D2, D15 |
@@ -83,7 +83,20 @@ Status key: ✅ done · 🟡 in progress · ⬜ not started · ⏸ blocked on in
 
 ---
 
-## Phase 4: Backend, database and authentication
+## Phase 4: Backend, database and authentication 🟡
+
+**Result (backend complete):** NestJS API in `apps/api` with OpenAPI at `/v1/openapi.json`, Socket.IO realtime, a Prisma 7 schema and migrations in `database/`, the authentication domain in `services/authentication`, and the notification pipeline (outbox, BullMQ worker, in-app inbox, Redis realtime) in `services/notifications`. CI runs typechecks and the backend suite against Postgres and Redis service containers.
+
+**Verified:** 56 API integration tests against real Postgres 16 and Redis 7, plus 14 domain tests. This covers the exit criteria: registration; OTP expiry and lockout; wrong-password responses identical to unknown-email responses; 2FA enrolment with replay blocking and recovery codes; refresh reuse ending the session family; device revocation; rate limits with Retry-After; security headers; OpenAPI routes all mounted; audit log append-only at the database level; the BullMQ worker path; a socket receiving a security event; and a dependency-direction check on `services/*`.
+
+**Decisions taken:** in-house authentication (ADR-007 accepted, D14 to be confirmed); Argon2id passwords; OTPs, refresh tokens and recovery codes stored as keyed digests; TOTP secrets encrypted; no DI metadata, so tsx, vitest and tsc behave the same.
+
+**Still open:**
+- Client wiring: web and mobile sign-in still use the sandbox client. The real HTTP client and its wiring are the remaining Phase 4 item.
+- D12: no email or SMS provider is approved, so messages fail closed until one is chosen.
+- D13: Sentry is wired but inactive without a DSN.
+- Breached-password check (k-anonymity) is planned for Phase 7; the current list is short.
+- Container image and production build are Phase 12; the API currently runs under tsx.
 
 **Goal:** real NestJS API, Prisma schema for identity, Redis, background jobs.
 
