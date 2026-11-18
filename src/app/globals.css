@@ -31,8 +31,8 @@
   --animate-gradient: gradient-pan 8s ease infinite;
 
   @keyframes fade-up {
-    from { opacity: 0; transform: translateY(18px) scale(0.98); filter: blur(4px); }
-    to { opacity: 1; transform: none; filter: none; }
+    from { opacity: 0; transform: translateY(18px) scale(0.98); }
+    to { opacity: 1; transform: none; }
   }
   @keyframes shimmer {
     from { background-position: -400px 0; }
@@ -221,3 +221,73 @@ body {
   animation: ribbon-drift ease-in-out infinite;
   transform-origin: center;
 }
+
+/* ─── Battleground backdrop (components/fx/battleground-backdrop.tsx) ─── */
+@property --zr {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 36vmax;
+}
+@keyframes zone-shrink {
+  0% { --zr: 46vmax; }
+  70% { --zr: 17vmax; }
+  85%, 100% { --zr: 17vmax; }
+}
+.bg-zone,
+.bg-zone-ring {
+  /* stepped: the zone "ticks" inward like a HUD, and repaints a few times per second instead of every frame */
+  animation: zone-shrink 45s steps(180) infinite;
+}
+/* Phones: drop the per-frame SVG glow filter on the ribbons (GPU memory) */
+@media (max-width: 768px) {
+  .ribbon-glow { filter: none; }
+}
+.bg-zone {
+  background: radial-gradient(circle at 62% 42%, transparent calc(var(--zr) - 2px), rgb(37 99 235 / 0.16) var(--zr), rgb(37 99 235 / 0.22));
+}
+.bg-zone-ring {
+  width: calc(var(--zr) * 2);
+  transform: translate(-50%, -50%);
+}
+
+@keyframes plane-fly {
+  0% { transform: translate(-60vw, 6vh) rotate(-4deg); opacity: 0; }
+  6% { opacity: 1; }
+  45% { transform: translate(115vw, -4vh) rotate(-4deg); opacity: 1; }
+  46%, 100% { transform: translate(115vw, -4vh) rotate(-4deg); opacity: 0; }
+}
+.bg-plane { animation: plane-fly 30s linear infinite; }
+
+@keyframes jumper-fall {
+  0% { transform: translateY(0); opacity: 0; }
+  8% { opacity: 1; }
+  80% { opacity: 0.9; }
+  100% { transform: translateY(115vh); opacity: 0; }
+}
+@keyframes sway {
+  0%, 100% { transform: rotate(-7deg) translateX(-8px); }
+  50% { transform: rotate(7deg) translateX(8px); }
+}
+.bg-jumper { animation: jumper-fall linear infinite; }
+.bg-sway { animation: sway 4s ease-in-out infinite; transform-origin: 50% 0; }
+
+@keyframes airdrop-fall {
+  0% { transform: translateY(0); opacity: 0; }
+  5% { opacity: 1; }
+  85% { transform: translateY(78vh); opacity: 1; }
+  100% { transform: translateY(80vh); opacity: 0; }
+}
+.bg-airdrop { animation: airdrop-fall 38s linear infinite; animation-delay: -8s; }
+
+@keyframes smoke-rise {
+  0% { transform: translate(-50%, 0) scale(0.4); opacity: 0; }
+  15% { opacity: 0.9; }
+  100% { transform: translate(calc(-50% + 40px), -48vh) scale(3.2); opacity: 0; }
+}
+.bg-smoke { animation: smoke-rise 10s ease-out infinite; }
+
+@keyframes compass-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.bg-compass { animation: compass-scroll 40s linear infinite; }

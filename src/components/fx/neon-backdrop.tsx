@@ -12,10 +12,8 @@ export function NeonBackdrop() {
   ];
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-      {/* colour fields */}
-      <div className="absolute -top-40 -left-40 size-[42rem] rounded-full bg-crimson/35 blur-[120px]" />
-      <div className="absolute top-1/3 -right-40 size-[36rem] rounded-full bg-neon/25 blur-[120px]" />
-      <div className="absolute -bottom-40 left-1/4 size-[34rem] rounded-full bg-mint/15 blur-[120px]" />
+      {/* colour fields as gradients (no blur filter → no giant GPU layers on phones) */}
+      <div className="absolute inset-0 bg-[radial-gradient(42rem_42rem_at_0%_0%,rgb(123_44_255/0.35),transparent_70%),radial-gradient(36rem_36rem_at_100%_45%,rgb(255_47_185/0.25),transparent_70%),radial-gradient(34rem_34rem_at_35%_100%,rgb(46_245_198/0.15),transparent_70%)]" />
       {/* grid */}
       <div className="absolute inset-0 opacity-[0.07] [background-image:linear-gradient(rgb(255_255_255/.6)_1px,transparent_1px),linear-gradient(90deg,rgb(255_255_255/.6)_1px,transparent_1px)] [background-size:64px_64px] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]" />
       {/* ribbons */}
@@ -43,7 +41,7 @@ export function NeonBackdrop() {
             <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
           </filter>
         </defs>
-        <g filter="url(#rb-glow)">
+        <g filter="url(#rb-glow)" className="ribbon-glow">
           {ribbons.map((r, i) => (
             <path key={i} d={r.d} fill="none" stroke={r.c} strokeWidth={r.w} strokeLinecap="round" opacity={r.o} className="neon-ribbon" style={{ animationDuration: r.dur, animationDelay: `${-i * 3}s` }} />
           ))}

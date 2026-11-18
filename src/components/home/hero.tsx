@@ -42,8 +42,8 @@ export function Hero({ banners, stats }: { banners: Banner[]; stats: { listings:
           </div>
           <dl className="mt-9 flex gap-8">
             {[
-              [stats.listings, "Live drops"],
-              [stats.sellers, "Verified sellers"],
+              stats.listings > 0 ? [stats.listings, "Live drops"] : ["₹0", "Listing fee"],
+              stats.sellers > 0 ? [stats.sellers, "Verified sellers"] : ["100%", "Player-ID only"],
               ["24/7", "Escrow protection"],
             ].map(([n, l]) => (
               <div key={l as string}>

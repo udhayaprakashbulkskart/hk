@@ -4,6 +4,7 @@ import "./globals.css";
 import { ToastProvider } from "@/components/ui/toast";
 import { NeonBackdrop } from "@/components/fx/neon-backdrop";
 import { Spotlight } from "@/components/fx/spotlight";
+import { BattlegroundBackdrop } from "@/components/fx/battleground-backdrop";
 import { SITE_NAME } from "@/lib/constants";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${inter.variable} ${orbitron.variable}`}>
       <body className="antialiased">
         <NeonBackdrop />
+        <BattlegroundBackdrop />
         <Spotlight />
         <ToastProvider>{children}</ToastProvider>
       </body>

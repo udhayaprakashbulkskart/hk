@@ -15,7 +15,12 @@ async function Results({ sp, skinsOnly, basePath }: { sp: SP; skinsOnly: boolean
   const filters = parseFilters(sp);
   const [res, saved] = await Promise.all([listProducts({ ...filters, skinsOnly, officialOnly: skinsOnly ? false : undefined }), getSavedIds(user?.id)]);
   if (!res.items.length) {
-    return <EmptyState title="No items found" body="Try a different search or clear some filters." action={{ href: basePath, label: "Clear filters" }} />;
+    const filtered = Boolean(filters.q || filters.category || filters.rarity || filters.game || filters.minPrice != null || filters.maxPrice != null || filters.minLevel != null);
+    return filtered ? (
+      <EmptyState title="No items found" body="Try a different search or clear some filters." action={{ href: basePath, label: "Clear filters" }} />
+    ) : (
+      <EmptyState title="First drops landing soon" body="Verified sellers are getting ready. Have officially transferable skins? Be the first to list them." action={{ href: "/sell", label: "Start selling" }} />
+    );
   }
   const flat = Object.fromEntries(Object.entries(sp).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v]));
   return (
