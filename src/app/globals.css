@@ -17,6 +17,10 @@
   --color-warn: #fbbf24;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-cinzel), Georgia, serif;
+  --color-gold: #e8c57a;
+  --color-gold-deep: #a8823f;
+  --color-wine: #2a1215;
   --font-display: var(--font-sora), var(--font-inter), ui-sans-serif, sans-serif;
 
   --shadow-neon: 0 0 0 1px rgb(255 45 149 / 0.55), 0 0 28px -4px rgb(255 45 149 / 0.55), 0 0 60px -20px rgb(123 44 255 / 0.6);

@@ -1,242 +1,204 @@
 import Link from "next/link";
 import Image from "next/image";
-import {
-  ArrowRight, Backpack, BadgeCheck, Car, Coins, Crosshair, Gift, HardHat, PackageCheck, ShieldCheck, Shirt, Sparkles, Store, Tag, Wallet,
-} from "lucide-react";
-import { getHomeData } from "@/lib/services/catalog";
-import { getSavedIds } from "@/lib/services/user-data";
-import { getCurrentUser } from "@/lib/auth";
+import { Rotate3d } from "lucide-react";
 import { db } from "@/lib/db";
 import { formatINR } from "@/lib/money";
-import { Hero } from "@/components/home/hero";
-import { DropTabs } from "@/components/home/drop-tabs";
-import { ProductGrid } from "@/components/product/product-card";
+import { productCardSelect } from "@/lib/services/catalog";
 import { RENDERS } from "@/lib/media";
+import { ArcaneCircle, Crescent, GoldFrame, PriceTag, UnlockButton } from "@/components/home/ornate";
 
-const CAT_META: Record<string, { Icon: React.ComponentType<{ className?: string }>; blurb: string }> = {
-  "weapon-skins": { Icon: Crosshair, blurb: "Upgradable guns with kill effects and finishes." },
-  outfits: { Icon: Shirt, blurb: "Full outfits, tops and masks for every style." },
-  "mythic-sets": { Icon: Sparkles, blurb: "The rarest sets — emotes, trails and voice packs." },
-  vehicles: { Icon: Car, blurb: "Supercar and buggy skins that turn heads." },
-  helmets: { Icon: HardHat, blurb: "Level-3 looks without the level-3 grind." },
-  accessories: { Icon: Backpack, blurb: "Backpacks, parachutes and finishing touches." },
+/* Showcase renders used for the poster scenes (owner-supplied). */
+const SCENE = {
+  center: RENDERS.goldenSeraph,
+  left: [
+    { src: RENDERS.ravenKnight, tag: "Raven Knight", sub: "Shadow of the Crow" },
+    { src: RENDERS.crimsonGambler, tag: "Crimson Gambler", sub: "Fortune's Wager" },
+  ],
+  right: [
+    { src: RENDERS.blossomEmpress, tag: "Blossom Empress", sub: "Petal Court" },
+    { src: RENDERS.pharaohGold, tag: "Pharaoh Gold", sub: "Sands of Rule" },
+  ],
 };
 
-/** Centered section heading: small pink eyebrow + bold white title. */
-function Heading({ eyebrow, title, href }: { eyebrow: string; title: string; href?: string }) {
+const FALLBACK_STRIP = [RENDERS.moltenAkm, RENDERS.dragonfireSmg, RENDERS.celestialRifle, RENDERS.frostbiteRifle, RENDERS.scarecrowAkm, RENDERS.skullRider, RENDERS.signedMummy, RENDERS.tridentWarden];
+const FALLBACK_FAN = [RENDERS.abyssalDragon, RENDERS.crimsonGambler, RENDERS.goldenSeraph, RENDERS.ravenKnight, RENDERS.pharaohGold];
+
+/** Hanging vertical name banner (red ribbon with gold trim). */
+function NameTag({ title, sub, className }: { title: string; sub: string; className?: string }) {
   return (
-    <div className="reveal relative mb-8 text-center">
-      <p className="text-[11px] font-semibold tracking-[0.25em] text-neon uppercase">{eyebrow}</p>
-      <h2 className="mt-2 font-display text-2xl font-extrabold tracking-wide text-white uppercase sm:text-3xl">{title}</h2>
-      {href && (
-        <Link href={href} className="group absolute right-0 bottom-1 hidden items-center gap-1 text-xs font-semibold tracking-wider text-zinc-300 uppercase hover:text-white sm:flex">
-          View all <ArrowRight className="size-3.5 text-neon transition group-hover:translate-x-1" />
-        </Link>
-      )}
+    <div className={`absolute z-20 hidden w-9 flex-col items-center sm:flex ${className}`}>
+      <span className="h-6 w-px bg-gold/70" />
+      <div className="relative flex flex-col items-center gap-2 border border-gold/70 bg-gradient-to-b from-[#9b1022] to-[#4c0711] px-1.5 py-3 [clip-path:polygon(0_0,100%_0,100%_92%,50%_100%,0_92%)]">
+        <span className="font-serif text-[10px] leading-tight font-bold tracking-widest text-[#ffe9c4] [writing-mode:vertical-rl]">{title}</span>
+        <span className="text-[9px] tracking-wider text-gold/80 [writing-mode:vertical-rl]">{sub}</span>
+      </div>
     </div>
   );
 }
 
-/** Corner-bracket frame (the reference's viewfinder corners). */
-function Brackets() {
-  const c = "absolute size-5 border-mint/80";
-  return (
-    <>
-      <span className={`${c} top-0 left-0 border-t-2 border-l-2`} />
-      <span className={`${c} top-0 right-0 border-t-2 border-r-2`} />
-      <span className={`${c} bottom-0 left-0 border-b-2 border-l-2`} />
-      <span className={`${c} right-0 bottom-0 border-r-2 border-b-2`} />
-    </>
-  );
-}
+const imgOk = (url?: string) => (url && (url.startsWith("/media/") || url.startsWith("/uploads/") || url.startsWith("https://")) ? url : undefined);
 
 export default async function HomePage() {
-  const user = await getCurrentUser();
-  const [data, saved, listingCount, ucPacks] = await Promise.all([
-    getHomeData(),
-    getSavedIds(user?.id),
-    db.product.count({ where: { status: "APPROVED", isOfficialStore: false } }),
-    db.product.findMany({ where: { status: "APPROVED", isOfficialStore: true }, orderBy: { price: "asc" }, take: 6, select: { slug: true, ucAmount: true, price: true } }),
-  ]);
-  const looks = [
-    { src: RENDERS.crimsonGambler, name: "Crimson Gambler", tag: "Outfit", href: "/skins?category=outfits" },
-    { src: RENDERS.moltenAkm, name: "Molten AKM", tag: "Weapon skin", href: "/skins?category=weapon-skins" },
-    { src: RENDERS.goldenSeraph, name: "Golden Seraph", tag: "Mythic set", href: "/skins?category=mythic-sets" },
-    { src: RENDERS.dragonfireSmg, name: "Dragonfire SMG", tag: "Weapon skin", href: "/skins?category=weapon-skins" },
-    { src: RENDERS.blossomEmpress, name: "Blossom Empress", tag: "Outfit", href: "/skins?category=outfits" },
-  ];
+  // Real listings drive prices; renders are only used for scenery and empty-state previews.
+  const listings = await db.product.findMany({
+    where: { status: "APPROVED", stock: { gt: 0 }, isOfficialStore: false },
+    orderBy: { price: "desc" },
+    take: 14,
+    select: productCardSelect,
+  });
+  const withImg = listings.filter((p) => imgOk(p.media[0]?.url));
+  const featured = withImg[0];
+  const strip = withImg.slice(1, 9);
+  // Tall cards suit full-length outfits; weapons only fill in if there are too few.
+  const isFigure = (p: (typeof withImg)[number]) => ["outfits", "mythic-sets"].includes(p.category.slug);
+  const fan = [...withImg.filter(isFigure), ...withImg.filter((p) => !isFigure(p))].slice(0, 5);
+  const fanTotal = fan.reduce((s, p) => s + p.price, 0);
+  const fanCompare = fan.reduce((s, p) => s + (p.compareAtPrice ?? p.price), 0);
 
   return (
-    <div className="pb-6">
-      <Hero banners={data.banners} />
-
-      {/* Why us */}
-      <section className="grid items-center gap-12 border-b border-white/10 py-16 lg:grid-cols-2">
-        <div className="reveal relative mx-auto aspect-[4/3] w-full max-w-xl p-3">
-          <Brackets />
-          <div className="relative size-full overflow-hidden bg-[radial-gradient(circle_at_50%_55%,rgb(255_45_149/0.35),transparent_55%),radial-gradient(circle_at_50%_55%,rgb(34_211_238/0.25),transparent_70%),#0b0b14]">
-            <div className="absolute top-1/2 left-1/2 aspect-square w-[62%] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-neon/70 shadow-[0_0_40px_rgb(255_45_149/0.6),inset_0_0_40px_rgb(34_211_238/0.4)]" />
-            <Image src={RENDERS.abyssalDragon} alt="Abyssal dragon outfit render" fill sizes="(max-width: 1024px) 90vw, 40vw" className="object-contain py-4 drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)]" />
-          </div>
-        </div>
-        <div className="reveal">
-          <p className="text-[11px] font-semibold tracking-[0.25em] text-neon uppercase">Why PUBG Store</p>
-          <h2 className="mt-3 font-display text-3xl leading-tight font-extrabold text-white uppercase sm:text-4xl">
-            We turn rare skins
-            <br />
-            into <span className="bg-gradient-to-r from-neon to-mint bg-clip-text text-transparent">safe trades.</span>
-          </h2>
-          <p className="mt-5 max-w-lg text-zinc-300">
-            Every seller is verified, every payment is held in escrow, and every delivery happens through the game&apos;s own gifting or redeem system — straight to your Player ID. No passwords. No OTPs. No risk.
-          </p>
-          <dl className="mt-8 grid grid-cols-3 gap-4">
-            {[
-              [Wallet, listingCount > 0 ? String(listingCount) : "₹0", listingCount > 0 ? "Live listings" : "Listing fee"],
-              [ShieldCheck, "100%", "Escrow protected"],
-              [Gift, "24/7", "Player-ID delivery"],
-            ].map(([Icon, n, l]) => {
-              const I = Icon as typeof Wallet;
-              return (
-                <div key={l as string} className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-                  <I className="size-7 text-neon" />
-                  <div>
-                    <dt className="font-display text-2xl font-extrabold text-mint">{n as string}</dt>
-                    <dd className="text-[11px] tracking-wider text-zinc-400 uppercase">{l as string}</dd>
-                  </div>
-                </div>
-              );
-            })}
-          </dl>
-          <Link href="/support" className="btn-outline mt-8 text-xs tracking-[0.15em] uppercase">
-            How it works <ArrowRight className="size-4" />
-          </Link>
-        </div>
-      </section>
-
-      {/* Categories (services grid) */}
-      <section className="border-b border-white/10 py-16">
-        <Heading eyebrow="What you can buy" title="Categories" href="/skins" />
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {data.categories.map((c) => {
-            const m = CAT_META[c.slug] ?? { Icon: Sparkles, blurb: "" };
-            return (
-              <Link key={c.id} href={`/skins?category=${c.slug}`} className="card-glow reveal group flex flex-col items-center gap-3 px-3 py-6 text-center">
-                <m.Icon className="size-8 text-neon transition duration-500 group-hover:scale-110 group-hover:text-mint" />
-                <p className="font-display text-xs font-bold tracking-wider text-white uppercase">{c.name}</p>
-                <p className="text-xs leading-relaxed text-zinc-400">{m.blurb}</p>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Shop the look (selected work) */}
-      <section className="border-b border-white/10 py-16">
-        <Heading eyebrow="Featured renders" title="Shop the look" href="/skins" />
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          {looks.map((l, k) => (
-            <Link key={l.name} href={l.href} className={`reveal group relative aspect-[3/4] overflow-hidden rounded-xl border border-white/10 bg-[radial-gradient(circle_at_50%_60%,rgb(255_45_149/0.28),transparent_60%),linear-gradient(170deg,#161626,#07070c)] ${k === 4 ? "hidden lg:block" : ""}`}>
-              <Image src={l.src} alt={l.name} fill sizes="(max-width: 640px) 50vw, 20vw" className="object-contain p-4 drop-shadow-[0_16px_24px_rgba(0,0,0,0.8)] transition duration-700 group-hover:scale-110" />
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent p-3 pt-10">
-                <p className="text-sm font-bold text-white">{l.name}</p>
-                <p className="text-[11px] text-zinc-400">{l.tag}</p>
+    <div className="-mx-4 bg-[radial-gradient(ellipse_at_50%_0%,#3a1a1c,#160b0d_55%,#0b0708)] px-3 pb-16 sm:px-5 lg:-mx-6 lg:px-8">
+      {/* ───────── 1. Hero poster ───────── */}
+      <section className="pt-4">
+        <GoldFrame>
+          <div className="relative h-[560px] overflow-hidden bg-[radial-gradient(circle_at_50%_38%,#c98a3a_0%,#7a3a1f_22%,#3b1414_48%,#140809_80%)] sm:h-[640px]">
+            {/* light rays */}
+            <div className="absolute inset-0 bg-[repeating-conic-gradient(from_0deg_at_50%_32%,rgb(255_220_150/0.10)_0deg_4deg,transparent_4deg_14deg)]" />
+            <ArcaneCircle className="absolute top-[4%] left-1/2 w-[520px] max-w-[95%] -translate-x-1/2 opacity-60" />
+            {/* side figures */}
+            {SCENE.left.map((f, k) => (
+              <div key={f.tag} className={`absolute bottom-[14%] hidden sm:block ${k === 0 ? "left-[1%] h-[78%] w-[24%]" : "left-[14%] h-[66%] w-[20%] opacity-90"}`}>
+                <Image src={f.src} alt={f.tag} fill sizes="25vw" className="object-contain object-bottom drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)]" />
               </div>
-              <span className="absolute top-1/2 left-1/2 grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/30 bg-black/40 opacity-0 backdrop-blur transition group-hover:opacity-100">
-                <ArrowRight className="size-4" />
-              </span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* Live drops, only when real listings exist */}
-      {data.trending.length > 0 && (
-        <section className="border-b border-white/10 py-16">
-          <Heading eyebrow="Live on the market" title="Hot drops" href="/marketplace" />
-          <DropTabs
-            tabs={[
-              { key: "new", label: "New Drops", href: "/marketplace", content: <ProductGrid items={data.recent} savedIds={saved} /> },
-              { key: "popular", label: "Most Popular", href: "/marketplace?sort=popular", content: <ProductGrid items={data.trending} savedIds={saved} /> },
-              { key: "deals", label: "Deals", href: "/marketplace?sort=price_asc", content: <ProductGrid items={data.deals.length ? data.deals : data.recent} savedIds={saved} /> },
-            ]}
-          />
-        </section>
-      )}
-
-      {/* UC packs (tools row) */}
-      {ucPacks.length > 0 && (
-        <section className="border-b border-white/10 py-16">
-          <Heading eyebrow="Instant · Player ID only" title="UC Top-Up" href="/uc" />
-          <div className="flex flex-wrap justify-center gap-4">
-            {ucPacks.map((u) => (
-              <Link key={u.slug} href={`/product/${u.slug}`} className="reveal group flex w-28 flex-col items-center gap-2 text-center">
-                <span className="grid size-16 place-items-center rounded-xl border border-white/10 bg-panel-2 transition group-hover:border-neon/70 group-hover:shadow-neon">
-                  <Coins className="size-7 text-amber-300" />
-                </span>
-                <span className="font-display text-sm font-extrabold text-white">{u.ucAmount?.toLocaleString("en-IN")} UC</span>
-                <span className="text-xs text-zinc-400">{formatINR(u.price)}</span>
-              </Link>
             ))}
+            {SCENE.right.map((f, k) => (
+              <div key={f.tag} className={`absolute bottom-[14%] hidden sm:block ${k === 0 ? "right-[1%] h-[78%] w-[24%]" : "right-[14%] h-[66%] w-[20%] opacity-90"}`}>
+                <Image src={f.src} alt={f.tag} fill sizes="25vw" className="object-contain object-bottom drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)]" />
+              </div>
+            ))}
+            <NameTag title={SCENE.left[0].tag} sub={SCENE.left[0].sub} className="top-0 left-[24%]" />
+            <NameTag title={SCENE.left[1].tag} sub={SCENE.left[1].sub} className="top-0 left-[33%]" />
+            <NameTag title={SCENE.right[0].tag} sub={SCENE.right[0].sub} className="top-0 right-[24%]" />
+            <NameTag title={SCENE.right[1].tag} sub={SCENE.right[1].sub} className="top-0 right-[33%]" />
+            {/* centre hero */}
+            <div className="absolute bottom-[12%] left-1/2 h-[88%] w-[60%] -translate-x-1/2 sm:w-[34%]">
+              <Image src={SCENE.center} alt="Golden Seraph" fill priority sizes="(max-width: 640px) 60vw, 34vw" className="object-contain object-bottom drop-shadow-[0_30px_40px_rgba(0,0,0,0.85)]" />
+            </div>
+            {/* floor haze + title */}
+            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#140809] via-[#140809]/85 to-transparent" />
+            <div className="absolute inset-x-0 bottom-[7%] text-center">
+              <h1 className="bg-[linear-gradient(180deg,#fff4d6,#e8c57a_55%,#a8823f)] bg-clip-text font-serif text-5xl font-bold tracking-[0.12em] text-transparent uppercase drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)] sm:text-7xl">
+                Mythic Legends
+              </h1>
+              <p className="mt-3 flex items-center justify-center gap-4 font-serif text-sm tracking-[0.5em] text-[#f3dfb4] sm:text-base">
+                <span className="h-px w-10 bg-gold/70" /> FATE · FORGED · IN GOLD <span className="h-px w-10 bg-gold/70" />
+              </p>
+            </div>
           </div>
-        </section>
-      )}
-
-      {/* Numbers + how it works */}
-      <section className="grid gap-10 border-b border-white/10 py-16 lg:grid-cols-2 lg:gap-0">
-        <div className="reveal lg:border-r lg:border-white/10 lg:pr-10">
-          <p className="text-[11px] font-semibold tracking-[0.25em] text-neon uppercase">Stats</p>
-          <h2 className="mt-2 font-display text-2xl font-extrabold text-white uppercase">By the numbers</h2>
-          <dl className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-4">
-            {[
-              [Store, listingCount > 0 ? String(listingCount) : "New", "Listings"],
-              [BadgeCheck, data.sellers.length > 0 ? String(data.sellers.length) : "Open", "Verified sellers"],
-              [Tag, "₹0", "Listing fee"],
-              [PackageCheck, "24/7", "Escrow"],
-            ].map(([Icon, n, l]) => {
-              const I = Icon as typeof Store;
-              return (
-                <div key={l as string} className="flex flex-col items-center gap-2 text-center">
-                  <I className="size-7 text-neon" />
-                  <dt className="font-display text-2xl font-extrabold text-mint">{n as string}</dt>
-                  <dd className="text-[11px] tracking-wider text-zinc-400 uppercase">{l as string}</dd>
-                </div>
-              );
-            })}
-          </dl>
-        </div>
-        <div className="reveal lg:pl-10">
-          <p className="text-[11px] font-semibold tracking-[0.25em] text-neon uppercase">How it works</p>
-          <h2 className="mt-2 font-display text-2xl font-extrabold text-white uppercase">Three steps. Zero risk.</h2>
-          <ol className="mt-8 space-y-4">
-            {[
-              ["Pick your skin", "Browse verified listings or top up UC — enter only your Player ID."],
-              ["Seller delivers", "Sent through the game's official gifting or redeem code. Your money waits in escrow."],
-              ["Confirm & done", "Confirm receipt and the seller is paid. Not delivered? Request a refund."],
-            ].map(([t, d], k) => (
-              <li key={t} className="card flex gap-4 p-4">
-                <span className="font-display text-2xl font-extrabold text-neon">0{k + 1}</span>
-                <div>
-                  <p className="font-bold text-white">{t}</p>
-                  <p className="mt-1 text-sm text-zinc-400">{d}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </div>
+        </GoldFrame>
       </section>
 
-      {/* Sell CTA */}
-      <section className="reveal grid items-center gap-8 py-16 lg:grid-cols-[1fr_auto]">
-        <div>
-          <p className="text-[11px] font-semibold tracking-[0.25em] text-neon uppercase">Get started</p>
-          <h2 className="mt-2 font-display text-3xl font-extrabold text-white uppercase sm:text-4xl">Have skins to sell? Let&apos;s get you listed.</h2>
-          <p className="mt-3 max-w-xl text-zinc-300">Verification takes under a day. No listing fees — a small commission only when you sell.</p>
-        </div>
-        <Link href="/sell" className="btn h-14 bg-gradient-to-r from-neon to-mint px-10 text-sm tracking-[0.15em] text-white uppercase shadow-[0_10px_40px_-10px_rgb(255_45_149/0.8)] hover:brightness-110">
-          Start selling <ArrowRight className="size-4" />
-        </Link>
+      {/* ───────── 2. Featured skin ───────── */}
+      <section className="mt-12">
+        <GoldFrame>
+          <div className="relative overflow-hidden bg-[radial-gradient(circle_at_50%_30%,#b9733a_0%,#5e2318_30%,#2a1215_60%,#140809_100%)]">
+            {/* crimson silk */}
+            <div className="absolute inset-y-[18%] -left-[10%] w-[55%] rounded-[50%] bg-[radial-gradient(ellipse_at_70%_50%,#c4142f,#7c0a1b_45%,transparent_70%)] opacity-80" />
+            <div className="absolute inset-y-[18%] -right-[10%] w-[55%] rounded-[50%] bg-[radial-gradient(ellipse_at_30%_50%,#c4142f,#7c0a1b_45%,transparent_70%)] opacity-80" />
+            <ArcaneCircle className="absolute top-[6%] left-1/2 w-[420px] max-w-[90%] -translate-x-1/2 opacity-50" />
+            <div className="relative grid min-h-[520px] items-end gap-6 px-5 pt-8 pb-8 sm:px-10 md:grid-cols-[1fr_1.1fr_1fr]">
+              <div className="order-2 md:order-1">
+                <p className="font-serif text-sm tracking-[0.3em] text-gold">{featured ? featured.category.name : "Mythic Set"}</p>
+                <h2 className="mt-1 flex items-center gap-3 font-serif text-3xl leading-tight font-bold text-[#fff1d2] sm:text-4xl">
+                  {featured?.title ?? "Golden Seraph"}
+                  <Link href={featured ? `/product/${featured.slug}` : "/skins"} aria-label="View in detail" className="grid size-10 shrink-0 place-items-center rounded-full border-2 border-gold/80 text-gold transition hover:bg-gold/15">
+                    <Rotate3d className="size-5" />
+                  </Link>
+                </h2>
+                <p className="mt-3 max-w-xs text-xs leading-relaxed text-gold/70">
+                  {featured ? `Sold by ${featured.seller.seller?.storeName ?? "a verified seller"} · delivered to your Player ID` : "First mythic drops are landing soon from verified sellers."}
+                </p>
+              </div>
+              <div className="relative order-1 mx-auto h-[420px] w-full max-w-sm md:order-2 md:h-[480px]">
+                <Image src={imgOk(featured?.media[0]?.url) ?? RENDERS.pharaohGold} alt={featured?.title ?? "Pharaoh Gold"} fill sizes="(max-width: 768px) 80vw, 30vw" className="object-contain object-bottom drop-shadow-[0_30px_40px_rgba(0,0,0,0.85)]" />
+              </div>
+              <div className="order-3 flex flex-col items-start gap-4 md:items-end">
+                {featured ? <PriceTag value={formatINR(featured.price)} note={featured.compareAtPrice ? `Was ${formatINR(featured.compareAtPrice)}` : undefined} /> : <PriceTag value="Soon" />}
+                <UnlockButton href={featured ? `/product/${featured.slug}` : "/sell"}>{featured ? "UNLOCK NOW" : "SELL ONE"}</UnlockButton>
+              </div>
+            </div>
+          </div>
+        </GoldFrame>
+      </section>
+
+      {/* ───────── 3. Variant pack ───────── */}
+      <section className="mt-12">
+        <GoldFrame className="mx-auto max-w-5xl">
+          <div className="bg-[linear-gradient(180deg,#3a1d1d,#241112)] px-5 py-6 sm:px-8">
+            <div className="flex flex-wrap items-center justify-between gap-5 border-b border-gold/25 pb-5">
+              <div className="flex items-center gap-3">
+                <h2 className="font-serif text-2xl font-bold text-[#fff1d2] sm:text-3xl">Arsenal Collection</h2>
+                <span className="rounded-sm bg-gold/90 px-2 py-0.5 text-[10px] font-bold tracking-wider text-[#2a1215] uppercase">{strip.length || 8} items</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-5">
+                {strip.length ? <PriceTag value={formatINR(strip.reduce((s, p) => s + p.price, 0))} note="Buy individually — no bundle markup" /> : <PriceTag value="Soon" />}
+                <UnlockButton href="/skins">VIEW ALL</UnlockButton>
+              </div>
+            </div>
+            <p className="mt-4 text-[11px] text-gold/70">Includes weapon skins and outfits from verified sellers. Every item is delivered through the game&apos;s official gifting or redeem system.</p>
+            <div className="mt-5 grid grid-cols-4 gap-3 sm:grid-cols-8">
+              {(strip.length ? strip.map((p) => ({ key: p.id, src: p.media[0]!.url, name: p.title, price: formatINR(p.price), href: `/product/${p.slug}` })) : FALLBACK_STRIP.map((src, k) => ({ key: src, src, name: src.split("/").pop()!.replace(/^(gun|outfit)-|\.webp$/g, "").replace(/-/g, " "), price: "Soon", href: "/skins", k }))).map((it) => (
+                <Link key={it.key} href={it.href} className="group flex flex-col items-center text-center">
+                  <span className="relative grid aspect-square w-full place-items-center rounded-full border border-gold/50 bg-[radial-gradient(circle,#5a2a22,#1d0d0e_70%)] transition group-hover:border-gold group-hover:shadow-[0_0_24px_rgba(232,197,122,0.45)]">
+                    <Image src={it.src} alt={it.name} fill sizes="12vw" className="object-contain p-2 transition duration-500 group-hover:scale-110" />
+                  </span>
+                  <span className="mt-2 line-clamp-2 text-[10px] text-[#f3dfb4] capitalize">{it.name}</span>
+                  <span className="text-[11px] font-bold text-gold">{it.price}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </GoldFrame>
+      </section>
+
+      {/* ───────── 4. Grand bundle ───────── */}
+      <section className="mt-14">
+        <GoldFrame className="mx-auto max-w-5xl">
+          <div className="grid items-center gap-8 bg-[linear-gradient(160deg,#3a1d1d,#1c0d0e)] px-5 py-8 sm:px-8 md:grid-cols-[0.9fr_1.4fr]">
+            <div className="text-center md:text-left">
+              <h2 className="font-serif text-4xl font-bold text-[#fff1d2]">Legends Vault</h2>
+              <p className="mt-1 flex items-center justify-center gap-2 font-serif text-sm tracking-[0.3em] text-gold md:justify-start">
+                <Crescent className="size-4" /> GRAND BUNDLE <Crescent className="size-4 -scale-x-100" />
+              </p>
+              <p className="mt-4 text-xs text-gold/70">The five most-wanted drops on the market right now.</p>
+              <div className="mt-3 flex flex-wrap justify-center gap-2 md:justify-start">
+                {["Mythic sets", "Legendary outfits", "Player-ID delivery"].map((t) => (
+                  <span key={t} className="border border-gold/50 px-2 py-0.5 text-[11px] text-gold">{t}</span>
+                ))}
+              </div>
+              <div className="mt-6 flex justify-center md:justify-start">
+                {fan.length ? <PriceTag size="lg" value={formatINR(fanTotal)} note={fanCompare > fanTotal ? `Was ${formatINR(fanCompare)}` : undefined} /> : <PriceTag size="lg" value="Soon" />}
+              </div>
+              <UnlockButton href="/skins?sort=popular" className="mt-6">EXPLORE</UnlockButton>
+            </div>
+            {/* fan of tall framed cards */}
+            <div className="flex items-end justify-center gap-2 sm:gap-3">
+              {(fan.length ? fan.map((p) => ({ key: p.id, src: p.media[0]!.url, href: `/product/${p.slug}`, name: p.title })) : FALLBACK_FAN.map((src) => ({ key: src, src, href: "/skins", name: "Coming soon" }))).map((c, k) => (
+                <Link
+                  key={c.key}
+                  href={c.href}
+                  title={c.name}
+                  className={`group relative w-[18%] border border-gold/70 p-1 transition duration-500 hover:-translate-y-2 ${k % 2 ? "aspect-[1/2.3] translate-y-6" : "aspect-[1/2.6]"}`}
+                >
+                  <span className="relative block size-full overflow-hidden border border-gold/30 bg-[radial-gradient(circle_at_50%_40%,#9a4a2a,#3a1515_55%,#140809)]">
+                    <Image src={c.src} alt={c.name} fill sizes="12vw" className="object-contain object-bottom p-1 transition duration-700 group-hover:scale-110" />
+                  </span>
+                  <Crescent className="absolute -bottom-3 left-1/2 size-5 -translate-x-1/2 text-gold" />
+                </Link>
+              ))}
+            </div>
+          </div>
+        </GoldFrame>
       </section>
     </div>
   );
 }
-
