@@ -102,18 +102,41 @@ The integration suite covers auth/sessions, CSRF, RBAC, moderation and complianc
 3. Payment flow: the server creates the Razorpay order and Checkout opens in the browser. The browser posts the result to `/api/payments/razorpay/verify`, which verifies the HMAC signature **and** re-fetches the payment from Razorpay to confirm `captured` status and the exact amount. The webhook does the same independently, so orders are confirmed even if the buyer closes the tab. Late payments on expired orders are refunded to the wallet automatically.
 4. Seller payouts are recorded manually: pay by UPI, then enter the UTR in **Admin → Withdrawals**. RazorpayX Payouts can automate this later.
 
-## Media storage (Cloudinary)
+## Media storage
 
-Set `STORAGE_DRIVER=cloudinary` plus `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` and `CLOUDINARY_API_SECRET`. The browser uploads directly to Cloudinary with a short-lived signature from `/api/uploads/sign`, which keeps 25 MB videos off serverless function body limits. The local driver writes to `public/uploads` and is **disabled in production**, because Vercel's filesystem is read-only. An S3-compatible driver can be added in `src/lib/storage.ts` behind the same interface.
+`STORAGE_DRIVER` selects how seller images and videos are stored:
 
-## Deploying to Vercel + managed PostgreSQL
+- **`vercel-blob`** (used in production): the browser uploads directly to Vercel Blob with a short-lived token from `/api/uploads/blob`. Tokens are issued only to signed-in users, for image/video types up to 25 MB, under `listings/`, with random suffixes. Requires `BLOB_READ_WRITE_TOKEN`, which Vercel adds automatically when a Blob store is connected to the project. Listings may only reference files on *this* project's Blob host.
+- **`cloudinary`**: direct signed uploads using `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` and `CLOUDINARY_API_SECRET`.
+- **`local`** (default, development only): writes to `public/uploads`. It is disabled in production because Vercel's filesystem is read-only.
 
-1. Create a managed Postgres database (Neon, Supabase, RDS, …). Use the **pooled** connection string for `DATABASE_URL`.
-2. Import the repository in Vercel (framework: Next.js). `vercel-build` runs `prisma generate && prisma migrate deploy && next build`, so migrations apply on each deploy.
-3. Add every variable from `.env.example` to the Vercel project's environment variables (Production and Preview). Leave out the `TEST_*` ones and **don't** set `ALLOW_LOCAL_UPLOADS` or `RATE_LIMIT_DISABLED`.
-4. `vercel.json` schedules `/api/cron/maintenance` daily (expires unpaid orders, auto-completes delivered items, prunes sessions). Vercel sends `CRON_SECRET` automatically. On a Pro plan, change the schedule to hourly for faster escrow release. Unpaid orders are also expired on every checkout.
-5. Create the first admin: register normally, then run `UPDATE "User" SET role='ADMIN' WHERE email='you@example.com';` against the production database. After that, promote others from **Admin → Users**.
-6. Deploy, then work through the checklist below.
+## Deployment (Neon + Vercel)
+
+The live setup:
+
+| Piece | Where |
+|---|---|
+| Database | Neon project `pubg-store`, Postgres 17, AWS Singapore (`aws-ap-southeast-1`), database `pubgstore` |
+| App | Vercel project `pubg-store`, functions in Singapore (`sin1`) |
+| Media | Vercel Blob store `pubg-store-media` (Singapore), connected to the project |
+
+Environment variables (Vercel → Project → Settings → Environment Variables):
+
+| Variable | Notes |
+|---|---|
+| `DATABASE_URL` | Neon **pooled** connection string (host contains `-pooler`), `sslmode=verify-full`. Used at runtime. |
+| `DIRECT_URL` | Neon **direct** connection string (no `-pooler`). Used only by `prisma migrate deploy` during the build. |
+| `BLOB_READ_WRITE_TOKEN` | Added automatically by the Blob store connection. |
+| `STORAGE_DRIVER` | `vercel-blob` |
+| `CRON_SECRET` | Long random string. Vercel Cron sends it to `/api/cron/maintenance`. |
+| `NEXT_PUBLIC_SITE_NAME` | Display name. |
+| `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET` | Add when going live with payments; until then checkout shows "online payments not configured". |
+
+Database credentials are scoped to the **Production** environment only, so preview builds can't migrate or write to the live database. For previews, create a Neon branch per preview and set preview-scoped `DATABASE_URL`/`DIRECT_URL`.
+
+How it deploys: `vercel-build` runs `prisma generate && prisma migrate deploy && next build`, so schema migrations apply automatically on every production deploy (over `DIRECT_URL`). The schedule in `vercel.json` runs the maintenance job daily.
+
+First admin: on a fresh database, register normally, then promote the account in the Neon SQL editor: `UPDATE "User" SET role='ADMIN' WHERE email='you@example.com';`.
 
 ## Production deployment checklist
 
@@ -132,7 +155,7 @@ Set `STORAGE_DRIVER=cloudinary` plus `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KE
 **Infrastructure**
 - [ ] Managed Postgres with automated backups and point-in-time recovery; pooled `DATABASE_URL`.
 - [ ] Run `prisma migrate deploy` successfully (part of `vercel-build`).
-- [ ] Set Cloudinary credentials and `STORAGE_DRIVER=cloudinary`, and upload a test image and video.
+- [ ] Connect a Vercel Blob store (or Cloudinary), set `STORAGE_DRIVER`, and upload a test image and video.
 - [ ] Set a long random `CRON_SECRET` and confirm the cron run in Vercel logs.
 - [ ] Custom domain with HTTPS (HSTS preload is on, so check before submitting to the preload list).
 - [ ] Error monitoring and log drain (Sentry, Vercel Observability).
