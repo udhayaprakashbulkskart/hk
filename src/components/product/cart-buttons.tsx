@@ -7,7 +7,7 @@ import { api } from "@/lib/client";
 import { useToast } from "@/components/ui/toast";
 import { Spinner } from "@/components/ui/states";
 
-export function AddToCartButton({ productId, compact, className, disabled }: { productId: string; compact?: boolean; className?: string; disabled?: boolean }) {
+export function AddToCartButton({ productId, compact, className, disabled, variant = "outline" }: { productId: string; compact?: boolean; className?: string; disabled?: boolean; variant?: "outline" | "primary" }) {
   const [pending, start] = useTransition();
   const router = useRouter();
   const toast = useToast();
@@ -26,14 +26,14 @@ export function AddToCartButton({ productId, compact, className, disabled }: { p
   };
   if (compact) {
     return (
-      <button type="button" onClick={add} disabled={pending || disabled} aria-label="Add to cart" className={clsx("grid size-9 place-items-center rounded-lg bg-neon text-white shadow-neon transition hover:brightness-110 disabled:opacity-50", className)}>
+      <button type="button" onClick={add} disabled={pending || disabled} aria-label="Add to cart" className={clsx("grid size-9 place-items-center rounded-lg bg-mint text-black shadow-mint transition hover:brightness-110 disabled:opacity-50", className)}>
         {pending ? <Spinner /> : <ShoppingCart className="size-4" />}
       </button>
     );
   }
   return (
-    <button type="button" onClick={add} disabled={pending || disabled} className={clsx("btn-outline py-3", className)}>
-      {pending ? <Spinner /> : <ShoppingCart className="size-4" />} Add to Cart
+    <button type="button" onClick={add} disabled={pending || disabled} className={clsx(variant === "primary" ? "btn-primary" : "btn-outline", "py-3", className)}>
+      {pending ? <Spinner className="size-4 border-black/30 border-t-black" /> : <ShoppingCart className="size-4" />} {disabled ? "Sold out" : "Add to Cart"}
     </button>
   );
 }

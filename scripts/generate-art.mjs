@@ -101,7 +101,7 @@ function svg({ subject, hue, accent = hue + 40, w = 800, h = 600, label }) {
   <rect width="${w}" height="${h}" fill="url(#bg)"/>
   ${dots}
   <ellipse cx="${w / 2}" cy="${h - 70}" rx="${w * 0.36}" ry="34" fill="url(#pad)"/>
-  <ellipse cx="${w / 2}" cy="${h - 70}" rx="${w * 0.3}" ry="20" fill="none" stroke="#ff2438" stroke-width="3" opacity=".8"/>
+  <ellipse cx="${w / 2}" cy="${h - 70}" rx="${w * 0.3}" ry="20" fill="none" stroke="#ff2fb9" stroke-width="3" opacity=".8"/>
   <g filter="url(#glow)" fill="url(#body)" stroke="${c1}" stroke-width="2" stroke-linejoin="round">${SUBJECTS[subject]}</g>
 </svg>`;
 }

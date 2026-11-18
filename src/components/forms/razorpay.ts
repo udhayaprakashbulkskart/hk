@@ -37,7 +37,7 @@ export async function openRazorpay(opts: { keyId: string; razorpayOrderId: strin
       name: "PUBG Store",
       description: opts.description,
       prefill: opts.prefill,
-      theme: { color: "#FF2438" },
+      theme: { color: "#2EF5C6" },
       handler: (r: RzpSuccess) => resolve(r),
       modal: { ondismiss: () => resolve(null), confirm_close: true },
     });

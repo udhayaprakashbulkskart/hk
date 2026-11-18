@@ -1,39 +1,54 @@
 @import "tailwindcss";
 
-/* ─── PUBG Store design tokens ─── */
+/* ─── PUBG Store · "Neon Luxe" design tokens ───
+   Mint primary actions, magenta accents & borders, violet depth, glass surfaces. */
 @theme {
-  --color-ink: #090909; /* matte black */
-  --color-panel: #171717; /* dark charcoal */
-  --color-panel-2: #1f1f1f;
-  --color-line: #2a2a2a;
-  --color-neon: #ff2438; /* neon red */
-  --color-neon-soft: #ff4d5e;
-  --color-crimson: #8b0015; /* deep crimson */
-  --color-muted: #a1a1aa;
-  --color-success: #22c55e;
-  --color-warn: #f59e0b;
+  --color-ink: #05060b;
+  --color-panel: #10111a;
+  --color-panel-2: #171826;
+  --color-line: #2a2b3d;
+  --color-neon: #ff2fb9; /* magenta — accents, borders, active */
+  --color-neon-soft: #ff7ad6;
+  --color-crimson: #7b2cff; /* violet depth */
+  --color-mint: #2ef5c6; /* primary actions */
+  --color-mint-deep: #10c79f;
+  --color-muted: #a3a6bf;
+  --color-success: #2ef5c6;
+  --color-warn: #fbbf24;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-rajdhani), var(--font-inter), ui-sans-serif, sans-serif;
+  --font-display: var(--font-orbitron), var(--font-inter), ui-sans-serif, sans-serif;
 
-  --shadow-neon: 0 0 0 1px rgb(255 36 56 / 0.45), 0 0 24px -4px rgb(255 36 56 / 0.55);
-  --shadow-card: 0 10px 30px -12px rgb(0 0 0 / 0.8);
+  --shadow-neon: 0 0 0 1px rgb(255 47 185 / 0.55), 0 0 28px -4px rgb(255 47 185 / 0.55), 0 0 60px -20px rgb(123 44 255 / 0.6);
+  --shadow-mint: 0 0 0 1px rgb(46 245 198 / 0.5), 0 10px 30px -8px rgb(46 245 198 / 0.55);
+  --shadow-card: 0 20px 50px -24px rgb(0 0 0 / 0.9);
 
-  --animate-fade-up: fade-up 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-fade-up: fade-up 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   --animate-shimmer: shimmer 1.4s linear infinite;
   --animate-pulse-glow: pulse-glow 2.4s ease-in-out infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-spin-slow: spin 18s linear infinite;
+  --animate-gradient: gradient-pan 8s ease infinite;
 
   @keyframes fade-up {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: none; }
+    from { opacity: 0; transform: translateY(18px) scale(0.98); filter: blur(4px); }
+    to { opacity: 1; transform: none; filter: none; }
   }
   @keyframes shimmer {
     from { background-position: -400px 0; }
     to { background-position: 400px 0; }
   }
   @keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 0 0 1px rgb(255 36 56 / 0.4), 0 0 18px -6px rgb(255 36 56 / 0.6); }
-    50% { box-shadow: 0 0 0 1px rgb(255 36 56 / 0.7), 0 0 30px -4px rgb(255 36 56 / 0.85); }
+    0%, 100% { box-shadow: 0 0 0 1px rgb(255 47 185 / 0.45), 0 0 18px -6px rgb(255 47 185 / 0.6); }
+    50% { box-shadow: 0 0 0 1px rgb(46 245 198 / 0.7), 0 0 34px -4px rgb(46 245 198 / 0.7); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-14px) rotate(1deg); }
+  }
+  @keyframes gradient-pan {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
   }
 }
 
@@ -44,78 +59,147 @@
 html {
   background: var(--color-ink);
   -webkit-tap-highlight-color: transparent;
+  scroll-behavior: smooth;
 }
 
 body {
-  background:
-    radial-gradient(1200px 500px at 15% -10%, rgb(139 0 21 / 0.35), transparent 60%),
-    radial-gradient(900px 400px at 100% 0%, rgb(255 36 56 / 0.12), transparent 60%),
-    var(--color-ink);
-  background-attachment: fixed;
-  color: #f4f4f5;
+  /* transparent so the fixed <NeonBackdrop/> (z-index -10) shows through; html paints the base colour */
+  background: transparent;
+  color: #f2f3fb;
   font-family: var(--font-sans);
   min-height: 100dvh;
 }
 
 ::selection {
-  background: rgb(255 36 56 / 0.45);
+  background: rgb(255 47 185 / 0.5);
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #3a3a3a transparent;
+  scrollbar-color: #ff2fb9 transparent;
 }
 
+/* ─── Surfaces ─── */
+@utility glass {
+  background: linear-gradient(160deg, rgb(255 255 255 / 0.07), rgb(255 255 255 / 0.02));
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+}
 @utility card {
-    @apply rounded-2xl border border-line bg-panel/90 shadow-card;
+  @apply glass rounded-3xl border border-white/10 shadow-card;
 }
+/* Interactive card: magenta frame, lift, cursor spotlight (vars set by <Spotlight/>). */
 @utility card-glow {
-    @apply rounded-2xl border border-line bg-panel/90 shadow-card transition duration-300 hover:border-neon/60 hover:shadow-neon;
+  @apply glass relative isolate overflow-hidden rounded-3xl border border-neon/40 shadow-card transition duration-500 ease-out hover:-translate-y-1.5 hover:border-neon hover:shadow-neon;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s;
+    background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgb(46 245 198 / 0.16), transparent 45%);
+  }
+  &:hover::before {
+    opacity: 1;
+  }
 }
+
+/* ─── Buttons ─── */
 @utility btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition duration-200 select-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neon;
+  @apply relative isolate inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl px-4 py-2.5 text-sm font-semibold tracking-wide transition duration-300 select-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mint;
 }
+/* Mint action button with a light sweep on hover. */
 @utility btn-primary {
-    @apply btn bg-gradient-to-b from-neon to-[#d9132a] text-white shadow-[0_8px_24px_-8px_rgb(255_36_56/0.8)] hover:brightness-110 active:brightness-95;
+  @apply btn bg-gradient-to-r from-mint to-[#7dfde0] text-[#03140f] shadow-mint hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    transform: translateX(-120%) skewX(-20deg);
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.65), transparent);
+    transition: transform 0.7s ease;
+  }
+  &:hover::after {
+    transform: translateX(120%) skewX(-20deg);
+  }
 }
 @utility btn-outline {
-    @apply btn border border-line bg-panel-2 text-zinc-100 hover:border-neon/60 hover:text-white;
+  @apply btn glass border border-neon/40 text-zinc-100 hover:border-neon hover:text-white hover:shadow-neon;
 }
 @utility btn-ghost {
-    @apply btn text-zinc-300 hover:bg-white/5 hover:text-white;
+  @apply btn text-zinc-300 hover:bg-white/5 hover:text-white;
 }
 @utility btn-sm {
-    @apply px-3 py-1.5 text-xs rounded-lg;
+  @apply rounded-lg px-3 py-1.5 text-xs;
 }
+
+/* ─── Forms ─── */
 @utility input {
-    @apply w-full rounded-xl border border-line bg-[#111] px-3.5 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition focus:border-neon/70 focus:ring-2 focus:ring-neon/25 aria-[invalid=true]:border-neon;
+  @apply w-full rounded-xl border border-white/10 bg-black/40 px-3.5 py-2.5 text-sm text-zinc-100 backdrop-blur placeholder:text-zinc-500 outline-none transition focus:border-mint/70 focus:ring-2 focus:ring-mint/20 aria-[invalid=true]:border-neon;
 }
 @utility label {
-    @apply mb-1.5 block text-sm font-medium text-zinc-300;
+  @apply mb-1.5 block text-sm font-medium text-zinc-300;
 }
+
+/* ─── Chips / pills (filter tabs) ─── */
 @utility chip {
-    @apply inline-flex items-center gap-1 rounded-full border border-line bg-panel-2 px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:border-neon/50 hover:text-white;
+  @apply glass inline-flex items-center gap-1 rounded-lg border border-white/15 px-4 py-2 text-xs font-semibold tracking-wide text-zinc-300 transition duration-300 hover:border-neon/60 hover:text-white;
 }
 @utility chip-active {
-    @apply border-neon bg-neon text-white shadow-neon hover:text-white;
+  @apply border-neon bg-gradient-to-r from-neon to-[#ff5fcb] text-white shadow-neon hover:text-white;
 }
 @utility badge {
-    @apply inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-semibold;
+  @apply inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-semibold;
 }
+
+/* ─── Typography ─── */
 @utility heading {
-    @apply font-display font-bold tracking-wide uppercase;
+  @apply font-display font-bold tracking-wider uppercase;
 }
+/* Hollow neon headline, like "FANTASY" in the reference. */
+@utility text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgb(255 255 255 / 0.9);
+  text-shadow: 0 0 24px rgb(46 245 198 / 0.35);
+}
+@utility text-gradient {
+  background: linear-gradient(90deg, var(--color-mint), #fff 40%, var(--color-neon));
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: var(--animate-gradient);
+}
+
 @utility skeleton {
-    @apply rounded-xl bg-[linear-gradient(90deg,#1a1a1a_0%,#262626_50%,#1a1a1a_100%)] bg-[length:800px_100%] animate-shimmer;
+  @apply rounded-xl bg-[linear-gradient(90deg,#141522_0%,#22243a_50%,#141522_100%)] bg-[length:800px_100%] animate-shimmer;
 }
 @utility table-base {
-    @apply w-full text-left text-sm;
-    & th {
-      @apply border-b border-line px-3 py-2.5 text-xs font-semibold tracking-wide text-zinc-400 uppercase;
-    }
-    & td {
-      @apply border-b border-line/60 px-3 py-3 align-middle;
-    }
+  @apply w-full text-left text-sm;
+  & th {
+    @apply border-b border-line px-3 py-2.5 text-xs font-semibold tracking-wide text-zinc-400 uppercase;
+  }
+  & td {
+    @apply border-b border-line/60 px-3 py-3 align-middle;
+  }
+}
+
+/* ─── Scroll reveal: elements animate in as they enter the viewport.
+   Uses scroll-driven animations where supported; elsewhere content is simply visible. */
+@supports (animation-timeline: view()) {
+  .reveal {
+    animation: fade-up linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 55%;
+  }
+}
+
+/* ─── Page transition (app/(store)/template.tsx) ─── */
+.page-enter {
+  animation: fade-up 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -123,6 +207,17 @@ body {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Neon ribbons drift and breathe. */
+@keyframes ribbon-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scaleY(1); }
+  50% { transform: translate3d(-60px, 24px, 0) scaleY(1.12); }
+}
+.neon-ribbon {
+  animation: ribbon-drift ease-in-out infinite;
+  transform-origin: center;
 }
