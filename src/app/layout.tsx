@@ -1,14 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Orbitron } from "next/font/google";
+import { Inter, Sora } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/toast";
-import { NeonBackdrop } from "@/components/fx/neon-backdrop";
 import { Spotlight } from "@/components/fx/spotlight";
-import { BattlegroundBackdrop } from "@/components/fx/battleground-backdrop";
+import { CinematicBackdrop } from "@/components/fx/cinematic-backdrop";
 import { SITE_NAME } from "@/lib/constants";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const orbitron = Orbitron({ subsets: ["latin"], weight: ["500", "600", "700", "800", "900"], variable: "--font-orbitron" });
+const sora = Sora({ subsets: ["latin"], weight: ["500", "600", "700", "800"], variable: "--font-sora" });
 
 export const metadata: Metadata = {
   title: { default: `${SITE_NAME} — PUBG Mobile & BGMI Marketplace`, template: `%s · ${SITE_NAME}` },
@@ -19,10 +18,9 @@ export const viewport: Viewport = { themeColor: "#05060b", width: "device-width"
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${orbitron.variable}`}>
+    <html lang="en" className={`${inter.variable} ${sora.variable}`}>
       <body className="antialiased">
-        <NeonBackdrop />
-        <BattlegroundBackdrop />
+        <CinematicBackdrop />
         <Spotlight />
         <ToastProvider>{children}</ToastProvider>
       </body>

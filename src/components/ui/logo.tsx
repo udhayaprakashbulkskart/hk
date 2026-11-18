@@ -24,7 +24,7 @@ export function Logo() {
     <Link href="/" className="flex items-center gap-2" aria-label="PUBG Store home">
       <LogoMark />
       <span className="font-display text-lg leading-none font-extrabold tracking-[0.18em]">
-        <span className="text-white">PUBG</span> <span className="text-gradient">STORE</span>
+        <span className="text-white">PUBG</span> <span className="text-neon">STORE</span>
       </span>
     </Link>
   );

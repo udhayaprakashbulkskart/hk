@@ -24,7 +24,7 @@ export async function Header() {
   const cartCount = cart?._sum.quantity ?? 0;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-ink/60 backdrop-blur-2xl supports-[backdrop-filter]:bg-ink/40">
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-ink/85 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 lg:px-6">
         <MobileDrawer signedIn={!!user} isAdmin={user?.role === "ADMIN"} />
         <div className="flex flex-1 justify-center md:flex-none md:justify-start">
@@ -35,7 +35,7 @@ export async function Header() {
             <NavLink
               key={i.href}
               href={i.href}
-              className="relative px-2 py-2 text-sm font-medium whitespace-nowrap text-zinc-400 transition after:absolute after:inset-x-2.5 after:-bottom-[13px] after:h-0.5 after:origin-left after:scale-x-0 after:bg-gradient-to-r after:from-mint after:to-neon after:shadow-[0_0_12px_#2ef5c6] after:transition hover:text-white lg:px-3"
+              className="relative px-2 py-2 text-[12px] font-semibold tracking-wider whitespace-nowrap text-zinc-300 uppercase transition after:absolute after:inset-x-2.5 after:-bottom-[13px] after:h-0.5 after:origin-left after:scale-x-0 after:bg-neon after:shadow-[0_0_12px_#ff2d95] after:transition hover:text-white lg:px-3"
             >
               {i.label}
             </NavLink>
@@ -65,8 +65,8 @@ export async function Header() {
             </>
           ) : (
             <div className="hidden items-center gap-2 md:flex">
-              <Link href="/login" className="btn-ghost">Sign in</Link>
-              <Link href="/register" className="btn-primary">Sign up</Link>
+              <Link href="/login" className="btn-ghost text-xs tracking-wider uppercase">Sign in</Link>
+              <Link href="/register" className="btn-outline btn-sm px-4 py-2 text-[11px] tracking-[0.15em] uppercase">Sign up</Link>
             </div>
           )}
         </div>

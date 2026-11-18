@@ -3,24 +3,24 @@
 /* ─── PUBG Store · "Neon Luxe" design tokens ───
    Mint primary actions, magenta accents & borders, violet depth, glass surfaces. */
 @theme {
-  --color-ink: #05060b;
-  --color-panel: #10111a;
-  --color-panel-2: #171826;
-  --color-line: #2a2b3d;
-  --color-neon: #ff2fb9; /* magenta — accents, borders, active */
-  --color-neon-soft: #ff7ad6;
-  --color-crimson: #7b2cff; /* violet depth */
-  --color-mint: #2ef5c6; /* primary actions */
-  --color-mint-deep: #10c79f;
-  --color-muted: #a3a6bf;
-  --color-success: #2ef5c6;
+  --color-ink: #07070c;
+  --color-panel: #0e0e16;
+  --color-panel-2: #15151f;
+  --color-line: #24243a;
+  --color-neon: #ff2d95; /* hot pink — primary actions, accents */
+  --color-neon-soft: #ff6db8;
+  --color-crimson: #7c3aed; /* violet depth */
+  --color-mint: #22d3ee; /* cyan — secondary accent */
+  --color-mint-deep: #0ea5c6;
+  --color-muted: #b4b7cc;
+  --color-success: #34d399;
   --color-warn: #fbbf24;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-orbitron), var(--font-inter), ui-sans-serif, sans-serif;
+  --font-display: var(--font-sora), var(--font-inter), ui-sans-serif, sans-serif;
 
-  --shadow-neon: 0 0 0 1px rgb(255 47 185 / 0.55), 0 0 28px -4px rgb(255 47 185 / 0.55), 0 0 60px -20px rgb(123 44 255 / 0.6);
-  --shadow-mint: 0 0 0 1px rgb(46 245 198 / 0.5), 0 10px 30px -8px rgb(46 245 198 / 0.55);
+  --shadow-neon: 0 0 0 1px rgb(255 45 149 / 0.55), 0 0 28px -4px rgb(255 45 149 / 0.55), 0 0 60px -20px rgb(123 44 255 / 0.6);
+  --shadow-mint: 0 0 0 1px rgb(34 211 238 / 0.5), 0 10px 30px -8px rgb(34 211 238 / 0.55);
   --shadow-card: 0 20px 50px -24px rgb(0 0 0 / 0.9);
 
   --animate-fade-up: fade-up 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
@@ -39,8 +39,8 @@
     to { background-position: 400px 0; }
   }
   @keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 0 0 1px rgb(255 47 185 / 0.45), 0 0 18px -6px rgb(255 47 185 / 0.6); }
-    50% { box-shadow: 0 0 0 1px rgb(46 245 198 / 0.7), 0 0 34px -4px rgb(46 245 198 / 0.7); }
+    0%, 100% { box-shadow: 0 0 0 1px rgb(255 45 149 / 0.45), 0 0 18px -6px rgb(255 45 149 / 0.6); }
+    50% { box-shadow: 0 0 0 1px rgb(34 211 238 / 0.7), 0 0 34px -4px rgb(34 211 238 / 0.7); }
   }
   @keyframes float {
     0%, 100% { transform: translateY(0) rotate(0deg); }
@@ -65,13 +65,13 @@ html {
 body {
   /* transparent so the fixed <NeonBackdrop/> (z-index -10) shows through; html paints the base colour */
   background: transparent;
-  color: #f2f3fb;
+  color: #eceef7;
   font-family: var(--font-sans);
   min-height: 100dvh;
 }
 
 ::selection {
-  background: rgb(255 47 185 / 0.5);
+  background: rgb(255 45 149 / 0.5);
 }
 
 * {
@@ -81,16 +81,16 @@ body {
 
 /* ─── Surfaces ─── */
 @utility glass {
-  background: linear-gradient(160deg, rgb(255 255 255 / 0.07), rgb(255 255 255 / 0.02));
-  backdrop-filter: blur(16px) saturate(140%);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  background: linear-gradient(160deg, rgb(24 24 36 / 0.92), rgb(12 12 20 / 0.94));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 @utility card {
-  @apply glass rounded-3xl border border-white/10 shadow-card;
+  @apply glass rounded-2xl border border-white/10 shadow-card;
 }
 /* Interactive card: magenta frame, lift, cursor spotlight (vars set by <Spotlight/>). */
 @utility card-glow {
-  @apply glass relative isolate overflow-hidden rounded-3xl border border-neon/40 shadow-card transition duration-500 ease-out hover:-translate-y-1.5 hover:border-neon hover:shadow-neon;
+  @apply glass relative isolate overflow-hidden rounded-2xl border border-white/10 shadow-card transition duration-500 ease-out hover:-translate-y-1 hover:border-neon/70 hover:shadow-neon;
   &::before {
     content: "";
     position: absolute;
@@ -99,7 +99,7 @@ body {
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.4s;
-    background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgb(46 245 198 / 0.16), transparent 45%);
+    background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgb(34 211 238 / 0.16), transparent 45%);
   }
   &:hover::before {
     opacity: 1;
@@ -108,11 +108,11 @@ body {
 
 /* ─── Buttons ─── */
 @utility btn {
-  @apply relative isolate inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl px-4 py-2.5 text-sm font-semibold tracking-wide transition duration-300 select-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mint;
+  @apply relative isolate inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl px-4 py-2.5 text-sm font-semibold tracking-wide transition duration-300 select-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neon;
 }
 /* Mint action button with a light sweep on hover. */
 @utility btn-primary {
-  @apply btn bg-gradient-to-r from-mint to-[#7dfde0] text-[#03140f] shadow-mint hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0;
+  @apply btn bg-gradient-to-r from-neon to-[#ff5fae] text-white shadow-[0_10px_30px_-10px_rgb(255_45_149/0.8)] hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0;
   &::after {
     content: "";
     position: absolute;
@@ -127,7 +127,7 @@ body {
   }
 }
 @utility btn-outline {
-  @apply btn glass border border-neon/40 text-zinc-100 hover:border-neon hover:text-white hover:shadow-neon;
+  @apply btn border border-neon/60 bg-transparent text-zinc-100 hover:bg-neon/10 hover:text-white;
 }
 @utility btn-ghost {
   @apply btn text-zinc-300 hover:bg-white/5 hover:text-white;
@@ -157,13 +157,13 @@ body {
 
 /* ─── Typography ─── */
 @utility heading {
-  @apply font-display font-bold tracking-wider uppercase;
+  @apply font-display font-extrabold tracking-wide uppercase;
 }
 /* Hollow neon headline, like "FANTASY" in the reference. */
 @utility text-outline {
   color: transparent;
   -webkit-text-stroke: 1.5px rgb(255 255 255 / 0.9);
-  text-shadow: 0 0 24px rgb(46 245 198 / 0.35);
+  text-shadow: 0 0 24px rgb(34 211 238 / 0.35);
 }
 @utility text-gradient {
   background: linear-gradient(90deg, var(--color-mint), #fff 40%, var(--color-neon));
@@ -212,82 +212,14 @@ body {
   }
 }
 
-/* Neon ribbons drift and breathe. */
-@keyframes ribbon-drift {
-  0%, 100% { transform: translate3d(0, 0, 0) scaleY(1); }
-  50% { transform: translate3d(-60px, 24px, 0) scaleY(1.12); }
-}
-.neon-ribbon {
-  animation: ribbon-drift ease-in-out infinite;
-  transform-origin: center;
-}
 
-/* ─── Battleground backdrop (components/fx/battleground-backdrop.tsx) ─── */
-@property --zr {
-  syntax: "<length>";
-  inherits: false;
-  initial-value: 36vmax;
+/* ─── Cinematic backdrop: fibre-optic light streaks drifting slowly at the edges ─── */
+@keyframes streak-drift {
+  0%, 100% { transform: translate3d(0, 0, 0); opacity: 0.9; }
+  50% { transform: translate3d(24px, -14px, 0); opacity: 1; }
 }
-@keyframes zone-shrink {
-  0% { --zr: 46vmax; }
-  70% { --zr: 17vmax; }
-  85%, 100% { --zr: 17vmax; }
-}
-.bg-zone,
-.bg-zone-ring {
-  /* stepped: the zone "ticks" inward like a HUD, and repaints a few times per second instead of every frame */
-  animation: zone-shrink 45s steps(180) infinite;
-}
-/* Phones: drop the per-frame SVG glow filter on the ribbons (GPU memory) */
-@media (max-width: 768px) {
-  .ribbon-glow { filter: none; }
-}
-.bg-zone {
-  background: radial-gradient(circle at 62% 42%, transparent calc(var(--zr) - 2px), rgb(37 99 235 / 0.16) var(--zr), rgb(37 99 235 / 0.22));
-}
-.bg-zone-ring {
-  width: calc(var(--zr) * 2);
-  transform: translate(-50%, -50%);
-}
+.streaks { animation: streak-drift 14s ease-in-out infinite; will-change: transform; }
 
-@keyframes plane-fly {
-  0% { transform: translate(-60vw, 6vh) rotate(-4deg); opacity: 0; }
-  6% { opacity: 1; }
-  45% { transform: translate(115vw, -4vh) rotate(-4deg); opacity: 1; }
-  46%, 100% { transform: translate(115vw, -4vh) rotate(-4deg); opacity: 0; }
-}
-.bg-plane { animation: plane-fly 30s linear infinite; }
-
-@keyframes jumper-fall {
-  0% { transform: translateY(0); opacity: 0; }
-  8% { opacity: 1; }
-  80% { opacity: 0.9; }
-  100% { transform: translateY(115vh); opacity: 0; }
-}
-@keyframes sway {
-  0%, 100% { transform: rotate(-7deg) translateX(-8px); }
-  50% { transform: rotate(7deg) translateX(8px); }
-}
-.bg-jumper { animation: jumper-fall linear infinite; }
-.bg-sway { animation: sway 4s ease-in-out infinite; transform-origin: 50% 0; }
-
-@keyframes airdrop-fall {
-  0% { transform: translateY(0); opacity: 0; }
-  5% { opacity: 1; }
-  85% { transform: translateY(78vh); opacity: 1; }
-  100% { transform: translateY(80vh); opacity: 0; }
-}
-.bg-airdrop { animation: airdrop-fall 38s linear infinite; animation-delay: -8s; }
-
-@keyframes smoke-rise {
-  0% { transform: translate(-50%, 0) scale(0.4); opacity: 0; }
-  15% { opacity: 0.9; }
-  100% { transform: translate(calc(-50% + 40px), -48vh) scale(3.2); opacity: 0; }
-}
-.bg-smoke { animation: smoke-rise 10s ease-out infinite; }
-
-@keyframes compass-scroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-.bg-compass { animation: compass-scroll 40s linear infinite; }
+/* Blinking type cursor (hero) */
+@keyframes caret { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+.caret { animation: caret 1.05s step-end infinite; }
