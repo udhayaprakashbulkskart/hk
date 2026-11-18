@@ -35,7 +35,7 @@ export async function Header() {
             <NavLink
               key={i.href}
               href={i.href}
-              className="relative px-2 py-2 text-[12px] font-semibold tracking-wider whitespace-nowrap text-zinc-300 uppercase transition after:absolute after:inset-x-2.5 after:-bottom-[13px] after:h-0.5 after:origin-left after:scale-x-0 after:bg-neon after:shadow-[0_0_12px_#ff2d95] after:transition hover:text-white lg:px-3"
+              className="relative px-2 py-2 text-[12px] font-semibold tracking-wider whitespace-nowrap text-zinc-300 uppercase transition after:absolute after:inset-x-2.5 after:-bottom-[13px] after:h-0.5 after:origin-left after:scale-x-0 after:bg-neon after:shadow-[0_0_12px_#f5b301] after:transition hover:text-white lg:px-3"
             >
               {i.label}
             </NavLink>

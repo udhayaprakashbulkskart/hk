@@ -1,9 +1,9 @@
 export const MAIN_NAV = [
   { href: "/", label: "Home", icon: "home" },
-  { href: "/marketplace", label: "Marketplace", icon: "store" },
-  { href: "/skins", label: "Buy Skins", icon: "crosshair" },
-  { href: "/sell", label: "Sell Items", icon: "tag" },
-  { href: "/uc", label: "UC Store", icon: "coins" },
+  { href: "/skins", label: "Skins", icon: "store" },
+  { href: "/guns", label: "Guns", icon: "crosshair" },
+  { href: "/uc", label: "UC Top-Up", icon: "coins" },
+  { href: "/sell", label: "Sell", icon: "tag" },
   { href: "/support", label: "Support", icon: "life" },
 ] as const;
 

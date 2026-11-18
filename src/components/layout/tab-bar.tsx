@@ -29,7 +29,7 @@ export function TabBar() {
                   <Icon className="size-6" />
                 </Link>
               ) : (
-                <Link href={href} aria-current={active ? "page" : undefined} className={clsx("flex flex-col items-center gap-0.5 py-2 text-[11px]", active ? "text-mint drop-shadow-[0_0_8px_#2ef5c6]" : "text-zinc-400")}>
+                <Link href={href} aria-current={active ? "page" : undefined} className={clsx("flex flex-col items-center gap-0.5 py-2 text-[11px]", active ? "text-mint drop-shadow-[0_0_8px_#f5b301]" : "text-zinc-400")}>
                   <Icon className="size-5" />
                   {label}
                 </Link>

@@ -14,8 +14,8 @@ export function AuthShell({ title, subtitle, render, children }: { title: string
         {children}
       </div>
       <div className="relative hidden h-[560px] lg:block" aria-hidden>
-        <div className="absolute inset-x-[15%] bottom-6 h-10 rounded-[50%] bg-[radial-gradient(ellipse,rgba(46,245,198,0.55),rgba(255,47,185,0.2)_50%,transparent_70%)]" />
-        <div className="absolute inset-x-[22%] bottom-9 h-4 rounded-[50%] border border-mint/60 shadow-[0_0_24px_rgba(46,245,198,0.6)]" />
+        <div className="absolute inset-x-[15%] bottom-6 h-10 rounded-[50%] bg-[radial-gradient(ellipse,rgba(245,179,1,0.55),rgba(255,122,26,0.2)_50%,transparent_70%)]" />
+        <div className="absolute inset-x-[22%] bottom-9 h-4 rounded-[50%] border border-mint/60 shadow-[0_0_24px_rgba(245,179,1,0.6)]" />
         <Image src={render} alt="" fill sizes="40vw" className="animate-float object-contain object-bottom pb-10 drop-shadow-[0_20px_40px_rgba(0,0,0,0.7)]" />
       </div>
     </div>

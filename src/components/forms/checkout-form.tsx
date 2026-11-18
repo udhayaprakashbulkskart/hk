@@ -77,7 +77,7 @@ export function CheckoutForm(props: {
 function PayOption({ value, selected, onSelect, title, sub, Icon, disabled }: { value: "WALLET" | "RAZORPAY"; selected: string; onSelect: (v: "WALLET" | "RAZORPAY") => void; title: string; sub: string; Icon: typeof Wallet; disabled?: boolean }) {
   return (
     <label className={clsx("flex cursor-pointer items-center gap-3 rounded-xl border p-3.5 transition", selected === value ? "border-neon bg-neon/10 shadow-neon" : "border-line hover:border-zinc-500", disabled && "cursor-not-allowed opacity-50")}>
-      <input type="radio" name="provider" value={value} checked={selected === value} disabled={disabled} onChange={() => onSelect(value)} className="accent-[#2ef5c6]" />
+      <input type="radio" name="provider" value={value} checked={selected === value} disabled={disabled} onChange={() => onSelect(value)} className="accent-[#f5b301]" />
       <Icon className="size-5 text-neon" />
       <span className="flex-1"><span className="block text-sm font-semibold">{title}</span><span className="text-xs text-muted">{sub}</span></span>
     </label>

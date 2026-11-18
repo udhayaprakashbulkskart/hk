@@ -27,7 +27,7 @@ export function SellerOnboardForm({ defaults }: { defaults?: { storeName?: strin
       </div>
       <Textarea label="About your store (optional)" name="bio" maxLength={300} defaultValue={defaults?.bio ?? ""} error={fields.bio} />
       <label className="flex items-start gap-2 text-sm text-zinc-300">
-        <input type="checkbox" name="agree" className="mt-1 accent-[#2ef5c6]" />
+        <input type="checkbox" name="agree" className="mt-1 accent-[#f5b301]" />
         <span>I will only list items transferable through the game&apos;s official gifting or redeem systems. I will never sell accounts or ask buyers for passwords or OTPs.</span>
       </label>
       {fields.agree && <p className="-mt-2 text-xs text-neon-soft">{fields.agree}</p>}

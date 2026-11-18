@@ -17,7 +17,7 @@ export function ProductGallery({ media, title }: { media: Media[]; title: string
 
   return (
     <div className="space-y-3">
-      <div className="card relative aspect-[4/3] overflow-hidden bg-[radial-gradient(ellipse_at_50%_88%,rgba(46,245,198,0.18),transparent_60%),linear-gradient(165deg,#1b1530,#07080f)]">
+      <div className="card relative aspect-[4/3] overflow-hidden bg-[radial-gradient(ellipse_at_50%_88%,rgba(245,179,1,0.18),transparent_60%),linear-gradient(165deg,#1c2027,#0d0f13)]">
         {view.kind === "spin" ? (
           <SpinViewer frames={frames.map((f) => f.url)} title={title} />
         ) : view.kind === "video" && video ? (
