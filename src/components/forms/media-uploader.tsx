@@ -2,11 +2,12 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { Film, Plus, X } from "lucide-react";
+import { upload } from "@vercel/blob/client";
 import { api } from "@/lib/client";
 import { Spinner } from "@/components/ui/states";
 
 export type MediaItem = { url: string; type: "IMAGE" | "VIDEO" | "SPIN" };
-type Sign = { driver: "local" } | { driver: "cloudinary"; cloudName: string; apiKey: string; timestamp: number; folder: string; signature: string };
+type Sign = { driver: "local" } | { driver: "vercel-blob" } | { driver: "cloudinary"; cloudName: string; apiKey: string; timestamp: number; folder: string; signature: string };
 
 const IMG = ["image/jpeg", "image/png", "image/webp"];
 const VID = ["video/mp4", "video/webm"];
@@ -14,6 +15,15 @@ const VID = ["video/mp4", "video/webm"];
 async function uploadOne(file: File): Promise<{ ok: true; item: MediaItem } | { ok: false; error: string }> {
   const sign = await api<Sign>("/api/uploads/sign");
   if (!sign.ok) return { ok: false, error: sign.error };
+  if (sign.data.driver === "vercel-blob") {
+    try {
+      const safe = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, "-").slice(-60);
+      const blob = await upload(`listings/${safe}`, file, { access: "public", handleUploadUrl: "/api/uploads/blob", contentType: file.type });
+      return { ok: true, item: { url: blob.url, type: file.type.startsWith("video/") ? "VIDEO" : "IMAGE" } };
+    } catch (e) {
+      return { ok: false, error: e instanceof Error ? e.message.replace(/^Vercel Blob: /, "") : "Upload failed" };
+    }
+  }
   const form = new FormData();
   form.append("file", file);
   if (sign.data.driver === "cloudinary") {

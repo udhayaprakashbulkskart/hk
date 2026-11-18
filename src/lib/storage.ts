@@ -6,15 +6,25 @@ import { randomUUID } from "node:crypto";
 import { ApiError } from "./errors";
 
 /**
- * Media storage. Two drivers:
+ * Media storage. Three drivers:
+ *  - "vercel-blob": the browser uploads directly to Vercel Blob with a short-lived client token
+ *    issued by /api/uploads/blob (auth + type/size limits enforced when the token is issued).
  *  - "cloudinary": the browser uploads directly to Cloudinary using a short-lived signature
- *    issued by /api/uploads/sign (keeps large videos off our serverless functions).
+ *    issued by /api/uploads/sign.
  *  - "local": dev-only; files are written to public/uploads by /api/uploads.
- * S3-compatible storage can be added as a third driver behind the same interface.
+ * Direct uploads keep large videos off serverless function body limits.
  */
-export type StorageDriver = "cloudinary" | "local";
+export type StorageDriver = "vercel-blob" | "cloudinary" | "local";
 export function storageDriver(): StorageDriver {
-  return process.env.STORAGE_DRIVER === "cloudinary" ? "cloudinary" : "local";
+  const d = process.env.STORAGE_DRIVER;
+  if (d === "vercel-blob" || d === "cloudinary") return d;
+  return "local";
+}
+
+/** Public hostname of *our* Blob store, derived from the read-write token (vercel_blob_rw_<storeId>_<secret>). */
+export function blobPublicHost() {
+  const storeId = process.env.BLOB_READ_WRITE_TOKEN?.split("_")[3];
+  return storeId ? `${storeId.toLowerCase()}.public.blob.vercel-storage.com` : null;
 }
 
 export const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
@@ -66,6 +76,8 @@ export function cloudinarySignature(folder = "pubg-store") {
 /** Only accept media hosted by us or our configured Cloudinary account. */
 export function isAllowedMediaUrl(url: string) {
   if (url.startsWith("/uploads/") || url.startsWith("/art/")) return !url.includes("..");
+  const blobHost = blobPublicHost();
+  if (blobHost && url.startsWith(`https://${blobHost}/`)) return true;
   const cloud = process.env.CLOUDINARY_CLOUD_NAME;
   return Boolean(cloud && url.startsWith(`https://res.cloudinary.com/${cloud}/`));
 }
