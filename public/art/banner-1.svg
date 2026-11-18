@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" role="img" aria-label="promotional artwork">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="45%" r="70%">
+      <stop offset="0" stop-color="hsl(210 70% 18%)"/>
+      <stop offset=".55" stop-color="#120708"/>
+      <stop offset="1" stop-color="#070707"/>
+    </radialGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="hsl(210 95% 62%)"/>
+      <stop offset=".5" stop-color="hsl(250 90% 45%)"/>
+      <stop offset="1" stop-color="hsl(210 80% 22%)"/>
+    </linearGradient>
+    <linearGradient id="visor" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fff" stop-opacity=".95"/>
+      <stop offset="1" stop-color="hsl(210 95% 62%)" stop-opacity=".7"/>
+    </linearGradient>
+    <radialGradient id="pad" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="hsl(210 100% 55%)" stop-opacity=".7"/>
+      <stop offset="1" stop-color="hsl(210 100% 55%)" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="10" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1200" height="600" fill="url(#bg)"/>
+  <circle cx="630" cy="210" r="1" fill="hsl(210 100% 55%)" opacity="0.15"/><circle cx="768" cy="299" r="2" fill="hsl(210 100% 55%)" opacity="0.23"/><circle cx="905" cy="389" r="3" fill="hsl(210 100% 55%)" opacity="0.31"/><circle cx="1043" cy="478" r="1" fill="hsl(210 100% 55%)" opacity="0.39"/><circle cx="1180" cy="87" r="2" fill="hsl(210 100% 55%)" opacity="0.47"/><circle cx="118" cy="177" r="3" fill="hsl(210 100% 55%)" opacity="0.15"/><circle cx="255" cy="266" r="1" fill="hsl(210 100% 55%)" opacity="0.23"/><circle cx="393" cy="355" r="2" fill="hsl(210 100% 55%)" opacity="0.31"/><circle cx="530" cy="444" r="3" fill="hsl(210 100% 55%)" opacity="0.39"/><circle cx="668" cy="54" r="1" fill="hsl(210 100% 55%)" opacity="0.47"/><circle cx="805" cy="143" r="2" fill="hsl(210 100% 55%)" opacity="0.15"/><circle cx="943" cy="232" r="3" fill="hsl(210 100% 55%)" opacity="0.23"/><circle cx="1080" cy="322" r="1" fill="hsl(210 100% 55%)" opacity="0.31"/><circle cx="18" cy="411" r="2" fill="hsl(210 100% 55%)" opacity="0.39"/><circle cx="155" cy="20" r="3" fill="hsl(210 100% 55%)" opacity="0.47"/><circle cx="293" cy="110" r="1" fill="hsl(210 100% 55%)" opacity="0.15"/><circle cx="430" cy="199" r="2" fill="hsl(210 100% 55%)" opacity="0.23"/><circle cx="568" cy="288" r="3" fill="hsl(210 100% 55%)" opacity="0.31"/><circle cx="705" cy="377" r="1" fill="hsl(210 100% 55%)" opacity="0.39"/><circle cx="843" cy="467" r="2" fill="hsl(210 100% 55%)" opacity="0.47"/><circle cx="980" cy="76" r="3" fill="hsl(210 100% 55%)" opacity="0.15"/><circle cx="1118" cy="165" r="1" fill="hsl(210 100% 55%)" opacity="0.23"/><circle cx="55" cy="255" r="2" fill="hsl(210 100% 55%)" opacity="0.31"/><circle cx="193" cy="344" r="3" fill="hsl(210 100% 55%)" opacity="0.39"/><circle cx="330" cy="433" r="1" fill="hsl(210 100% 55%)" opacity="0.47"/><circle cx="468" cy="43" r="2" fill="hsl(210 100% 55%)" opacity="0.15"/><circle cx="605" cy="132" r="3" fill="hsl(210 100% 55%)" opacity="0.23"/><circle cx="743" cy="221" r="1" fill="hsl(210 100% 55%)" opacity="0.31"/>
+  <ellipse cx="600" cy="530" rx="432" ry="34" fill="url(#pad)"/>
+  <ellipse cx="600" cy="530" rx="360" ry="20" fill="none" stroke="#ff2438" stroke-width="3" opacity=".8"/>
+  <g filter="url(#glow)" fill="url(#body)" stroke="hsl(210 95% 62%)" stroke-width="2" stroke-linejoin="round">
+    <g transform="translate(770 60)">
+      <path d="M150 20 C110 20 92 52 94 86 C96 104 104 116 110 122 L100 134 C70 140 40 160 30 196 L10 300 L40 306 L58 230 L66 300 L60 470 L118 470 L140 330 L160 330 L182 470 L240 470 L234 300 L242 230 L260 306 L290 300 L270 196 C260 160 230 140 200 134 L190 122 C196 116 204 104 206 86 C208 52 190 20 150 20 Z"/>
+      <path d="M96 140 L60 120 L40 150 L70 170 Z M204 140 L240 120 L260 150 L230 170 Z" opacity=".85"/>
+      <path d="M112 74 L188 74 L182 96 L118 96 Z" fill="url(#visor)"/>
+    </g></g>
+</svg>

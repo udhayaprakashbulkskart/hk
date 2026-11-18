@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" role="img" aria-label="promotional artwork">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="45%" r="70%">
+      <stop offset="0" stop-color="hsl(285 70% 18%)"/>
+      <stop offset=".55" stop-color="#120708"/>
+      <stop offset="1" stop-color="#070707"/>
+    </radialGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="hsl(285 95% 62%)"/>
+      <stop offset=".5" stop-color="hsl(325 90% 45%)"/>
+      <stop offset="1" stop-color="hsl(285 80% 22%)"/>
+    </linearGradient>
+    <linearGradient id="visor" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fff" stop-opacity=".95"/>
+      <stop offset="1" stop-color="hsl(285 95% 62%)" stop-opacity=".7"/>
+    </linearGradient>
+    <radialGradient id="pad" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="hsl(285 100% 55%)" stop-opacity=".7"/>
+      <stop offset="1" stop-color="hsl(285 100% 55%)" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="10" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1200" height="600" fill="url(#bg)"/>
+  <circle cx="855" cy="285" r="1" fill="hsl(285 100% 55%)" opacity="0.15"/><circle cx="993" cy="374" r="2" fill="hsl(285 100% 55%)" opacity="0.23"/><circle cx="1130" cy="464" r="3" fill="hsl(285 100% 55%)" opacity="0.31"/><circle cx="68" cy="73" r="1" fill="hsl(285 100% 55%)" opacity="0.39"/><circle cx="205" cy="162" r="2" fill="hsl(285 100% 55%)" opacity="0.47"/><circle cx="343" cy="252" r="3" fill="hsl(285 100% 55%)" opacity="0.15"/><circle cx="480" cy="341" r="1" fill="hsl(285 100% 55%)" opacity="0.23"/><circle cx="618" cy="430" r="2" fill="hsl(285 100% 55%)" opacity="0.31"/><circle cx="755" cy="39" r="3" fill="hsl(285 100% 55%)" opacity="0.39"/><circle cx="893" cy="129" r="1" fill="hsl(285 100% 55%)" opacity="0.47"/><circle cx="1030" cy="218" r="2" fill="hsl(285 100% 55%)" opacity="0.15"/><circle cx="1168" cy="307" r="3" fill="hsl(285 100% 55%)" opacity="0.23"/><circle cx="105" cy="397" r="1" fill="hsl(285 100% 55%)" opacity="0.31"/><circle cx="243" cy="6" r="2" fill="hsl(285 100% 55%)" opacity="0.39"/><circle cx="380" cy="95" r="3" fill="hsl(285 100% 55%)" opacity="0.47"/><circle cx="518" cy="185" r="1" fill="hsl(285 100% 55%)" opacity="0.15"/><circle cx="655" cy="274" r="2" fill="hsl(285 100% 55%)" opacity="0.23"/><circle cx="793" cy="363" r="3" fill="hsl(285 100% 55%)" opacity="0.31"/><circle cx="930" cy="452" r="1" fill="hsl(285 100% 55%)" opacity="0.39"/><circle cx="1068" cy="62" r="2" fill="hsl(285 100% 55%)" opacity="0.47"/><circle cx="5" cy="151" r="3" fill="hsl(285 100% 55%)" opacity="0.15"/><circle cx="143" cy="240" r="1" fill="hsl(285 100% 55%)" opacity="0.23"/><circle cx="280" cy="330" r="2" fill="hsl(285 100% 55%)" opacity="0.31"/><circle cx="418" cy="419" r="3" fill="hsl(285 100% 55%)" opacity="0.39"/><circle cx="555" cy="28" r="1" fill="hsl(285 100% 55%)" opacity="0.47"/><circle cx="693" cy="118" r="2" fill="hsl(285 100% 55%)" opacity="0.15"/><circle cx="830" cy="207" r="3" fill="hsl(285 100% 55%)" opacity="0.23"/><circle cx="968" cy="296" r="1" fill="hsl(285 100% 55%)" opacity="0.31"/>
+  <ellipse cx="600" cy="530" rx="432" ry="34" fill="url(#pad)"/>
+  <ellipse cx="600" cy="530" rx="360" ry="20" fill="none" stroke="#ff2438" stroke-width="3" opacity=".8"/>
+  <g filter="url(#glow)" fill="url(#body)" stroke="hsl(285 95% 62%)" stroke-width="2" stroke-linejoin="round">
+    <g transform="translate(590 230) scale(1.65)">
+      <path d="M10 110 L18 82 C24 72 40 66 70 62 L130 34 C150 26 200 24 240 30 L300 56 L360 64 C380 68 392 80 396 96 L398 112 L360 114 C356 90 316 86 304 114 L120 116 C114 88 74 86 66 114 Z"/>
+      <path d="M140 40 L190 36 L196 60 L120 62 Z M206 36 C232 36 254 40 276 56 L210 60 Z" fill="url(#visor)"/>
+      <circle cx="93" cy="114" r="24"/><circle cx="332" cy="114" r="24"/>
+    </g></g>
+</svg>

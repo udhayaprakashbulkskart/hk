@@ -1,0 +1,544 @@
+// PUBG Store — marketplace schema.
+// All money values are stored as integer paise (₹1 = 100 paise) to avoid float errors.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ───────────────────────────── Enums ─────────────────────────────
+
+enum Role {
+  USER
+  SELLER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum SellerStatus {
+  NONE
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum Game {
+  PUBG_MOBILE
+  BGMI
+  BOTH
+}
+
+enum Rarity {
+  COMMON
+  RARE
+  EPIC
+  LEGENDARY
+  MYTHIC
+}
+
+enum ProductStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+  ARCHIVED
+}
+
+// Only delivery methods that the games' own systems allow. No account
+// sharing, no password/OTP collection — ever.
+enum DeliveryMethod {
+  IN_GAME_GIFT // official in-game gifting to the buyer's Player ID
+  REDEEM_CODE // officially issued redeem / voucher code
+  UC_TOPUP // UC credited to Player ID via an authorised top-up channel
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  SPIN // ordered frame set for the 360° viewer
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  PARTIALLY_REFUNDED
+  REFUNDED
+  COMPLETED
+  CANCELLED
+  PAYMENT_FAILED
+}
+
+enum FulfillmentStatus {
+  AWAITING_PAYMENT
+  PROCESSING
+  DELIVERED
+  COMPLETED
+  REFUND_REQUESTED
+  REFUNDED
+  CANCELLED
+}
+
+enum PaymentProvider {
+  RAZORPAY
+  WALLET
+}
+
+enum PaymentStatus {
+  CREATED
+  AUTHORIZED
+  CAPTURED
+  FAILED
+  REFUNDED
+}
+
+enum WalletTxnType {
+  CREDIT
+  DEBIT
+}
+
+enum WalletTxnReason {
+  TOPUP
+  PURCHASE
+  SALE_EARNING
+  REFUND
+  WITHDRAWAL
+  WITHDRAWAL_REVERSAL
+  ADJUSTMENT
+}
+
+enum WithdrawalStatus {
+  PENDING
+  APPROVED
+  PAID
+  REJECTED
+}
+
+enum RefundStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+  PROCESSED
+}
+
+enum RefundDestination {
+  WALLET
+  ORIGINAL
+}
+
+enum ReportStatus {
+  OPEN
+  RESOLVED
+  DISMISSED
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+}
+
+// ───────────────────────────── Users & auth ─────────────────────────────
+
+model User {
+  id            String     @id @default(cuid())
+  email         String     @unique
+  name          String
+  passwordHash  String
+  role          Role       @default(USER)
+  status        UserStatus @default(ACTIVE)
+  avatarUrl     String?
+  phone         String?
+  // Buyer's in-game Player ID used for gifting / top-ups. Never a password.
+  gamePlayerId  String?
+  preferredGame Game       @default(BGMI)
+  walletBalance Int        @default(0)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  sessions       Session[]
+  seller         SellerProfile?
+  products       Product[]          @relation("SellerProducts")
+  orders         Order[]
+  sales          OrderItem[]        @relation("SellerSales")
+  cartItems      CartItem[]
+  wishlist       WishlistItem[]
+  walletTxns     WalletTransaction[]
+  withdrawals    Withdrawal[]
+  refunds        Refund[]
+  reviewsGiven   Review[]           @relation("ReviewBuyer")
+  reviewsGot     Review[]           @relation("ReviewSeller")
+  notifications  Notification[]
+  reports        Report[]
+  tickets        SupportTicket[]
+  auditLogs      AuditLog[]
+  topups         WalletTopup[]
+
+  @@index([role])
+}
+
+model Session {
+  id         String   @id @default(cuid())
+  // SHA-256 of the random session token; the raw token only lives in the cookie.
+  tokenHash  String   @unique
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  userAgent  String?
+  ip         String?
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model RateLimit {
+  key       String   @id
+  count     Int
+  resetAt   DateTime
+}
+
+model SellerProfile {
+  id               String       @id @default(cuid())
+  userId           String       @unique
+  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  storeName        String       @unique
+  bio              String?
+  status           SellerStatus @default(PENDING)
+  // KYC-lite: legal name + PAN last 4 + payout UPI. No game credentials.
+  legalName        String
+  panLast4         String?
+  payoutUpi        String?
+  rejectionReason  String?
+  ratingAvg        Float        @default(0)
+  ratingCount      Int          @default(0)
+  totalSales       Int          @default(0)
+  verifiedAt       DateTime?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+}
+
+// ───────────────────────────── Catalog ─────────────────────────────
+
+model Category {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  name        String
+  description String?
+  icon        String    @default("box")
+  isSkin      Boolean   @default(true)
+  sortOrder   Int       @default(0)
+  products    Product[]
+}
+
+model Product {
+  id              String         @id @default(cuid())
+  slug            String         @unique
+  title           String
+  description     String
+  categoryId      String
+  category        Category       @relation(fields: [categoryId], references: [id])
+  sellerId        String
+  seller          User           @relation("SellerProducts", fields: [sellerId], references: [id])
+  game            Game           @default(BOTH)
+  rarity          Rarity         @default(EPIC)
+  level           Int?
+  maxLevel        Int?
+  features        String[]
+  deliveryMethod  DeliveryMethod @default(IN_GAME_GIFT)
+  price           Int // paise
+  compareAtPrice  Int? // paise
+  stock           Int            @default(1)
+  status          ProductStatus  @default(PENDING)
+  rejectionReason String?
+  isFeatured      Boolean        @default(false)
+  isOfficialStore Boolean        @default(false) // platform-run (e.g. UC packs)
+  ucAmount        Int? // for UC packs
+  views           Int            @default(0)
+  salesCount      Int            @default(0)
+  wishlistCount   Int            @default(0)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  approvedAt      DateTime?
+
+  media     ProductMedia[]
+  cartItems CartItem[]
+  wishlist  WishlistItem[]
+  orderItems OrderItem[]
+  reports   Report[]
+
+  @@index([status, categoryId])
+  @@index([status, createdAt])
+  @@index([sellerId])
+}
+
+model ProductMedia {
+  id        String    @id @default(cuid())
+  productId String
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  type      MediaType @default(IMAGE)
+  sortOrder Int       @default(0)
+  alt       String?
+
+  @@index([productId])
+}
+
+model WishlistItem {
+  userId    String
+  productId String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, productId])
+}
+
+model CartItem {
+  userId    String
+  productId String
+  quantity  Int      @default(1)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, productId])
+}
+
+// ───────────────────────────── Orders & payments ─────────────────────────────
+
+model Order {
+  id             String          @id @default(cuid())
+  orderNumber    String          @unique
+  buyerId        String
+  buyer          User            @relation(fields: [buyerId], references: [id])
+  status         OrderStatus     @default(PENDING_PAYMENT)
+  subtotal       Int
+  platformFee    Int             @default(0) // commission (sum of items)
+  total          Int
+  provider       PaymentProvider
+  // Delivery target: in-game Player ID + game. Never credentials.
+  gamePlayerId   String
+  game           Game
+  paidAt         DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  items    OrderItem[]
+  payments Payment[]
+  refunds  Refund[]
+
+  @@index([buyerId, createdAt])
+  @@index([status])
+}
+
+model OrderItem {
+  id                String            @id @default(cuid())
+  orderId           String
+  order             Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId         String
+  product           Product           @relation(fields: [productId], references: [id])
+  sellerId          String
+  seller            User              @relation("SellerSales", fields: [sellerId], references: [id])
+  titleSnapshot     String
+  unitPrice         Int
+  quantity          Int
+  lineTotal         Int
+  commissionRateBps Int // basis points, 1000 = 10%
+  commission        Int
+  sellerEarning     Int
+  status            FulfillmentStatus @default(AWAITING_PAYMENT)
+  deliveryNote      String? // seller's note, e.g. gift reference / redeem code
+  deliveredAt       DateTime?
+  completedAt       DateTime?
+  earningCredited   Boolean           @default(false)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  review  Review?
+  refunds Refund[]
+
+  @@index([sellerId, status])
+  @@index([orderId])
+}
+
+model Payment {
+  id                String          @id @default(cuid())
+  orderId           String?
+  order             Order?          @relation(fields: [orderId], references: [id])
+  topupId           String?         @unique
+  topup             WalletTopup?    @relation(fields: [topupId], references: [id])
+  provider          PaymentProvider
+  amount            Int
+  currency          String          @default("INR")
+  status            PaymentStatus   @default(CREATED)
+  razorpayOrderId   String?         @unique
+  razorpayPaymentId String?         @unique
+  method            String?
+  failureReason     String?
+  rawEvent          Json?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@index([orderId])
+}
+
+model WalletTopup {
+  id        String        @id @default(cuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id])
+  amount    Int
+  status    PaymentStatus @default(CREATED)
+  createdAt DateTime      @default(now())
+  payment   Payment?
+}
+
+model WalletTransaction {
+  id           String          @id @default(cuid())
+  userId       String
+  user         User            @relation(fields: [userId], references: [id])
+  type         WalletTxnType
+  reason       WalletTxnReason
+  amount       Int
+  balanceAfter Int
+  reference    String? // order number / withdrawal id / refund id
+  note         String?
+  createdAt    DateTime        @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model Withdrawal {
+  id          String           @id @default(cuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id])
+  amount      Int
+  upiId       String
+  status      WithdrawalStatus @default(PENDING)
+  adminNote   String?
+  payoutRef   String?
+  processedAt DateTime?
+  createdAt   DateTime         @default(now())
+
+  @@index([status])
+}
+
+model Refund {
+  id          String            @id @default(cuid())
+  orderId     String
+  order       Order             @relation(fields: [orderId], references: [id])
+  orderItemId String
+  orderItem   OrderItem         @relation(fields: [orderItemId], references: [id])
+  requesterId String
+  requester   User              @relation(fields: [requesterId], references: [id])
+  amount      Int
+  reason      String
+  status      RefundStatus      @default(REQUESTED)
+  destination RefundDestination @default(WALLET)
+  adminNote   String?
+  providerRef String?
+  processedAt DateTime?
+  createdAt   DateTime          @default(now())
+
+  @@index([status])
+}
+
+model Review {
+  id          String    @id @default(cuid())
+  orderItemId String    @unique
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id])
+  buyerId     String
+  buyer       User      @relation("ReviewBuyer", fields: [buyerId], references: [id])
+  sellerId    String
+  seller      User      @relation("ReviewSeller", fields: [sellerId], references: [id])
+  rating      Int
+  comment     String?
+  createdAt   DateTime  @default(now())
+
+  @@index([sellerId])
+}
+
+// ───────────────────────────── Platform ─────────────────────────────
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  body      String
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId, readAt])
+}
+
+model Report {
+  id         String       @id @default(cuid())
+  productId  String
+  product    Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  reporterId String
+  reporter   User         @relation(fields: [reporterId], references: [id])
+  reason     String
+  details    String?
+  status     ReportStatus @default(OPEN)
+  adminNote  String?
+  createdAt  DateTime     @default(now())
+
+  @@index([status])
+}
+
+model Banner {
+  id        String   @id @default(cuid())
+  title     String
+  subtitle  String?
+  badge     String?
+  ctaLabel  String   @default("Shop Now")
+  ctaHref   String   @default("/marketplace")
+  imageUrl  String
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model SupportTicket {
+  id        String       @id @default(cuid())
+  userId    String?
+  user      User?        @relation(fields: [userId], references: [id])
+  email     String
+  subject   String
+  message   String
+  orderRef  String?
+  status    TicketStatus @default(OPEN)
+  adminReply String?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation(fields: [actorId], references: [id])
+  action     String
+  entityType String
+  entityId   String?
+  meta       Json?
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}

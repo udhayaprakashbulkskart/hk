@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+/* ─── PUBG Store design tokens ─── */
+@theme {
+  --color-ink: #090909; /* matte black */
+  --color-panel: #171717; /* dark charcoal */
+  --color-panel-2: #1f1f1f;
+  --color-line: #2a2a2a;
+  --color-neon: #ff2438; /* neon red */
+  --color-neon-soft: #ff4d5e;
+  --color-crimson: #8b0015; /* deep crimson */
+  --color-muted: #a1a1aa;
+  --color-success: #22c55e;
+  --color-warn: #f59e0b;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-rajdhani), var(--font-inter), ui-sans-serif, sans-serif;
+
+  --shadow-neon: 0 0 0 1px rgb(255 36 56 / 0.45), 0 0 24px -4px rgb(255 36 56 / 0.55);
+  --shadow-card: 0 10px 30px -12px rgb(0 0 0 / 0.8);
+
+  --animate-fade-up: fade-up 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-shimmer: shimmer 1.4s linear infinite;
+  --animate-pulse-glow: pulse-glow 2.4s ease-in-out infinite;
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes shimmer {
+    from { background-position: -400px 0; }
+    to { background-position: 400px 0; }
+  }
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 0 1px rgb(255 36 56 / 0.4), 0 0 18px -6px rgb(255 36 56 / 0.6); }
+    50% { box-shadow: 0 0 0 1px rgb(255 36 56 / 0.7), 0 0 30px -4px rgb(255 36 56 / 0.85); }
+  }
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  background: var(--color-ink);
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background:
+    radial-gradient(1200px 500px at 15% -10%, rgb(139 0 21 / 0.35), transparent 60%),
+    radial-gradient(900px 400px at 100% 0%, rgb(255 36 56 / 0.12), transparent 60%),
+    var(--color-ink);
+  background-attachment: fixed;
+  color: #f4f4f5;
+  font-family: var(--font-sans);
+  min-height: 100dvh;
+}
+
+::selection {
+  background: rgb(255 36 56 / 0.45);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3a3a3a transparent;
+}
+
+@utility card {
+    @apply rounded-2xl border border-line bg-panel/90 shadow-card;
+}
+@utility card-glow {
+    @apply rounded-2xl border border-line bg-panel/90 shadow-card transition duration-300 hover:border-neon/60 hover:shadow-neon;
+}
+@utility btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition duration-200 select-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neon;
+}
+@utility btn-primary {
+    @apply btn bg-gradient-to-b from-neon to-[#d9132a] text-white shadow-[0_8px_24px_-8px_rgb(255_36_56/0.8)] hover:brightness-110 active:brightness-95;
+}
+@utility btn-outline {
+    @apply btn border border-line bg-panel-2 text-zinc-100 hover:border-neon/60 hover:text-white;
+}
+@utility btn-ghost {
+    @apply btn text-zinc-300 hover:bg-white/5 hover:text-white;
+}
+@utility btn-sm {
+    @apply px-3 py-1.5 text-xs rounded-lg;
+}
+@utility input {
+    @apply w-full rounded-xl border border-line bg-[#111] px-3.5 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition focus:border-neon/70 focus:ring-2 focus:ring-neon/25 aria-[invalid=true]:border-neon;
+}
+@utility label {
+    @apply mb-1.5 block text-sm font-medium text-zinc-300;
+}
+@utility chip {
+    @apply inline-flex items-center gap-1 rounded-full border border-line bg-panel-2 px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:border-neon/50 hover:text-white;
+}
+@utility chip-active {
+    @apply border-neon bg-neon text-white shadow-neon hover:text-white;
+}
+@utility badge {
+    @apply inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-semibold;
+}
+@utility heading {
+    @apply font-display font-bold tracking-wide uppercase;
+}
+@utility skeleton {
+    @apply rounded-xl bg-[linear-gradient(90deg,#1a1a1a_0%,#262626_50%,#1a1a1a_100%)] bg-[length:800px_100%] animate-shimmer;
+}
+@utility table-base {
+    @apply w-full text-left text-sm;
+    & th {
+      @apply border-b border-line px-3 py-2.5 text-xs font-semibold tracking-wide text-zinc-400 uppercase;
+    }
+    & td {
+      @apply border-b border-line/60 px-3 py-3 align-middle;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
