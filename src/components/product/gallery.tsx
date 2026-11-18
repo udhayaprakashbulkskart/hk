@@ -17,13 +17,13 @@ export function ProductGallery({ media, title }: { media: Media[]; title: string
 
   return (
     <div className="space-y-3">
-      <div className="card relative aspect-[4/3] overflow-hidden bg-black">
+      <div className="card relative aspect-[4/3] overflow-hidden bg-[radial-gradient(ellipse_at_50%_88%,rgba(46,245,198,0.18),transparent_60%),linear-gradient(165deg,#1b1530,#07080f)]">
         {view.kind === "spin" ? (
           <SpinViewer frames={frames.map((f) => f.url)} title={title} />
         ) : view.kind === "video" && video ? (
           <video src={video.url} controls playsInline className="size-full object-contain" />
         ) : current ? (
-          <Image src={current.url} alt={current.alt ?? title} fill priority sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" unoptimized={current.url.endsWith(".svg") || current.url.startsWith("/uploads/")} />
+          <Image src={current.url} alt={current.alt ?? title} fill priority sizes="(max-width: 1024px) 100vw, 50vw" className="object-contain p-4 drop-shadow-[0_20px_40px_rgba(0,0,0,0.7)]" unoptimized={current.url.endsWith(".svg") || current.url.startsWith("/uploads/")} />
         ) : null}
       </div>
       <div className="flex gap-2 overflow-x-auto pb-1">
@@ -34,7 +34,7 @@ export function ProductGallery({ media, title }: { media: Media[]; title: string
         )}
         {images.map((m, i) => (
           <Thumb key={m.id} active={view.kind === "image" && view.i === i} onClick={() => setView({ kind: "image", i })} label={`Image ${i + 1}`}>
-            <Image src={m.url} alt="" fill sizes="96px" className="object-cover" unoptimized={m.url.endsWith(".svg") || m.url.startsWith("/uploads/")} />
+            <Image src={m.url} alt="" fill sizes="96px" className="object-contain p-1" unoptimized={m.url.endsWith(".svg") || m.url.startsWith("/uploads/")} />
           </Thumb>
         ))}
         {video && (

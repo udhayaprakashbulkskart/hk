@@ -83,20 +83,20 @@ async function main() {
   // ── Products ──
   type P = { t: string; c: string; img: string[]; price: number; mrp?: number; r: Rarity; lvl?: [number, number]; g?: Game; f: string[]; s: number; feat?: boolean; d?: DeliveryMethod; spin?: boolean; sales?: number };
   const P: P[] = [
-    { t: "Glacier M416", c: "weapon-skins", img: ["rifle-1", "rifle-2", "rifle-3"], price: 2499, mrp: 3499, r: "MYTHIC", lvl: [7, 7], f: ["Kill Effect", "On-Hit Effect", "Loot Crate", "Advanced Look"], s: 0, feat: true, spin: true, sales: 42 },
-    { t: "Inferno AKM", c: "weapon-skins", img: ["rifle-4", "rifle-5"], price: 1899, mrp: 2299, r: "LEGENDARY", lvl: [5, 7], f: ["Kill Message", "Custom Finish"], s: 1, sales: 28 },
-    { t: "Venom Groza", c: "weapon-skins", img: ["rifle-6"], price: 1599, r: "LEGENDARY", lvl: [4, 7], f: ["Hit Effect"], s: 0, g: "BGMI", sales: 19 },
-    { t: "Pulse UZI", c: "weapon-skins", img: ["smg-1"], price: 699, mrp: 899, r: "EPIC", lvl: [3, 5], f: ["Muzzle Glow"], s: 3, sales: 11 },
-    { t: "Crimson Vector", c: "weapon-skins", img: ["smg-2"], price: 849, r: "EPIC", lvl: [2, 5], f: ["Custom Finish"], s: 0, sales: 7 },
+    { t: "Celestial M416", c: "weapon-skins", img: ["/media/skins/gun-celestial-rifle.webp"], price: 2499, mrp: 3499, r: "MYTHIC", lvl: [7, 7], f: ["Kill Effect", "On-Hit Effect", "Loot Crate", "Advanced Look"], s: 0, feat: true, sales: 42 },
+    { t: "Molten AKM", c: "weapon-skins", img: ["/media/skins/gun-molten-akm.webp"], price: 1899, mrp: 2299, r: "LEGENDARY", lvl: [5, 7], f: ["Kill Message", "Custom Finish"], s: 1, sales: 28 },
+    { t: "Dragonfire Groza", c: "weapon-skins", img: ["/media/skins/gun-dragonfire-smg.webp"], price: 1599, r: "LEGENDARY", lvl: [4, 7], f: ["Hit Effect"], s: 0, g: "BGMI", sales: 19 },
+    { t: "Frostbite Kar98", c: "weapon-skins", img: ["/media/skins/gun-frostbite-rifle.webp"], price: 699, mrp: 899, r: "EPIC", lvl: [3, 5], f: ["Muzzle Glow"], s: 3, sales: 11 },
+    { t: "Scarecrow AKM", c: "weapon-skins", img: ["/media/skins/gun-scarecrow-akm.webp"], price: 849, r: "EPIC", lvl: [2, 5], f: ["Custom Finish"], s: 0, sales: 7 },
     { t: "Sunfire UMP45", c: "weapon-skins", img: ["smg-3"], price: 549, r: "RARE", f: ["Finish only"], s: 3, g: "PUBG_MOBILE", sales: 3 },
-    { t: "X-Suit Poseidon", c: "mythic-sets", img: ["figure-1", "figure-2"], price: 5999, mrp: 6999, r: "MYTHIC", lvl: [6, 6], f: ["Full Set", "Emote", "Glide Trail"], s: 0, feat: true, sales: 37 },
-    { t: "Blood Raven Set", c: "mythic-sets", img: ["figure-2"], price: 4299, r: "MYTHIC", f: ["Full Set", "Mask"], s: 1, feat: true, sales: 25 },
-    { t: "Pharaoh X-Suit", c: "mythic-sets", img: ["figure-4"], price: 6499, mrp: 7999, r: "MYTHIC", lvl: [5, 6], f: ["Upgradable", "Exclusive Voice Pack"], s: 0, sales: 31 },
-    { t: "Silvanus Guardian", c: "mythic-sets", img: ["figure-6"], price: 4899, r: "MYTHIC", f: ["Full Set", "Parachute"], s: 1, g: "BGMI", sales: 14 },
-    { t: "Neon Ronin Outfit", c: "outfits", img: ["figure-3"], price: 1299, mrp: 1599, r: "LEGENDARY", f: ["Top", "Pants", "Mask"], s: 1, sales: 18 },
-    { t: "Golden Pharaoh Outfit", c: "outfits", img: ["figure-4"], price: 2199, r: "LEGENDARY", f: ["Full outfit"], s: 1, sales: 9 },
-    { t: "Arctic Ops Outfit", c: "outfits", img: ["figure-6"], price: 899, r: "EPIC", f: ["Top", "Pants"], s: 1, sales: 6 },
-    { t: "Toxic Hazmat Suit", c: "outfits", img: ["figure-5"], price: 749, mrp: 999, r: "EPIC", f: ["Full outfit"], s: 1, sales: 4 },
+    { t: "Abyssal Dragon Set", c: "mythic-sets", img: ["/media/skins/outfit-abyssal-dragon.webp", "/media/skins/outfit-trident-warden.webp"], price: 5999, mrp: 6999, r: "MYTHIC", lvl: [6, 6], f: ["Full Set", "Emote", "Glide Trail"], s: 0, feat: true, sales: 37 },
+    { t: "Raven Knight Set", c: "mythic-sets", img: ["/media/skins/outfit-raven-knight.webp"], price: 4299, r: "MYTHIC", f: ["Full Set", "Mask"], s: 1, feat: true, sales: 25 },
+    { t: "Pharaoh Gold X-Suit", c: "mythic-sets", img: ["/media/skins/outfit-pharaoh-gold.webp"], price: 6499, mrp: 7999, r: "MYTHIC", lvl: [5, 6], f: ["Upgradable", "Exclusive Voice Pack"], s: 0, sales: 31 },
+    { t: "Golden Seraph Set", c: "mythic-sets", img: ["/media/skins/outfit-golden-seraph.webp"], price: 4899, r: "MYTHIC", f: ["Full Set", "Parachute"], s: 1, g: "BGMI", sales: 14 },
+    { t: "Crimson Gambler Outfit", c: "outfits", img: ["/media/skins/outfit-crimson-gambler.webp"], price: 1299, mrp: 1599, r: "LEGENDARY", f: ["Top", "Pants", "Mask"], s: 1, sales: 18 },
+    { t: "Blossom Empress Outfit", c: "outfits", img: ["/media/skins/outfit-blossom-empress.webp"], price: 2199, r: "LEGENDARY", f: ["Full outfit"], s: 1, sales: 9 },
+    { t: "Skull Rider Outfit", c: "outfits", img: ["/media/skins/outfit-skull-rider.webp"], price: 899, r: "EPIC", f: ["Top", "Pants"], s: 1, sales: 6 },
+    { t: "Signed Mummy Suit", c: "outfits", img: ["/media/skins/outfit-signed-mummy.webp"], price: 749, mrp: 999, r: "EPIC", f: ["Full outfit"], s: 1, sales: 4 },
     { t: "Lamborghini Urus Skin", c: "vehicles", img: ["car-2", "car-3"], price: 3999, r: "LEGENDARY", f: ["UAZ Skin", "Custom Horn"], s: 2, feat: true, sales: 22 },
     { t: "Neon Sports Car Skin", c: "vehicles", img: ["car-1"], price: 3499, mrp: 3999, r: "LEGENDARY", f: ["Dacia Skin", "Neon Underglow"], s: 2, sales: 16 },
     { t: "Koenigsegg Jesko Skin", c: "vehicles", img: ["car-4"], price: 5499, r: "MYTHIC", f: ["Coupe RB Skin", "Unique Exhaust"], s: 2, sales: 12 },
@@ -113,7 +113,7 @@ async function main() {
   ];
   const created = [];
   for (const [i, p] of P.entries()) {
-    const media: { url: string; type: MediaType; sortOrder: number; alt: string }[] = p.img.map((m, k) => ({ url: `/art/${m}.svg`, type: "IMAGE", sortOrder: k + 1, alt: p.t }));
+    const media: { url: string; type: MediaType; sortOrder: number; alt: string }[] = p.img.map((m, k) => ({ url: m.startsWith("/") ? m : `/art/${m}.svg`, type: "IMAGE", sortOrder: k + 1, alt: p.t }));
     if (p.spin) for (let k = 0; k < 24; k++) media.push({ url: `/art/spin/rifle-${String(k).padStart(2, "0")}.svg`, type: "SPIN", sortOrder: 100 + k, alt: p.t });
     const approvedAt = new Date(Date.now() - (P.length - i) * 3_600_000 * 7);
     created.push(
@@ -171,9 +171,9 @@ async function main() {
   // ── Banners ──
   await db.banner.createMany({
     data: [
-      { title: "Mythic Sets", subtitle: "Exclusive PUBG Mobile & BGMI outfits from verified sellers", badge: "New arrival", ctaLabel: "Shop Now", ctaHref: "/skins?category=mythic-sets", imageUrl: "/art/banner-1.svg", sortOrder: 0 },
-      { title: "Upgradable Guns", subtitle: "Max-level weapon skins with kill effects", badge: "Hot deals", ctaLabel: "Explore", ctaHref: "/skins?category=weapon-skins", imageUrl: "/art/banner-2.svg", sortOrder: 1 },
-      { title: "Supercar Skins", subtitle: "Ride in style — vehicle skins at the best prices", badge: "Limited", ctaLabel: "View vehicles", ctaHref: "/skins?category=vehicles", imageUrl: "/art/banner-3.svg", sortOrder: 2 },
+      { title: "Mythic Sets", subtitle: "Exclusive PUBG Mobile & BGMI outfits from verified sellers", badge: "New arrival", ctaLabel: "Shop Now", ctaHref: "/skins?category=mythic-sets", imageUrl: "/media/skins/outfit-golden-seraph.webp", sortOrder: 0 },
+      { title: "Abyssal Sets", subtitle: "Legendary armour sets from verified sellers", badge: "Hot deals", ctaLabel: "Explore", ctaHref: "/skins?category=mythic-sets", imageUrl: "/media/skins/outfit-abyssal-dragon.webp", sortOrder: 1 },
+      { title: "Pharaoh Gold", subtitle: "Royal mythic outfits — upgradable and rare", badge: "Limited", ctaLabel: "View mythics", ctaHref: "/skins?category=mythic-sets", imageUrl: "/media/skins/outfit-pharaoh-gold.webp", sortOrder: 2 },
     ],
   });
 

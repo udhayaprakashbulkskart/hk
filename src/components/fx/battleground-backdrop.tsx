@@ -43,7 +43,7 @@ function Plane() {
   return (
     <div className="bg-plane absolute top-[14%] left-0 flex items-center">
       <span className="bg-contrail h-[3px] w-[38vw] rounded-full bg-gradient-to-r from-transparent via-white/25 to-white/60" />
-      <svg viewBox="0 0 120 60" className="h-10 w-20 drop-shadow-[0_0_10px_rgba(255,255,255,0.35)] sm:h-14 sm:w-28">
+      <svg viewBox="0 0 120 60" className="h-10 w-20 opacity-70 sm:h-14 sm:w-28">
         {/* side-view transport plane silhouette (original drawing) */}
         <path d="M4 32 L20 30 L44 29 L48 18 L58 18 L62 29 L96 30 C108 31 116 33 116 36 C116 39 108 40 96 40 L30 41 L14 46 L8 46 L14 40 L4 38 Z" fill="#cfd3e6" opacity=".85" />
         <path d="M60 30 L74 8 L82 8 L76 30 Z" fill="#aeb3cb" opacity=".85" />
@@ -57,19 +57,19 @@ function Plane() {
 
 /* ───────────── Paratroopers ───────────── */
 const JUMPERS = [
-  { left: "18%", delay: "-2s", dur: "22s", size: 1, hue: "#2ef5c6" },
-  { left: "34%", delay: "-9s", dur: "26s", size: 0.75, hue: "#ff2fb9" },
-  { left: "52%", delay: "-15s", dur: "24s", size: 0.9, hue: "#fbbf24" },
-  { left: "71%", delay: "-5s", dur: "28s", size: 0.65, hue: "#7b2cff" },
-  { left: "86%", delay: "-19s", dur: "25s", size: 0.85, hue: "#2ef5c6" },
+  { left: "18%", delay: "-2s", dur: "22s", size: 1, hue: "#4a5068" },
+  { left: "34%", delay: "-9s", dur: "26s", size: 0.75, hue: "#3d4256" },
+  { left: "52%", delay: "-15s", dur: "24s", size: 0.9, hue: "#565b72" },
+  { left: "71%", delay: "-5s", dur: "28s", size: 0.65, hue: "#3a3e52" },
+  { left: "86%", delay: "-19s", dur: "25s", size: 0.85, hue: "#4a5068" },
 ];
 
 function Jumper({ left, delay, dur, size, hue }: { left: string; delay: string; dur: string; size: number; hue: string }) {
   return (
     <div className="bg-jumper absolute -top-24" style={{ left, animationDelay: delay, animationDuration: dur }}>
       <div className="bg-sway" style={{ animationDelay: delay }}>
-        <svg viewBox="0 0 60 80" className="h-16 w-12 opacity-70 sm:h-20 sm:w-16" style={{ transform: `scale(${size})` }}>
-          <path d="M4 26 C4 10 18 2 30 2 C42 2 56 10 56 26 C50 22 44 22 38 26 C34 22 26 22 22 26 C16 22 10 22 4 26 Z" fill={hue} fillOpacity=".75" stroke="#fff" strokeOpacity=".5" />
+        <svg viewBox="0 0 60 80" className="h-16 w-12 opacity-45 sm:h-20 sm:w-16" style={{ transform: `scale(${size})` }}>
+          <path d="M4 26 C4 10 18 2 30 2 C42 2 56 10 56 26 C50 22 44 22 38 26 C34 22 26 22 22 26 C16 22 10 22 4 26 Z" fill={hue} fillOpacity=".85" stroke="#9aa0b8" strokeOpacity=".35" />
           <path d="M5 26 L28 58 M22 26 L29 58 M38 26 L31 58 M55 26 L32 58" stroke="#fff" strokeOpacity=".45" strokeWidth="0.8" />
           {/* jumper */}
           <circle cx="30" cy="60" r="3.2" fill="#e5e7f5" />
@@ -85,13 +85,13 @@ function Airdrop() {
   return (
     <div className="bg-airdrop absolute -top-40 left-[8%] sm:left-[44%]">
       <div className="bg-sway [animation-duration:5s]">
-        <svg viewBox="0 0 90 130" className="h-28 w-20 opacity-80 drop-shadow-[0_0_14px_rgba(255,47,185,0.45)] sm:h-36 sm:w-24">
-          <path d="M6 36 C6 14 26 4 45 4 C64 4 84 14 84 36 C76 30 66 30 58 36 C52 30 38 30 32 36 C24 30 14 30 6 36 Z" fill="#ff2fb9" fillOpacity=".8" stroke="#fff" strokeOpacity=".5" />
+        <svg viewBox="0 0 90 130" className="h-28 w-20 opacity-55 sm:h-36 sm:w-24">
+          <path d="M6 36 C6 14 26 4 45 4 C64 4 84 14 84 36 C76 30 66 30 58 36 C52 30 38 30 32 36 C24 30 14 30 6 36 Z" fill="#5a2333" fillOpacity=".85" stroke="#9aa0b8" strokeOpacity=".3" />
           <path d="M7 36 L30 92 M32 36 L38 92 M58 36 L52 92 M83 36 L60 92" stroke="#fff" strokeOpacity=".45" strokeWidth="1" />
           {/* crate */}
-          <rect x="26" y="90" width="38" height="32" rx="3" fill="#d97706" stroke="#fbbf24" strokeWidth="1.5" />
+          <rect x="26" y="90" width="38" height="32" rx="3" fill="#6b4a1f" stroke="#a37a3a" strokeWidth="1.5" />
           <path d="M26 100 H64 M26 112 H64 M45 90 V122" stroke="#78350f" strokeWidth="2" />
-          <rect x="38" y="102" width="14" height="8" rx="1.5" fill="#fbbf24" />
+          <rect x="38" y="102" width="14" height="8" rx="1.5" fill="#c9952f" />
         </svg>
       </div>
     </div>

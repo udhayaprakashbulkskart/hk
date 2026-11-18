@@ -8,6 +8,7 @@ import { formatINR } from "@/lib/money";
 import { getCommissionBps } from "@/lib/settings";
 import { SellerOnboardForm } from "@/components/forms/seller-onboard-form";
 import { PageTitle } from "@/components/ui/section";
+import { RENDERS } from "@/lib/media";
 
 export const metadata: Metadata = { title: "Sell Items" };
 
@@ -15,8 +16,9 @@ function Hero() {
   return (
     <div className="card relative mb-6 flex flex-col items-center overflow-hidden p-6 text-center sm:flex-row sm:text-left">
       <div className="absolute inset-0 bg-gradient-to-br from-crimson/40 via-transparent to-transparent" />
-      <div className="relative size-36 shrink-0 sm:size-44">
-        <Image src="/art/backpack-1.svg" alt="" fill className="rounded-2xl object-cover" unoptimized />
+      <div className="relative h-48 w-36 shrink-0 sm:h-56 sm:w-44">
+        <div className="absolute bottom-1 left-1/2 h-4 w-3/4 -translate-x-1/2 rounded-[50%] bg-mint/40 blur-md" />
+        <Image src={RENDERS.abyssalDragon} alt="" fill sizes="176px" className="animate-float object-contain drop-shadow-[0_14px_28px_rgba(0,0,0,0.7)]" />
       </div>
       <div className="relative mt-4 sm:mt-0 sm:ml-6">
         <h2 className="heading text-2xl sm:text-3xl">List your PUBG / BGMI items and earn real money</h2>

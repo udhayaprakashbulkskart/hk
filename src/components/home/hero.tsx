@@ -17,8 +17,9 @@ export function Hero({ banners, stats }: { banners: Banner[]; stats: { listings:
   }, [banners.length]);
   const b = banners[i];
   if (!b) return null;
-  // Wide promo banners are cropped badly in a circle, so generated banners use square companion art.
-  const art = b.imageUrl.startsWith("/art/banner-") ? (["/art/figure-1.svg", "/art/rifle-4.svg", "/art/car-1.svg"][i % 3]) : b.imageUrl;
+  // Banners point at transparent character renders; older vector banners fall back to the render set.
+  const FALLBACK = ["/media/skins/outfit-golden-seraph.webp", "/media/skins/outfit-abyssal-dragon.webp", "/media/skins/outfit-pharaoh-gold.webp"];
+  const art = b.imageUrl.startsWith("/media/") || b.imageUrl.startsWith("https://") ? b.imageUrl : FALLBACK[i % FALLBACK.length];
   return (
     <section className="relative -mx-4 overflow-hidden px-4 pt-6 pb-4 lg:-mx-6 lg:px-6 lg:pt-12">
       <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_1fr]">
@@ -61,9 +62,12 @@ export function Hero({ banners, stats }: { banners: Banner[]; stats: { listings:
             <div className="size-full rounded-full bg-ink" />
           </div>
           <div className="absolute inset-[14%] rounded-full shadow-[0_0_80px_10px_rgba(255,47,185,0.35),inset_0_0_60px_rgba(46,245,198,0.25)]" />
-          {/* art */}
-          <div key={art} className="absolute inset-[18%] animate-float overflow-hidden rounded-full page-enter">
-            <Image src={art} alt="" fill priority sizes="(max-width: 1024px) 80vw, 40vw" className="scale-[1.15] object-cover" unoptimized={art.endsWith(".svg")} />
+          {/* pedestal glow */}
+          <div className="absolute bottom-[9%] left-1/2 h-[9%] w-[58%] -translate-x-1/2 rounded-[50%] bg-[radial-gradient(ellipse,rgba(46,245,198,0.55),rgba(255,47,185,0.25)_45%,transparent_70%)]" />
+          <div className="absolute bottom-[11%] left-1/2 h-[4%] w-[44%] -translate-x-1/2 rounded-[50%] border border-mint/60 shadow-[0_0_24px_rgba(46,245,198,0.6)]" />
+          {/* full-length character render, breaking out of the ring */}
+          <div key={art} className="absolute inset-x-[10%] top-[-4%] bottom-[12%] animate-float page-enter">
+            <Image src={art} alt={b.title} fill priority sizes="(max-width: 1024px) 80vw, 40vw" className="object-contain object-bottom drop-shadow-[0_20px_40px_rgba(0,0,0,0.6)]" unoptimized={art.endsWith(".svg")} />
           </div>
           {/* floating chips */}
           <div className="glass absolute top-[10%] -left-2 hidden lg:flex animate-float items-center gap-2 rounded-2xl border border-neon/40 px-3 py-2 text-xs shadow-neon sm:left-0">

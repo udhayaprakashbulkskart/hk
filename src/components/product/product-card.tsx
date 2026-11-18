@@ -15,8 +15,8 @@ export function ProductCard({ p, saved = false, priority }: { p: ProductCardData
   const off = discountPercent(p.price, p.compareAtPrice);
   return (
     <div className="group card-glow reveal flex flex-col p-2.5 sm:p-3">
-      <Link href={`/product/${p.slug}`} className="relative block aspect-[4/3.6] overflow-hidden rounded-2xl bg-black" aria-label={p.title}>
-        <MediaImage src={img} alt={p.media[0]?.alt ?? p.title} priority={priority} className="object-cover transition duration-700 ease-out group-hover:scale-110 group-hover:rotate-1" />
+      <Link href={`/product/${p.slug}`} className="relative block aspect-[4/3.6] overflow-hidden rounded-2xl bg-[radial-gradient(ellipse_at_50%_88%,rgba(46,245,198,0.18),transparent_60%),linear-gradient(165deg,#1b1530,#07080f)]" aria-label={p.title}>
+        <MediaImage src={img} alt={p.media[0]?.alt ?? p.title} priority={priority} className="object-contain p-2 drop-shadow-[0_12px_22px_rgba(0,0,0,0.7)] transition duration-700 ease-out group-hover:scale-110" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-80" />
         <div className="absolute top-2 left-2 flex gap-1">
           <RarityBadge rarity={p.rarity} />

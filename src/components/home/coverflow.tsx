@@ -64,8 +64,8 @@ export function Coverflow({ items }: { items: FlowItem[] }) {
                   }
                 }}
               >
-                <div className="relative aspect-square overflow-hidden rounded-2xl bg-black">
-                  <Image src={it.image} alt={it.title} fill sizes="260px" className="object-cover" unoptimized={it.image.endsWith(".svg") || it.image.startsWith("/uploads/")} draggable={false} />
+                <div className="relative aspect-square overflow-hidden rounded-2xl bg-[radial-gradient(ellipse_at_50%_88%,rgba(46,245,198,0.18),transparent_60%),linear-gradient(165deg,#1b1530,#07080f)]">
+                  <Image src={it.image} alt={it.title} fill sizes="260px" className="object-contain p-3 drop-shadow-[0_12px_22px_rgba(0,0,0,0.7)]" unoptimized={it.image.endsWith(".svg") || it.image.startsWith("/uploads/")} draggable={false} />
                   {d === 0 && <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-mint/50" />}
                 </div>
                 <div className={`flex items-end justify-between gap-2 px-1 pt-3 transition-opacity duration-500 ${d === 0 ? "opacity-100" : "opacity-0"}`}>

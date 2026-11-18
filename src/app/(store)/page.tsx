@@ -12,6 +12,7 @@ import { DropTabs } from "@/components/home/drop-tabs";
 import { ProductGrid } from "@/components/product/product-card";
 import { Stars } from "@/components/ui/badges";
 import { EmptyState } from "@/components/ui/states";
+import { CATEGORY_RENDER, RENDERS } from "@/lib/media";
 
 const CAT_ICON: Record<string, React.ComponentType<{ className?: string }>> = {
   "weapon-skins": Crosshair, outfits: Shirt, "mythic-sets": Sparkles, vehicles: Car, helmets: HardHat, accessories: Backpack,
@@ -45,7 +46,7 @@ export default async function HomePage() {
   const flow = [...data.featured, ...data.trending.filter((t) => !data.featured.some((f) => f.id === t.id))].slice(0, 9).map((p) => ({
     id: p.id, slug: p.slug, title: p.title, store: p.isOfficialStore ? "Official store" : (p.seller.seller?.storeName ?? ""), price: p.price, image: p.media[0]?.url ?? "/art/rifle-1.svg",
   }));
-  const collage = ["/art/figure-1.svg", "/art/figure-4.svg", "/art/helmet-1.svg", "/art/figure-2.svg", "/art/car-1.svg"];
+  const collage = [RENDERS.crimsonGambler, RENDERS.goldenSeraph, RENDERS.moltenAkm, RENDERS.ravenKnight, RENDERS.dragonfireSmg];
 
   return (
     <div className="space-y-20 pb-6">
@@ -74,9 +75,9 @@ export default async function HomePage() {
             "col-span-2 row-span-4 col-start-5 row-start-1",
             "col-span-2 row-span-2 col-start-5 row-start-5",
           ].map((cls, k) => (
-            <div key={k} className={`${cls} group relative overflow-hidden rounded-2xl border border-white/10`}>
-              <Image src={collage[k]} alt="" fill sizes="(max-width: 1024px) 33vw, 16vw" className="scale-125 object-cover transition duration-1000 group-hover:scale-150" unoptimized />
-              <div className="absolute inset-0 bg-gradient-to-t from-ink/60 to-transparent" />
+            <div key={k} className={`${cls} group relative overflow-hidden rounded-2xl border border-white/10 bg-[radial-gradient(ellipse_at_50%_85%,rgba(46,245,198,0.22),transparent_60%),linear-gradient(160deg,#1b1530,#090a12)]`}>
+              <Image src={collage[k]} alt="" fill sizes="(max-width: 1024px) 33vw, 18vw" className="object-contain p-2 drop-shadow-[0_12px_24px_rgba(0,0,0,0.7)] transition duration-1000 group-hover:scale-110" />
+              <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-ink/70 to-transparent" />
             </div>
           ))}
           <div className="pointer-events-none absolute -inset-4 -z-10 rounded-[2rem] bg-gradient-to-br from-neon/20 via-transparent to-mint/20 blur-2xl" />
@@ -100,6 +101,33 @@ export default async function HomePage() {
             })}
           </div>
           <Link href="/skins" className="btn-primary mt-8 px-7 py-3">Learn More</Link>
+        </div>
+      </section>
+
+      <section>
+        <SectionTitle outline="SHOP" solid="BY CATEGORY" href="/skins" />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
+          {data.categories.map((c) => {
+            const render = CATEGORY_RENDER[c.slug];
+            const Icon = CAT_ICON[c.slug] ?? Sparkles;
+            return (
+              <Link key={c.id} href={`/skins?category=${c.slug}`} className="card-glow reveal group flex flex-col overflow-hidden">
+                <div className="relative aspect-[4/5] bg-[radial-gradient(ellipse_at_50%_90%,rgba(255,47,185,0.25),transparent_60%),linear-gradient(170deg,#1a1430,#07080f)]">
+                  {render ? (
+                    <Image src={render} alt="" fill sizes="(max-width: 640px) 50vw, 16vw" className="object-contain p-3 drop-shadow-[0_14px_28px_rgba(0,0,0,0.7)] transition duration-700 group-hover:scale-110" />
+                  ) : (
+                    <span className="absolute inset-0 grid place-items-center">
+                      <Icon className="size-14 text-mint/80 transition duration-700 group-hover:scale-110 group-hover:rotate-6" />
+                    </span>
+                  )}
+                  <span className="absolute bottom-3 left-1/2 h-3 w-2/3 -translate-x-1/2 rounded-[50%] bg-mint/30 blur-md" />
+                </div>
+                <p className="flex items-center justify-between px-3 py-3 font-display text-xs font-bold tracking-wider uppercase">
+                  {c.name} <ArrowRight className="size-3.5 text-mint transition group-hover:translate-x-1" />
+                </p>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
