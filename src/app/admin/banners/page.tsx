@@ -11,7 +11,7 @@ export default async function AdminBanners() {
   const banners = await db.banner.findMany({ orderBy: { sortOrder: "asc" } });
   return (
     <div className="space-y-6">
-      <PageTitle title="Promotional banners" subtitle="Shown in the home page carousel (active banners, by sort order)." />
+      <PageTitle title="Promotional banners" subtitle="Up to three active banners appear as promo cards under the home page categories (by sort order)." />
       <ul className="grid gap-3 md:grid-cols-2">
         {banners.map((b) => (
           <li key={b.id} className="card overflow-hidden">

@@ -64,8 +64,8 @@ export default async function AdminOrders(props: PageProps<"/admin/orders">) {
                   <div className="flex flex-wrap items-center gap-2">
                     <Link href={`/orders/${o.orderNumber}`} className="font-semibold hover:text-neon">{o.orderNumber}</Link>
                     <StatusBadge status={o.status} />
-                    <span className="text-xs text-muted">{o.buyer.email} · Player ID {o.gamePlayerId} · {o.provider} · {o.createdAt.toLocaleString("en-IN", { dateStyle: "short", timeStyle: "short" })}</span>
-                    <span className="ml-auto font-semibold">{formatINR(o.total)} <span className="text-xs text-muted">(fee {formatINR(o.platformFee)})</span></span>
+                    <span className="text-xs text-muted">{o.buyer.email} · Player ID {o.gamePlayerId}{o.gameNickname ? ` (${o.gameNickname})` : ""} · {o.provider} · {o.createdAt.toLocaleString("en-IN", { dateStyle: "short", timeStyle: "short" })}</span>
+                    <span className="ml-auto font-semibold">{formatINR(o.total)} <span className="text-xs text-muted">(fee {formatINR(o.platformFee)}{o.discount ? ` · coupon ${o.couponCode} −${formatINR(o.discount)}` : ""})</span></span>
                   </div>
                   <ul className="mt-3 space-y-2">
                     {o.items.map((it) => (

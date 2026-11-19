@@ -83,6 +83,53 @@ export const checkoutSchema = z.object({
   game: z.enum(["PUBG_MOBILE", "BGMI"]),
   productId: z.string().optional(), // "Buy now" a single product, else whole cart
   quantity: z.coerce.number().int().min(1).max(10).optional(),
+  couponCode: z.string().trim().max(32).optional().transform((v) => v || undefined),
+  gameNickname: z.string().trim().max(32).optional().transform((v) => v || undefined).refine((v) => !v || v.length >= 2, "Nickname must be at least 2 characters"),
+});
+
+export const couponPreviewSchema = z.object({
+  code: z.string().trim().min(1, "Enter a coupon code").max(32),
+  productId: z.string().optional(),
+  quantity: z.coerce.number().int().min(1).max(10).optional(),
+});
+
+const dateTime = z.string().refine((v) => !Number.isNaN(Date.parse(v)), "Invalid date");
+
+export const couponSchema = z
+  .object({
+    code: z.string().trim().min(3, "At least 3 characters").max(32).regex(/^[A-Za-z0-9_-]+$/, "Letters, numbers, - and _ only"),
+    description: z.string().trim().max(120).optional(),
+    type: z.enum(["PERCENT", "FLAT"]),
+    value: z.coerce.number().positive("Must be positive"), // percent or rupees
+    minOrder: z.coerce.number().min(0).default(0), // rupees
+    maxDiscount: z.coerce.number().positive().optional().nullable(), // rupees
+    usageLimit: z.coerce.number().int().positive().optional().nullable(),
+    perUserLimit: z.coerce.number().int().min(1).max(100).default(1),
+    endsAt: dateTime.optional().nullable(),
+    isActive: z.boolean().default(true),
+  })
+  .refine((c) => c.type !== "PERCENT" || c.value <= 90, { message: "Max 90%", path: ["value"] });
+
+export const categorySchema = z.object({
+  name: z.string().trim().min(2).max(40),
+  slug: z.string().trim().min(2).max(40).regex(/^[a-z0-9-]+$/, "lowercase letters, numbers and - only"),
+  description: z.string().trim().max(200).optional(),
+  isSkin: z.boolean().default(true),
+  sortOrder: z.coerce.number().int().min(0).max(100).default(0),
+});
+
+export const campaignSchema = z.object({
+  name: z.string().trim().min(2).max(60),
+  kicker: z.string().trim().max(40).optional(),
+  title: z.string().trim().min(2).max(60),
+  nativeTitle: z.string().trim().max(20).optional(),
+  subtitle: z.string().trim().max(140).optional(),
+  ctaLabel: z.string().trim().min(2).max(24).default("Shop Now"),
+  ctaHref: z.string().trim().startsWith("/", "Use an internal path like /bundles").default("/marketplace"),
+  heroLeft: z.string().trim().max(300).optional(),
+  heroRight: z.string().trim().max(300).optional(),
+  endsAt: dateTime.optional().nullable(),
+  isActive: z.boolean().default(true),
 });
 
 export const razorpayVerifySchema = z.object({

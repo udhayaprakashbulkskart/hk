@@ -80,9 +80,9 @@ export function RegisterForm({ next }: { next?: string }) {
       <Input label="Email" name="email" type="email" required autoComplete="email" error={fields.email} />
       <PasswordInput autoComplete="new-password" error={fields.password} hint="At least 8 characters with a letter and a number" />
       <label className="flex items-start gap-2 text-sm text-zinc-300">
-        <input type="checkbox" name="acceptTerms" className="mt-1 accent-[#f5b301]" />
+        <input type="checkbox" name="acceptTerms" className="mt-1 accent-[#f2c14e]" />
         <span>
-          I agree to the <Link href="/terms" className="text-neon hover:underline">terms</Link> and understand PUBG Store will never ask for my game password or OTP.
+          I agree to the <Link href="/terms" className="text-neon hover:underline">terms</Link> and understand DROPZONE STORE will never ask for my game password or OTP.
         </span>
       </label>
       {fields.acceptTerms && <p className="-mt-2 text-xs text-neon-soft">{fields.acceptTerms}</p>}

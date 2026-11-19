@@ -61,3 +61,19 @@ export async function parseBody<T>(req: Request, schema: ZodType<T>): Promise<T>
   }
   return schema.parse(json);
 }
+
+/**
+ * PATCH helper: validates with `schema.partial()` but keeps only the keys the client actually sent,
+ * so zod `.default()`s don't silently overwrite fields that weren't part of the update.
+ */
+export async function parsePatch<T extends Record<string, unknown>>(req: Request, schema: ZodType<T>): Promise<Partial<T>> {
+  let json: unknown;
+  try {
+    json = await req.json();
+  } catch {
+    throw new ApiError(400, "Invalid JSON body");
+  }
+  const sent = json && typeof json === "object" ? Object.keys(json) : [];
+  const parsed = schema.parse(json) as Record<string, unknown>;
+  return Object.fromEntries(Object.entries(parsed).filter(([k]) => sent.includes(k))) as Partial<T>;
+}

@@ -44,7 +44,7 @@ export function Price({ price, compareAt, size = "md" }: { price: number; compar
 const STATUS_TONE: Record<string, string> = {
   green: "border-success/40 bg-success/10 text-success",
   amber: "border-warn/40 bg-warn/10 text-warn",
-  red: "border-neon/50 bg-neon/10 text-neon-soft",
+  red: "border-mint/60 bg-mint/15 text-[#ff8a95]",
   zinc: "border-zinc-600 bg-zinc-800/60 text-zinc-300",
   sky: "border-sky-500/40 bg-sky-500/10 text-sky-300",
 };

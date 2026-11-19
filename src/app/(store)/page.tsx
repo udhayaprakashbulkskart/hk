@@ -1,239 +1,252 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, BadgeCheck, Coins, Crosshair, Gift, PackageCheck, ShieldCheck, Shirt, Sparkles, Tag, Zap } from "lucide-react";
+import { ArrowRight, BadgeCheck, Coins, Headset, KeyRound, ShieldCheck, Zap } from "lucide-react";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { formatINR } from "@/lib/money";
-import { getHomeData } from "@/lib/services/catalog";
+import { getHomeData, type ProductCardData } from "@/lib/services/catalog";
 import { getSavedIds } from "@/lib/services/user-data";
 import { RENDERS } from "@/lib/media";
-import { DropTabs } from "@/components/home/drop-tabs";
+import { CATEGORY_NAV } from "@/components/layout/nav";
+import { NavIcon } from "@/components/layout/icons";
 import { ProductGrid } from "@/components/product/product-card";
+import { SectionHeader, Flourish } from "@/components/ui/section";
+import { Frame } from "@/components/ui/frame";
+import { Countdown } from "@/components/home/countdown";
+import { CloudScroll, Lantern } from "@/components/fx/festive-backdrop";
 
-/** Section header: amber kicker + condensed title + optional link, with a hazard tick. */
-function Head({ kicker, title, href, cta = "View all" }: { kicker: string; title: string; href?: string; cta?: string }) {
+const CATEGORY_ART: Record<string, string | undefined> = {
+  "weapon-skins": RENDERS.moltenAkm,
+  outfits: RENDERS.ravenKnight,
+  helmets: RENDERS.skullRider,
+  backpacks: RENDERS.tridentWarden,
+  vehicles: RENDERS.celestialRifle,
+  crates: RENDERS.dragonfireSmg,
+  bundles: RENDERS.blossomEmpress,
+};
+
+const BENEFITS = [
+  { Icon: ShieldCheck, title: "Escrow protection", body: "Seller payouts are released only after you confirm delivery or the protection window passes." },
+  { Icon: KeyRound, title: "No passwords, ever", body: "We never ask for game passwords or OTPs. UC goes to your Player ID only." },
+  { Icon: BadgeCheck, title: "Verified sellers", body: "Sellers complete verification before listing, and every listing is reviewed." },
+  { Icon: Headset, title: "Real support", body: "Raise a ticket or dispute from any order; refunds go back to your wallet or payment source." },
+];
+
+function ProductSection({ kicker, title, href, items, saved }: { kicker: string; title: string; href: string; items: ProductCardData[]; saved: string[] }) {
+  if (!items.length) return null;
   return (
-    <div className="mb-6 flex items-end justify-between gap-4">
-      <div>
-        <p className="flex items-center gap-2 text-[11px] font-bold tracking-[0.22em] text-neon uppercase">
-          <span className="hazard inline-block h-2.5 w-6 rounded-[2px]" /> {kicker}
-        </p>
-        <h2 className="mt-1 font-display text-4xl leading-none font-semibold tracking-wide text-white uppercase sm:text-5xl">{title}</h2>
-      </div>
-      {href && (
-        <Link href={href} className="group flex shrink-0 items-center gap-1 text-sm font-bold text-neon">
-          {cta} <ArrowRight className="size-4 transition group-hover:translate-x-1" />
-        </Link>
-      )}
-    </div>
+    <section className="reveal">
+      <SectionHeader kicker={kicker} title={title} href={href} />
+      <ProductGrid items={items} savedIds={saved} />
+    </section>
   );
 }
 
-const TILES = [
-  { href: "/skins?category=outfits", label: "Skins & Outfits", sub: "Mythic sets, outfits, helmets", img: RENDERS.ravenKnight, Icon: Shirt },
-  { href: "/guns", label: "Gun Skins", sub: "Upgradable weapons & finishes", img: RENDERS.moltenAkm, Icon: Crosshair },
-  { href: "/uc", label: "UC Top-Up", sub: "Instant to your Player ID", img: null, Icon: Coins },
-  { href: "/sell", label: "Sell Items", sub: "List in minutes, get paid", img: null, Icon: Tag },
-];
-
-const CATS = [
-  { slug: "mythic-sets", name: "Mythic Sets", img: RENDERS.goldenSeraph },
-  { slug: "weapon-skins", name: "Gun Skins", img: RENDERS.dragonfireSmg },
-  { slug: "outfits", name: "Outfits", img: RENDERS.crimsonGambler },
-  { slug: "helmets", name: "Helmets", img: RENDERS.skullRider },
-  { slug: "mythic-sets", name: "Legendary", img: RENDERS.pharaohGold },
-  { slug: "weapon-skins", name: "Rifles", img: RENDERS.celestialRifle },
-];
-
 export default async function HomePage() {
   const user = await getCurrentUser();
-  const [data, saved, ucPacks, liveCount] = await Promise.all([
+  const [data, saved, ucPacks] = await Promise.all([
     getHomeData(),
     getSavedIds(user?.id),
-    db.product.findMany({ where: { status: "APPROVED", isOfficialStore: true, stock: { gt: 0 } }, orderBy: { price: "asc" }, take: 6, select: { id: true, slug: true, ucAmount: true, price: true } }),
-    db.product.count({ where: { status: "APPROVED", isOfficialStore: false, stock: { gt: 0 } } }),
+    db.product.findMany({ where: { status: "APPROVED", isOfficialStore: true, stock: { gt: 0 } }, orderBy: { price: "asc" }, take: 4, select: { id: true, ucAmount: true, price: true } }),
   ]);
-  const bestValue = ucPacks.length ? ucPacks.reduce((best, p) => ((p.ucAmount ?? 0) / p.price > (best.ucAmount ?? 0) / best.price ? p : best)) : null;
+  const c = data.campaign;
+  const hasListings = data.recent.length > 0;
 
   return (
-    <div className="space-y-20 pb-8">
-      {/* ── Hero ── */}
-      <section className="relative -mx-4 overflow-hidden border-b border-white/[0.07] px-4 pt-6 pb-12 lg:-mx-6 lg:px-6 lg:pt-12">
-        <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="page-enter">
-            <span className="inline-flex items-center gap-2 rounded border border-neon/40 bg-neon/10 px-2.5 py-1 text-[11px] font-bold tracking-[0.2em] text-neon uppercase">
-              <Zap className="size-3.5 fill-current" /> PUBG Mobile · BGMI
-            </span>
-            <h1 className="mt-5 font-display text-[3.6rem] leading-[0.88] font-semibold tracking-wide text-white uppercase sm:text-8xl xl:text-[7.5rem]">
-              Gear up.
-              <br />
-              <span className="text-neon">Drop in.</span>
-            </h1>
-            <p className="mt-6 max-w-lg text-base leading-relaxed text-zinc-300">
-              Buy skins, gun finishes and outfits from verified sellers, or top up UC in seconds. Everything is delivered to your Player ID — you never share a password or OTP.
+    <div className="space-y-16 pb-8 sm:space-y-20">
+      {/* ── Festival hero ── */}
+      <section className="relative -mx-4 overflow-hidden px-4 pt-6 pb-10 lg:-mx-6 lg:px-6">
+        <Lantern className="absolute top-0 left-2 w-8 sm:left-8 sm:w-12" />
+        <Lantern className="absolute top-0 right-2 w-8 sm:right-8 sm:w-12" delay="1.4s" />
+        <div className="relative mx-auto grid max-w-6xl items-end gap-4 md:grid-cols-[1fr_1.3fr_1fr]">
+          <div className="relative hidden h-[440px] md:block">
+            <Image src={c?.heroLeft || RENDERS.blossomEmpress} alt="" fill priority sizes="30vw" className="animate-float object-contain object-bottom drop-shadow-[0_20px_40px_rgb(0_0_0/0.7)]" />
+          </div>
+          <div className="relative z-10 text-center">
+            <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-neon/60 bg-[#5c0a12]/70 px-4 py-1 text-[11px] font-semibold tracking-[0.25em] text-neon-soft uppercase">
+              {c?.kicker || "Festival marketplace"}
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/skins" className="btn-primary px-7 py-3.5 text-base">
-                Buy Skins <ArrowRight className="size-4" />
-              </Link>
-              <Link href="/uc" className="btn-outline px-7 py-3.5 text-base">
-                <Coins className="size-4 text-neon" /> UC Top-Up
-              </Link>
+            {c?.nativeTitle && <p className="gold-text font-serif text-5xl leading-none font-black sm:text-7xl" lang="zh">{c.nativeTitle}</p>}
+            <h1 className="heading mt-2 text-4xl leading-tight sm:text-6xl">
+              <span className="gold-text">{c?.title || "DROPZONE STORE"}</span>
+            </h1>
+            <div className="mt-3 flex items-center justify-center gap-2">
+              <Flourish flip /> <span className="text-xs tracking-[0.3em] text-[#e7cfa8] uppercase">PUBG Mobile · BGMI</span> <Flourish />
             </div>
-            <ul className="mt-9 grid max-w-lg grid-cols-3 gap-3 text-xs text-zinc-400">
-              {[
-                [ShieldCheck, "Escrow protected"],
-                [BadgeCheck, "Verified sellers"],
-                [Gift, "Player-ID delivery"],
-              ].map(([I, t]) => {
-                const Icon = I as typeof ShieldCheck;
-                return (
-                  <li key={t as string} className="flex items-center gap-2">
-                    <Icon className="size-4 shrink-0 text-neon" /> {t as string}
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-          <div className="relative mx-auto aspect-[4/5] w-full max-w-[440px]">
-            <div className="absolute inset-[10%] rounded-full bg-[radial-gradient(circle,rgb(245_179_1/0.32),rgb(255_122_26/0.12)_45%,transparent_70%)]" />
-            <div className="absolute inset-x-[8%] top-[8%] bottom-[4%] border border-white/10 [clip-path:polygon(0_6%,6%_0,100%_0,100%_94%,94%_100%,0_100%)]" />
-            <Image src={RENDERS.goldenSeraph} alt="Golden armour outfit" fill priority sizes="(max-width: 1024px) 80vw, 36vw" className="object-contain object-bottom drop-shadow-[0_24px_36px_rgba(0,0,0,0.75)]" />
-            <div className="absolute bottom-[10%] -left-2 rounded-lg border border-white/10 bg-panel/95 px-4 py-3 shadow-card sm:left-0">
-              <p className="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">Live listings</p>
-              <p className="font-display text-3xl leading-none font-semibold text-white">{liveCount > 0 ? liveCount : "Opening soon"}</p>
-            </div>
-            {bestValue && (
-              <Link href={`/checkout?product=${bestValue.id}`} className="absolute top-[14%] right-0 rounded-lg bg-neon px-4 py-2.5 text-[#111] shadow-neon transition hover:-translate-y-0.5">
-                <p className="text-[10px] font-bold tracking-widest uppercase">Best value UC</p>
-                <p className="font-display text-2xl leading-none font-semibold">
-                  {bestValue.ucAmount?.toLocaleString("en-IN")} UC · {formatINR(bestValue.price)}
-                </p>
-              </Link>
+            <p className="mx-auto mt-4 max-w-md text-sm text-[#f3dcb8] sm:text-base">
+              {c?.subtitle || "Weapon skins, outfits, bundles and UC top-ups from verified sellers — paid securely, delivered through in-game methods the games allow."}
+            </p>
+            {c?.endsAt && (
+              <div className="mt-5 flex flex-col items-center gap-2">
+                <span className="text-[11px] tracking-[0.25em] text-mint uppercase">Ends in</span>
+                <Countdown endsAt={c.endsAt.toISOString()} />
+              </div>
             )}
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Link href={c?.ctaHref || "/marketplace"} className="btn-primary px-7 py-3 text-base">
+                {c?.ctaLabel || "Shop now"} <ArrowRight className="size-4" />
+              </Link>
+              <Link href="/uc" className="btn-outline px-6 py-3 text-base">
+                <Coins className="size-4" /> UC Top-Up
+              </Link>
+            </div>
           </div>
+          <div className="relative hidden h-[440px] md:block">
+            <Image src={c?.heroRight || RENDERS.goldenSeraph} alt="" fill priority sizes="30vw" className="animate-float object-contain object-bottom drop-shadow-[0_20px_40px_rgb(0_0_0/0.7)] [animation-delay:1.5s]" />
+          </div>
+          {/* phone: a single render under the copy */}
+          <div className="relative mx-auto h-64 w-full max-w-xs md:hidden">
+            <Image src={c?.heroRight || RENDERS.goldenSeraph} alt="" fill sizes="80vw" className="object-contain object-bottom" />
+          </div>
+        </div>
+        <CloudScroll className="absolute bottom-0 left-0 w-56 opacity-60 sm:w-80" />
+        <CloudScroll className="absolute right-0 bottom-0 w-56 opacity-60 sm:w-80" flip />
+      </section>
+
+      {/* ── Categories ── */}
+      <section className="reveal">
+        <SectionHeader kicker="Browse" title="Shop by category" href="/marketplace" />
+        <div className="grid grid-cols-4 gap-2 sm:gap-3 lg:grid-cols-8">
+          {CATEGORY_NAV.map((cat) => (
+            <Link key={cat.slug} href={`/category/${cat.slug}`} className="group card-glow flex flex-col items-center gap-1 p-2 text-center sm:p-3">
+              <div className="relative grid aspect-square w-full place-items-center overflow-hidden rounded-lg bg-[radial-gradient(circle_at_50%_40%,#7a1420,#2a070b_75%)]">
+                {CATEGORY_ART[cat.slug] ? (
+                  <Image src={CATEGORY_ART[cat.slug]!} alt="" fill sizes="(min-width:1024px) 12vw, 25vw" className="object-contain p-1 transition duration-500 group-hover:scale-110" />
+                ) : (
+                  <NavIcon name={cat.icon} className="size-8 text-neon" />
+                )}
+              </div>
+              <span className="text-[11px] font-semibold text-[#ffe9b8] sm:text-xs">{cat.label}</span>
+            </Link>
+          ))}
+          <Link href="/uc" className="group card-glow flex flex-col items-center gap-1 p-2 text-center sm:p-3">
+            <div className="grid aspect-square w-full place-items-center rounded-lg bg-[radial-gradient(circle_at_50%_40%,#b8862b,#5c0a12_75%)]">
+              <Coins className="size-9 text-[#ffe08a] transition group-hover:scale-110" />
+            </div>
+            <span className="text-[11px] font-semibold text-[#ffe9b8] sm:text-xs">UC Top-Up</span>
+          </Link>
         </div>
       </section>
 
-      {/* ── Quick tiles ── */}
-      <section className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        {TILES.map((t) => (
-          <Link key={t.href} href={t.href} className="card-glow reveal group relative flex h-40 flex-col justify-end overflow-hidden p-4 sm:h-48">
-            {t.img ? (
-              <Image src={t.img} alt="" fill sizes="(max-width: 1024px) 50vw, 25vw" className="object-contain object-right p-3 opacity-70 transition duration-500 group-hover:scale-110 group-hover:opacity-100" />
-            ) : (
-              <t.Icon className="absolute top-4 right-4 size-16 text-neon/25 transition duration-500 group-hover:scale-110 group-hover:text-neon/50" />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#111317] via-[#111317]/70 to-transparent" />
-            <div className="relative">
-              <t.Icon className="mb-2 size-6 text-neon" />
-              <p className="font-display text-2xl leading-none font-semibold text-white uppercase sm:text-3xl">{t.label}</p>
-              <p className="mt-1 text-xs text-zinc-400">{t.sub}</p>
-            </div>
-          </Link>
-        ))}
-      </section>
-
-      {/* ── UC Top-up ── */}
-      {ucPacks.length > 0 && (
-        <section>
-          <Head kicker="Instant · Player ID only" title="UC Top-Up" href="/uc" cta="All packs" />
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            {ucPacks.map((p) => (
-              <div key={p.id} className={`card reveal relative flex flex-col items-center gap-2 p-4 text-center ${p.id === bestValue?.id ? "border-neon/70" : ""}`}>
-                {p.id === bestValue?.id && <span className="absolute -top-2.5 rounded bg-neon px-2 py-0.5 text-[10px] font-bold tracking-wider text-[#111] uppercase">Best value</span>}
-                <span className="grid size-14 place-items-center rounded-full bg-gradient-to-br from-neon to-mint text-[#111] shadow-neon">
-                  <Coins className="size-7" />
-                </span>
-                <p className="font-display text-3xl leading-none font-semibold text-white">{p.ucAmount?.toLocaleString("en-IN")} UC</p>
-                <p className="text-sm font-bold text-neon">{formatINR(p.price)}</p>
-                <Link href={`/checkout?product=${p.id}`} className="btn-primary btn-sm mt-1 w-full py-2">
-                  Top up now
-                </Link>
+      {/* ── Promo banners (admin → Banners) ── */}
+      {data.banners.length > 0 && (
+        <section className="reveal -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0">
+          {data.banners.slice(0, 3).map((b) => (
+            <Link key={b.id} href={b.ctaHref} className="group card-glow relative flex h-40 w-[80%] shrink-0 snap-start items-center overflow-hidden p-4 sm:w-auto">
+              <div className="relative z-10 max-w-[60%]">
+                {b.badge && <span className="mb-1 inline-block rounded bg-mint px-2 py-0.5 text-[10px] font-bold tracking-wider text-white uppercase">{b.badge}</span>}
+                <p className="heading gold-text text-xl leading-tight">{b.title}</p>
+                {b.subtitle && <p className="mt-1 line-clamp-2 text-xs text-[#f3dcb8]">{b.subtitle}</p>}
+                <span className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-neon">{b.ctaLabel} <ArrowRight className="size-3.5 transition group-hover:translate-x-1" /></span>
               </div>
+              <Image src={b.imageUrl} alt="" width={180} height={180} className="absolute -right-4 bottom-0 h-full w-auto object-contain transition duration-500 group-hover:scale-105" unoptimized={b.imageUrl.endsWith(".svg") || b.imageUrl.startsWith("/uploads/")} />
+            </Link>
+          ))}
+        </section>
+      )}
+
+      <ProductSection kicker="Legendary & Mythic" title="Featured legendary items" href="/marketplace?rarity=LEGENDARY&rarity=MYTHIC" items={data.featured} saved={saved} />
+
+      {/* ── Limited-time offers ── */}
+      {data.deals.length > 0 && (
+        <section className="reveal">
+          <Frame>
+            <div className="p-4 sm:p-6">
+              <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-semibold tracking-[0.25em] text-mint uppercase">Price drops</p>
+                  <h2 className="heading gold-text text-2xl sm:text-3xl">Limited-time offers</h2>
+                </div>
+                {c?.endsAt && <Countdown endsAt={c.endsAt.toISOString()} compact />}
+              </div>
+              <ProductGrid items={data.deals.slice(0, 4)} savedIds={saved} />
+            </div>
+          </Frame>
+        </section>
+      )}
+
+      <ProductSection kicker="Festival" title="Festival bundles" href="/category/bundles" items={data.bundles} saved={saved} />
+
+      {/* ── Exclusive outfit showcase ── */}
+      {data.outfits.length > 0 && (
+        <section className="reveal">
+          <SectionHeader kicker="Showcase" title="Exclusive outfits" href="/category/outfits" />
+          <div className="grid gap-4 md:grid-cols-3">
+            {data.outfits.map((p, i) => (
+              <Link key={p.id} href={`/product/${p.slug}`} className="group">
+                <Frame>
+                  <div className="relative h-80 overflow-hidden rounded-xl bg-[radial-gradient(circle_at_50%_30%,#9e1420,#2a070b_70%)]">
+                    {p.media[0] && <Image src={p.media[0].url} alt={p.media[0].alt ?? p.title} fill sizes="(min-width:768px) 33vw, 100vw" className="object-contain object-bottom transition duration-700 group-hover:scale-105" />}
+                    <span className="absolute top-3 left-3 rounded-full border border-neon/60 bg-[#2a070b]/80 px-2.5 py-0.5 text-[10px] font-bold tracking-widest text-neon uppercase">{p.rarity}</span>
+                    {i === 0 && <span className="absolute top-3 right-3 rounded bg-mint px-2 py-0.5 text-[10px] font-bold text-white">TOP PICK</span>}
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#1c0507] via-[#1c0507]/80 to-transparent p-4 pt-12">
+                      <p className="heading text-lg text-[#ffe9b8]">{p.title}</p>
+                      <p className="mt-1 flex items-baseline gap-2">
+                        <span className="font-bold text-neon">{formatINR(p.price)}</span>
+                        {p.compareAtPrice != null && p.compareAtPrice > p.price && <span className="text-xs text-[#b89a7a] line-through">{formatINR(p.compareAtPrice)}</span>}
+                      </p>
+                    </div>
+                  </div>
+                </Frame>
+              </Link>
             ))}
           </div>
         </section>
       )}
 
-      {/* ── Live listings ── */}
-      <section>
-        <Head kicker="Live on the market" title="Hot Drops" href="/marketplace" />
-        {data.trending.length ? (
-          <DropTabs
-            tabs={[
-              { key: "popular", label: "Trending", href: "/marketplace?sort=popular", content: <ProductGrid items={data.trending} savedIds={saved} /> },
-              { key: "new", label: "New", href: "/marketplace", content: <ProductGrid items={data.recent} savedIds={saved} /> },
-              { key: "deals", label: "Deals", href: "/marketplace?sort=price_asc", content: <ProductGrid items={data.deals.length ? data.deals : data.recent} savedIds={saved} /> },
-            ]}
-          />
-        ) : (
-          <div className="card flex flex-col items-center gap-4 px-6 py-12 text-center sm:flex-row sm:text-left">
-            <Sparkles className="size-10 shrink-0 text-neon" />
-            <div className="flex-1">
-              <p className="font-display text-3xl leading-none font-semibold text-white uppercase">First drops landing soon</p>
-              <p className="mt-2 text-sm text-zinc-400">Verified sellers are setting up. Own transferable skins? List them first and get the spotlight.</p>
-            </div>
-            <Link href="/sell" className="btn-primary px-6">Start selling</Link>
+      {/* ── UC top-up teaser ── */}
+      {ucPacks.length > 0 && (
+        <section className="reveal">
+          <SectionHeader kicker="Delivered to your Player ID" title="UC Top-Up" href="/uc" />
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {ucPacks.map((p) => (
+              <Link key={p.id} href="/uc" className="card-glow flex flex-col items-center gap-2 p-4 text-center">
+                <span className="grid size-14 place-items-center rounded-full border border-[#fff1c2]/60 bg-gradient-to-b from-[#ffe08a] to-[#b8862b] text-[#3a0a0e] shadow-neon">
+                  <Coins className="size-7" />
+                </span>
+                <span className="heading text-xl text-[#ffe9b8]">{(p.ucAmount ?? 0).toLocaleString("en-IN")} UC</span>
+                <span className="font-bold text-neon">{formatINR(p.price)}</span>
+              </Link>
+            ))}
           </div>
-        )}
-      </section>
+        </section>
+      )}
 
-      {/* ── Categories ── */}
-      <section>
-        <Head kicker="Find your style" title="Shop by Category" href="/skins" />
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {CATS.map((c) => (
-            <Link key={c.name} href={`/skins?category=${c.slug}`} className="card-glow reveal group flex flex-col">
-              <div className="relative aspect-[3/4] bg-[radial-gradient(ellipse_at_50%_80%,rgb(245_179_1/0.18),transparent_60%)]">
-                <Image src={c.img} alt={c.name} fill sizes="(max-width: 640px) 50vw, 16vw" className="object-contain p-3 drop-shadow-[0_14px_22px_rgba(0,0,0,0.7)] transition duration-500 group-hover:scale-110" />
+      <ProductSection kicker="Most wanted" title="Best sellers" href="/marketplace?sort=popular" items={data.trending} saved={saved} />
+      <ProductSection kicker="Just in" title="Recently added" href="/marketplace?sort=newest" items={data.recent} saved={saved} />
+
+      {!hasListings && (
+        <section className="reveal">
+          <Frame>
+            <div className="flex flex-col items-center gap-3 p-8 text-center">
+              <h2 className="heading gold-text text-2xl sm:text-3xl">First festival drops landing soon</h2>
+              <p className="max-w-lg text-sm text-[#f3dcb8]">Verified sellers are preparing their listings. Own officially transferable cosmetics? List them and reach buyers first.</p>
+              <div className="flex flex-wrap justify-center gap-3">
+                <Link href="/sell" className="btn-primary">Start selling</Link>
+                <Link href="/uc" className="btn-outline">Top up UC</Link>
               </div>
-              <p className="flex items-center justify-between border-t border-white/[0.07] px-3 py-2.5 font-display text-xl leading-none font-semibold text-white uppercase">
-                {c.name} <ArrowRight className="size-4 text-neon transition group-hover:translate-x-1" />
-              </p>
-            </Link>
+            </div>
+          </Frame>
+        </section>
+      )}
+
+      {/* ── Benefits ── */}
+      <section className="reveal">
+        <SectionHeader kicker="Why DROPZONE" title="Shop with confidence" />
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {BENEFITS.map(({ Icon, title, body }) => (
+            <div key={title} className="card p-5">
+              <span className="mb-3 grid size-11 place-items-center rounded-full border border-neon/60 bg-[#5c0a12] text-neon">
+                <Icon className="size-5" />
+              </span>
+              <h3 className="heading text-base text-[#ffe9b8]">{title}</h3>
+              <p className="mt-1 text-sm text-muted">{body}</p>
+            </div>
           ))}
         </div>
-      </section>
-
-      {/* ── How it works ── */}
-      <section>
-        <Head kicker="Safe by design" title="How it works" />
-        <ol className="grid gap-3 md:grid-cols-3">
-          {[
-            [Sparkles, "Choose", "Pick a skin, gun finish or UC pack. Enter only your in-game Player ID at checkout."],
-            [PackageCheck, "Receive", "The seller sends it with the game's official gifting or redeem code. Your payment waits in escrow."],
-            [ShieldCheck, "Confirm", "Confirm you received it and the seller gets paid. Not delivered? Request a refund."],
-          ].map(([I, t, d], k) => {
-            const Icon = I as typeof Sparkles;
-            return (
-              <li key={t as string} className="card reveal relative overflow-hidden p-6">
-                <span className="absolute -top-3 -right-1 font-display text-[7rem] leading-none font-semibold text-white/[0.04]">0{k + 1}</span>
-                <Icon className="size-8 text-neon" />
-                <p className="mt-4 font-display text-3xl leading-none font-semibold text-white uppercase">
-                  {k + 1}. {t as string}
-                </p>
-                <p className="mt-2 text-sm text-zinc-400">{d as string}</p>
-              </li>
-            );
-          })}
-        </ol>
-      </section>
-
-      {/* ── Sell banner ── */}
-      <section className="reveal relative overflow-hidden rounded-xl border border-neon/40 bg-[linear-gradient(110deg,#1e1a10,#13161b_55%)] p-6 sm:p-10">
-        <div className="hazard absolute inset-x-0 top-0 h-1.5" />
-        <div className="relative z-10 max-w-xl">
-          <p className="text-[11px] font-bold tracking-[0.22em] text-neon uppercase">For sellers</p>
-          <h2 className="mt-1 font-display text-4xl leading-none font-semibold text-white uppercase sm:text-6xl">Turn your skins into cash</h2>
-          <p className="mt-3 text-sm text-zinc-300">Get verified in under a day. No listing fees — a small commission only when you sell. Payouts straight to UPI.</p>
-          <Link href="/sell" className="btn-primary mt-6 px-7 py-3">
-            Start selling <ArrowRight className="size-4" />
-          </Link>
-        </div>
-        <div className="absolute -right-6 bottom-0 hidden h-[115%] w-[34%] sm:block">
-          <Image src={RENDERS.crimsonGambler} alt="" fill sizes="30vw" className="object-contain object-bottom drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)]" />
-        </div>
+        <p className="mt-4 flex items-center justify-center gap-2 text-center text-xs text-[#b89a7a]">
+          <Zap className="size-3.5 shrink-0 text-neon" /> Payments by Razorpay, verified on our server before any order is marked paid.
+        </p>
       </section>
     </div>
   );

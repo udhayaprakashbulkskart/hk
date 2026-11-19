@@ -339,6 +339,80 @@ describe("razorpay payments (mock gateway)", () => {
   });
 });
 
+describe("coupons, UC nickname & admin promotions", () => {
+  it("applies a coupon: discount is funded by the platform, seller earning unchanged, usage limited per user", async () => {
+    const code = `T${uid()}`.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
+    expect((await admin.post("/api/admin/coupons", { code, type: "PERCENT", value: 10, minOrder: 100, maxDiscount: 150, perUserLimit: 1 })).status).toBe(201);
+    const seller = await makeSeller();
+    const p = await liveProduct(seller, { price: 2000, stock: 3 });
+    const buyer = await register();
+    await fund(buyer.email, 1_000_000);
+
+    const pre = await buyer.post("/api/coupons/validate", { code: code.toLowerCase(), productId: p.id });
+    expect(pre.status).toBe(200);
+    expect(pre.data.discount).toBe(15_000); // 10% of ₹2000 capped at ₹150
+    expect((await buyer.post("/api/coupons/validate", { code: "NOPE-NOPE", productId: p.id })).json?.fields?.couponCode).toBeTruthy();
+
+    const r = await buyer.post("/api/checkout", { provider: "WALLET", gamePlayerId: "5123456789", game: "BGMI", productId: p.id, couponCode: code });
+    expect(r.status, JSON.stringify(r.json)).toBe(201);
+    expect(await balance(buyer.email)).toBe(1_000_000 - 185_000);
+    const order = await tdb.order.findUniqueOrThrow({ where: { orderNumber: r.data.orderNumber }, include: { items: true } });
+    expect(order).toMatchObject({ subtotal: 200_000, discount: 15_000, total: 185_000, couponCode: code });
+    expect(order.items[0]).toMatchObject({ discount: 15_000, sellerEarning: 180_000 });
+    expect((await tdb.coupon.findUniqueOrThrow({ where: { code } })).usedCount).toBe(1);
+
+    const again = await buyer.post("/api/checkout", { provider: "WALLET", gamePlayerId: "5123456789", game: "BGMI", productId: p.id, couponCode: code });
+    expect(again.status).toBe(400);
+    expect(await balance(buyer.email)).toBe(1_000_000 - 185_000);
+  });
+
+  it("releases a coupon when an unpaid Razorpay order is cancelled", async () => {
+    const code = `R${uid()}`.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
+    await admin.post("/api/admin/coupons", { code, type: "FLAT", value: 50, perUserLimit: 1 });
+    const seller = await makeSeller();
+    const p = await liveProduct(seller, { price: 500, stock: 2 });
+    const buyer = await register();
+    const r = await buyer.post("/api/checkout", { provider: "RAZORPAY", gamePlayerId: "5123456789", game: "BGMI", productId: p.id, couponCode: code });
+    expect(r.status, JSON.stringify(r.json)).toBe(201);
+    expect(r.data.amount).toBe(45_000);
+    expect((await tdb.coupon.findUniqueOrThrow({ where: { code } })).usedCount).toBe(1);
+    // Let the payment window lapse, then run the scheduled expiry.
+    await tdb.order.update({ where: { orderNumber: r.data.orderNumber }, data: { createdAt: new Date(Date.now() - 2 * 3_600_000) } });
+    const cron = await new Client().req("GET", "/api/cron/maintenance", undefined, { authorization: `Bearer ${process.env.CRON_SECRET ?? "test-cron-secret"}` });
+    expect(cron.status).toBe(200);
+    expect((await tdb.order.findUniqueOrThrow({ where: { orderNumber: r.data.orderNumber } })).status).toBe("CANCELLED");
+    expect((await tdb.coupon.findUniqueOrThrow({ where: { code } })).usedCount).toBe(0);
+    expect(await tdb.couponRedemption.count({ where: { coupon: { code } } })).toBe(0);
+  });
+
+  it("requires an in-game nickname for UC top-ups and stores it on the order", async () => {
+    const pack = await tdb.product.findFirstOrThrow({ where: { isOfficialStore: true, status: "APPROVED" }, orderBy: { price: "asc" } });
+    const buyer = await register();
+    await fund(buyer.email, pack.price);
+    const missing = await buyer.post("/api/checkout", { provider: "WALLET", gamePlayerId: "5123456789", game: "BGMI", productId: pack.id });
+    expect(missing.status).toBe(400);
+    expect(missing.json?.fields?.gameNickname).toBeTruthy();
+    const ok = await buyer.post("/api/checkout", { provider: "WALLET", gamePlayerId: "5123456789", game: "BGMI", productId: pack.id, gameNickname: "DragonSlayer" });
+    expect(ok.status, JSON.stringify(ok.json)).toBe(201);
+    expect((await tdb.order.findUniqueOrThrow({ where: { orderNumber: ok.data.orderNumber } })).gameNickname).toBe("DragonSlayer");
+  });
+
+  it("admin PATCH only changes the fields sent (defaults don't overwrite)", async () => {
+    const slug = `cat-${uid()}`.toLowerCase().replace(/[^a-z0-9-]/g, "");
+    const c = await admin.post("/api/admin/categories", { name: "Test Cat", slug, sortOrder: 42, isSkin: true });
+    expect(c.status, JSON.stringify(c.json)).toBe(201);
+    expect((await admin.patch(`/api/admin/categories/${c.data.id}`, { name: "Renamed" })).status).toBe(200);
+    expect(await tdb.category.findUniqueOrThrow({ where: { slug } })).toMatchObject({ name: "Renamed", sortOrder: 42 });
+    const camp = await admin.post("/api/admin/campaigns", { name: "Test", title: "Test Campaign", kicker: "Kick", endsAt: new Date(Date.now() + 86_400_000).toISOString() });
+    expect(camp.status, JSON.stringify(camp.json)).toBe(201);
+    expect((await admin.patch(`/api/admin/campaigns/${camp.data.id}`, { isActive: false })).status).toBe(200);
+    expect(await tdb.campaign.findUniqueOrThrow({ where: { id: camp.data.id } })).toMatchObject({ kicker: "Kick", isActive: false });
+    expect((await admin.post("/api/admin/campaigns", { name: "Bad one", title: "Bad", heroLeft: "https://evil.example/x.png" })).status).toBe(400);
+    await admin.del(`/api/admin/campaigns/${camp.data.id}`);
+    await admin.del(`/api/admin/categories/${c.data.id}`);
+  });
+});
+
 describe("cron maintenance", () => {
   it("requires the cron secret", async () => {
     expect((await new Client().get("/api/cron/maintenance")).status).toBe(401);

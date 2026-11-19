@@ -1,30 +1,30 @@
 @import "tailwindcss";
 
-/* ─── PUBG Store · "Tactical Amber" design tokens ───
-   Gunmetal surfaces, amber primary actions, orange for hot/sale, crisp white type.
+/* ─── DROPZONE STORE · "Festival Red & Gold" design tokens ───
+   Lacquer-red surfaces, antique-gold actions and borders, crimson for sale tags.
    Token names are kept stable (neon = primary, mint = secondary) so every page follows. */
 @theme {
-  --color-ink: #0b0d10;
-  --color-panel: #13161b;
-  --color-panel-2: #1a1e25;
-  --color-line: #2a2f38;
-  --color-neon: #f5b301; /* amber — primary actions, highlights */
-  --color-neon-soft: #ffd35c;
-  --color-crimson: #c2410c; /* deep orange depth */
-  --color-mint: #ff7a1a; /* orange — secondary accent, deals */
-  --color-mint-deep: #e8590c;
-  --color-muted: #a7adb8;
+  --color-ink: #1c0507; /* lacquer black-red */
+  --color-panel: #2b090c;
+  --color-panel-2: #3a0e12;
+  --color-line: #5a1d1f;
+  --color-neon: #f2c14e; /* antique gold — primary actions, highlights */
+  --color-neon-soft: #ffe08a;
+  --color-crimson: #8b0f1a;
+  --color-mint: #e3263a; /* festival crimson — secondary, sale tags */
+  --color-mint-deep: #b5121f;
+  --color-muted: #e2c7a6;
   --color-success: #3ddc84;
-  --color-warn: #f5b301;
-  --color-gold: #f5b301;
-  --color-gold-deep: #b98500;
+  --color-warn: #f2c14e;
+  --color-gold: #f2c14e;
+  --color-gold-deep: #b8862b;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-teko), var(--font-inter), ui-sans-serif, sans-serif;
-  --font-serif: var(--font-teko), var(--font-inter), sans-serif;
+  --font-display: var(--font-cinzel), Georgia, serif;
+  --font-serif: var(--font-cinzel), Georgia, serif;
 
-  --shadow-neon: 0 0 0 1px rgb(245 179 1 / 0.6), 0 12px 32px -12px rgb(245 179 1 / 0.45);
-  --shadow-mint: 0 0 0 1px rgb(255 122 26 / 0.5), 0 10px 30px -10px rgb(255 122 26 / 0.5);
+  --shadow-neon: 0 0 0 1px rgb(242 193 78 / 0.6), 0 12px 32px -12px rgb(242 193 78 / 0.45);
+  --shadow-mint: 0 0 0 1px rgb(227 38 58 / 0.5), 0 10px 30px -10px rgb(227 38 58 / 0.5);
   --shadow-card: 0 18px 40px -22px rgb(0 0 0 / 0.9);
 
   --animate-fade-up: fade-up 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
@@ -43,8 +43,8 @@
     to { background-position: 400px 0; }
   }
   @keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 0 0 1px rgb(245 179 1 / 0.4), 0 0 16px -6px rgb(245 179 1 / 0.5); }
-    50% { box-shadow: 0 0 0 1px rgb(245 179 1 / 0.8), 0 0 28px -4px rgb(245 179 1 / 0.7); }
+    0%, 100% { box-shadow: 0 0 0 1px rgb(242 193 78 / 0.4), 0 0 16px -6px rgb(242 193 78 / 0.5); }
+    50% { box-shadow: 0 0 0 1px rgb(242 193 78 / 0.8), 0 0 28px -4px rgb(242 193 78 / 0.7); }
   }
   @keyframes float {
     0%, 100% { transform: translateY(0); }
@@ -69,31 +69,31 @@ html {
 body {
   /* transparent so the fixed backdrop (z-index -10) shows through; html paints the base colour */
   background: transparent;
-  color: #eef0f3;
+  color: #fbeedd;
   font-family: var(--font-sans);
   min-height: 100dvh;
 }
 
 ::selection {
-  background: rgb(245 179 1 / 0.45);
-  color: #0b0d10;
+  background: rgb(242 193 78 / 0.45);
+  color: #2b090c;
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #3a404a transparent;
+  scrollbar-color: #8b5a2b transparent;
 }
 
 /* ─── Surfaces ─── */
 @utility glass {
-  background: linear-gradient(180deg, #171a20, #12151a);
+  background: linear-gradient(170deg, #3d0e13 0%, #2a080c 55%, #22070a 100%);
 }
 @utility card {
-  @apply glass rounded-xl border border-white/[0.07] shadow-card;
+  @apply glass rounded-xl border border-neon/25 shadow-card;
 }
 /* Interactive card: lifts and gets an amber edge on hover. */
 @utility card-glow {
-  @apply glass relative isolate overflow-hidden rounded-xl border border-white/[0.07] shadow-card transition duration-300 ease-out hover:-translate-y-1 hover:border-neon/60 hover:shadow-neon;
+  @apply glass relative isolate overflow-hidden rounded-xl border border-neon/35 shadow-card transition duration-300 ease-out hover:-translate-y-1 hover:border-neon hover:shadow-neon;
   &::before {
     content: "";
     position: absolute;
@@ -102,7 +102,7 @@ body {
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.3s;
-    background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%), rgb(245 179 1 / 0.1), transparent 45%);
+    background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%), rgb(242 193 78 / 0.1), transparent 45%);
   }
   &:hover::before {
     opacity: 1;
@@ -115,7 +115,7 @@ body {
 }
 /* Amber action button (black text for maximum legibility) with a light sweep. */
 @utility btn-primary {
-  @apply btn bg-neon text-[#111] shadow-[0_8px_24px_-10px_rgb(245_179_1/0.9)] hover:-translate-y-0.5 hover:bg-neon-soft active:translate-y-0;
+  @apply btn border border-[#fff1c2]/60 bg-gradient-to-b from-[#ffe08a] via-[#f2c14e] to-[#c9922f] text-[#3a0a0e] shadow-[0_8px_24px_-10px_rgb(242_193_78/0.9),inset_0_1px_0_rgb(255_255_255/0.6)] hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0;
   &::after {
     content: "";
     position: absolute;
@@ -130,7 +130,7 @@ body {
   }
 }
 @utility btn-outline {
-  @apply btn border border-white/20 bg-white/[0.03] text-white hover:border-neon hover:text-neon;
+  @apply btn border border-neon/70 bg-gradient-to-b from-[#b5121f] to-[#7a0b14] text-[#ffe9b8] shadow-[inset_0_1px_0_rgb(255_220_160/0.35)] hover:brightness-115 hover:text-white;
 }
 @utility btn-ghost {
   @apply btn text-zinc-300 hover:bg-white/5 hover:text-white;
@@ -141,7 +141,7 @@ body {
 
 /* ─── Forms ─── */
 @utility input {
-  @apply w-full rounded-lg border border-white/10 bg-[#0f1216] px-3.5 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition focus:border-neon/80 focus:ring-2 focus:ring-neon/20 aria-[invalid=true]:border-red-500;
+  @apply w-full rounded-lg border border-neon/25 bg-[#1a0507] px-3.5 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition focus:border-neon/80 focus:ring-2 focus:ring-neon/20 aria-[invalid=true]:border-red-500;
 }
 @utility label {
   @apply mb-1.5 block text-sm font-medium text-zinc-300;
@@ -149,10 +149,10 @@ body {
 
 /* ─── Chips / pills (filter tabs) ─── */
 @utility chip {
-  @apply inline-flex items-center gap-1 rounded-md border border-white/12 bg-white/[0.03] px-3.5 py-2 text-xs font-semibold tracking-wide text-zinc-300 transition duration-200 hover:border-neon/60 hover:text-white;
+  @apply inline-flex items-center gap-1 rounded-md border border-neon/30 bg-[#2b090c] px-3.5 py-2 text-xs font-semibold tracking-wide text-[#f3dcb8] transition duration-200 hover:border-neon hover:text-white;
 }
 @utility chip-active {
-  @apply border-neon bg-neon text-[#111] hover:text-[#111];
+  @apply border-[#fff1c2]/60 bg-gradient-to-b from-[#ffe08a] to-[#d9a53d] text-[#3a0a0e] hover:text-[#3a0a0e];
 }
 @utility badge {
   @apply inline-flex items-center gap-1 rounded border px-2 py-0.5 text-[11px] font-semibold;
@@ -160,7 +160,7 @@ body {
 
 /* ─── Typography ─── */
 @utility heading {
-  @apply font-display font-semibold tracking-wide uppercase;
+  @apply font-display font-bold tracking-wide;
 }
 @utility text-outline {
   color: transparent;
@@ -174,7 +174,7 @@ body {
 }
 
 @utility skeleton {
-  @apply rounded-lg bg-[linear-gradient(90deg,#15181d_0%,#20242b_50%,#15181d_100%)] bg-[length:800px_100%] animate-shimmer;
+  @apply rounded-lg bg-[linear-gradient(90deg,#2b090c_0%,#45131a_50%,#2b090c_100%)] bg-[length:800px_100%] animate-shimmer;
 }
 @utility table-base {
   @apply w-full text-left text-sm;
@@ -201,8 +201,8 @@ body {
 }
 
 /* Diagonal hazard stripe used on section rules and sale tags */
-.hazard {
-  background: repeating-linear-gradient(-45deg, var(--color-neon) 0 8px, #111 8px 16px);
+.hazard { /* gold hairline (kept name for existing markup) */
+  background: linear-gradient(90deg, transparent, var(--color-neon), transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -214,3 +214,36 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ─── Festival ornaments ─── */
+/* Gold-framed ribbon title (section headings) */
+@utility ribbon {
+  @apply relative inline-flex items-center justify-center rounded-full border border-neon/80 bg-gradient-to-b from-[#a8121f] to-[#6d0a12] px-8 py-2 font-display text-lg font-bold text-[#ffe9b8] shadow-[0_0_0_3px_#2b090c,0_0_0_4px_rgb(242_193_78/0.55),0_10px_30px_-10px_rgb(0_0_0/0.8)] sm:text-2xl;
+}
+.gold-text {
+  background: linear-gradient(180deg, #fff3c4 0%, #f2c14e 45%, #b8862b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@keyframes lantern-sway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+.lantern { animation: lantern-sway 5s ease-in-out infinite; transform-origin: 50% 0; }
+
+@keyframes petal-fall {
+  0% { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.9; }
+  100% { transform: translate3d(-12vw, 110vh, 0) rotate(540deg); opacity: 0; }
+}
+.petal { animation: petal-fall linear infinite; }
+
+@keyframes firework {
+  0% { transform: scale(0.2); opacity: 0; }
+  15% { opacity: 1; }
+  70% { opacity: 0.8; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+.firework { animation: firework 4.5s ease-out infinite; }
+
+@keyframes tick { 0% { transform: translateY(-30%); opacity: 0; } 100% { transform: none; opacity: 1; } }
+.tick { animation: tick 0.35s ease-out; }

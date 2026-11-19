@@ -4,17 +4,11 @@ import { db } from "@/lib/db";
 import { SupportForm } from "@/components/forms/account-forms";
 import { StatusBadge } from "@/components/ui/badges";
 import { PageTitle } from "@/components/ui/section";
+import { FAQ as ALL_FAQ } from "@/lib/content/faq";
 
 export const metadata: Metadata = { title: "Support" };
 
-const FAQ = [
-  ["Do you need my game password or OTP?", "Never. We only need your in-game Player ID. Anyone asking for your password or OTP is a scammer — report them."],
-  ["How is my item delivered?", "Sellers use the game's official in-game gifting or officially issued redeem codes, sent to the Player ID you enter at checkout."],
-  ["When does the seller get paid?", "Funds are held in escrow. The seller is paid after you confirm receipt, or automatically after the protection window if you don't raise an issue."],
-  ["What if I don't receive my item?", "Open the order and tap “Request refund” before confirming receipt. Our team reviews every request; approved refunds go to your wallet or original payment method."],
-  ["Can I buy or sell game accounts?", "No. Account trading breaks the games' terms of service and is not allowed on PUBG Store."],
-  ["Is PUBG Store official?", "No. We're an independent marketplace and are not affiliated with KRAFTON, PUBG Corporation or Tencent."],
-];
+const FAQ = ALL_FAQ.flatMap((g) => g.items).slice(0, 6);
 
 export default async function SupportPage(props: PageProps<"/support">) {
   const sp = await props.searchParams;

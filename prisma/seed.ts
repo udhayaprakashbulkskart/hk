@@ -21,7 +21,7 @@ const slug = (t: string) => `${t.toLowerCase().replace(/[^a-z0-9]+/g, "-").repla
 
 async function wipe() {
   const tables = [
-    "AuditLog", "SupportTicket", "Setting", "Banner", "Report", "Notification", "Review", "Refund", "Withdrawal",
+    "AuditLog", "SupportTicket", "Setting", "Banner", "CouponRedemption", "Coupon", "Campaign", "Report", "Notification", "Review", "Refund", "Withdrawal",
     "WalletTransaction", "Payment", "WalletTopup", "OrderItem", "Order", "CartItem", "WishlistItem", "ProductMedia",
     "Product", "Category", "SellerProfile", "Session", "RateLimit", "User",
   ];
@@ -38,9 +38,12 @@ async function main() {
     ["weapon-skins", "Weapon Skins", "crosshair", true],
     ["outfits", "Outfits", "shirt", true],
     ["mythic-sets", "Mythic Sets", "sparkles", true],
-    ["vehicles", "Vehicles", "car", true],
     ["helmets", "Helmets", "hard-hat", true],
-    ["accessories", "Accessories", "backpack", true],
+    ["backpacks", "Backpacks", "backpack", true],
+    ["vehicles", "Vehicle Skins", "car", true],
+    ["crates", "Crates", "box", true],
+    ["bundles", "Bundles", "gift", true],
+    ["accessories", "Accessories", "sparkles", true],
     ["uc-topup", "UC Top-Up", "coins", false],
   ] as const;
   const cats: Record<string, string> = {};
@@ -53,7 +56,7 @@ async function main() {
   const admin = await db.user.create({
     data: {
       email: "admin@pubgstore.dev", name: "Store Admin", passwordHash: pw("Admin@12345"), role: "ADMIN",
-      seller: { create: { storeName: "PUBG Store Official", legalName: "PUBG Store Ops", status: "VERIFIED", verifiedAt: new Date(), ratingAvg: 4.9, ratingCount: 312, totalSales: 1840 } },
+      seller: { create: { storeName: "DROPZONE Official", legalName: "DROPZONE Ops", status: "VERIFIED", verifiedAt: new Date(), ratingAvg: 4.9, ratingCount: 312, totalSales: 1840 } },
     },
   });
   const buyer = await db.user.create({
@@ -106,8 +109,10 @@ async function main() {
     { t: "Glacier Helmet", c: "helmets", img: ["helmet-2"], price: 899, mrp: 1099, r: "LEGENDARY", f: ["Helmet Skin", "Frost Effect"], s: 3, sales: 13 },
     { t: "Golden Warrior Helmet", c: "helmets", img: ["helmet-3"], price: 1199, r: "LEGENDARY", f: ["Helmet Skin"], s: 3, sales: 10 },
     { t: "Phantom Helmet", c: "helmets", img: ["helmet-4"], price: 449, r: "RARE", f: ["Helmet Skin"], s: 3, sales: 1 },
-    { t: "Tactical Backpack Lv.3", c: "accessories", img: ["backpack-1"], price: 499, r: "EPIC", f: ["Backpack Skin"], s: 3, sales: 9 },
-    { t: "Frost Backpack", c: "accessories", img: ["backpack-2"], price: 649, mrp: 799, r: "LEGENDARY", f: ["Backpack Skin"], s: 3, sales: 6 },
+    { t: "Tactical Backpack Lv.3", c: "backpacks", img: ["backpack-1"], price: 499, r: "EPIC", f: ["Backpack Skin"], s: 3, sales: 9 },
+    { t: "Frost Backpack", c: "backpacks", img: ["backpack-2"], price: 649, mrp: 799, r: "LEGENDARY", f: ["Backpack Skin"], s: 3, sales: 6 },
+    { t: "Lunar Festival Bundle", c: "bundles", img: ["/media/skins/outfit-blossom-empress.webp", "/media/skins/gun-dragonfire-smg.webp"], price: 3299, mrp: 4499, r: "LEGENDARY", f: ["Outfit", "Weapon Finish", "Emote"], s: 1, feat: true, sales: 15 },
+    { t: "Dragon Treasure Crate Pack", c: "crates", img: ["/media/skins/gun-molten-akm.webp"], price: 799, mrp: 999, r: "EPIC", f: ["Crate coupon x5"], s: 3, d: "REDEEM_CODE", sales: 6 },
     { t: "Royal Parachute", c: "accessories", img: ["parachute-1"], price: 399, r: "EPIC", f: ["Parachute Skin", "Trail"], s: 3, d: "REDEEM_CODE", sales: 4 },
     { t: "Sky Rider Parachute", c: "accessories", img: ["parachute-2"], price: 349, r: "RARE", f: ["Parachute Skin"], s: 3, d: "REDEEM_CODE", sales: 2 },
   ];
@@ -171,9 +176,25 @@ async function main() {
   // ── Banners ──
   await db.banner.createMany({
     data: [
-      { title: "Mythic Sets", subtitle: "Exclusive PUBG Mobile & BGMI outfits from verified sellers", badge: "New arrival", ctaLabel: "Shop Now", ctaHref: "/skins?category=mythic-sets", imageUrl: "/media/skins/outfit-golden-seraph.webp", sortOrder: 0 },
-      { title: "Abyssal Sets", subtitle: "Legendary armour sets from verified sellers", badge: "Hot deals", ctaLabel: "Explore", ctaHref: "/skins?category=mythic-sets", imageUrl: "/media/skins/outfit-abyssal-dragon.webp", sortOrder: 1 },
-      { title: "Pharaoh Gold", subtitle: "Royal mythic outfits — upgradable and rare", badge: "Limited", ctaLabel: "View mythics", ctaHref: "/skins?category=mythic-sets", imageUrl: "/media/skins/outfit-pharaoh-gold.webp", sortOrder: 2 },
+      { title: "Mythic Sets", subtitle: "Exclusive PUBG Mobile & BGMI outfits from verified sellers", badge: "New arrival", ctaLabel: "Shop Now", ctaHref: "/category/outfits", imageUrl: "/media/skins/outfit-golden-seraph.webp", sortOrder: 0 },
+      { title: "Abyssal Sets", subtitle: "Legendary armour sets from verified sellers", badge: "Hot deals", ctaLabel: "Explore", ctaHref: "/category/outfits", imageUrl: "/media/skins/outfit-abyssal-dragon.webp", sortOrder: 1 },
+      { title: "Pharaoh Gold", subtitle: "Royal mythic outfits — upgradable and rare", badge: "Limited", ctaLabel: "View mythics", ctaHref: "/category/outfits", imageUrl: "/media/skins/outfit-pharaoh-gold.webp", sortOrder: 2 },
+    ],
+  });
+
+  // ── Festival campaign + coupons ──
+  await db.campaign.create({
+    data: {
+      name: "Lunar Festival", kicker: "Limited-time festival event", title: "Lunar Festival Sale", nativeTitle: "新春",
+      subtitle: "Festival bundles, legendary outfits and weapon skins at special prices.", ctaLabel: "Shop the festival", ctaHref: "/category/bundles",
+      heroLeft: "/media/skins/outfit-blossom-empress.webp", heroRight: "/media/skins/outfit-golden-seraph.webp",
+      endsAt: new Date(Date.now() + 10 * 86_400_000), isActive: true,
+    },
+  });
+  await db.coupon.createMany({
+    data: [
+      { code: "LUNAR10", description: "10% off festival orders (max ₹500)", type: "PERCENT", value: 10, maxDiscount: rs(500), minOrder: rs(499), perUserLimit: 1 },
+      { code: "WELCOME50", description: "₹50 off your first order over ₹299", type: "FLAT", value: rs(50), minOrder: rs(299), perUserLimit: 1 },
     ],
   });
 

@@ -8,7 +8,7 @@ import { getProductBySlug, relatedProducts } from "@/lib/services/catalog";
 import { getSavedIds } from "@/lib/services/user-data";
 import { DELIVERY_LABEL, GAME_LABEL, RARITY_LABEL } from "@/lib/constants";
 import { ProductGallery } from "@/components/product/gallery";
-import { AddToCartButton, BuyNowButton } from "@/components/product/cart-buttons";
+import { PurchasePanel } from "@/components/product/cart-buttons";
 import { WishlistButton } from "@/components/product/wishlist-button";
 import { ProductGrid } from "@/components/product/product-card";
 import { ReportButton } from "@/components/forms/report-button";
@@ -19,7 +19,7 @@ export async function generateMetadata(props: PageProps<"/product/[slug]">): Pro
   const { slug } = await props.params;
   const p = await db.product.findUnique({ where: { slug }, select: { title: true, description: true, status: true } });
   if (!p || p.status !== "APPROVED") return { title: "Item not found" };
-  return { title: p.title, description: p.description.slice(0, 160) };
+  return { title: p.title, description: p.description.slice(0, 160), alternates: { canonical: `/product/${slug}` } };
 }
 
 export default async function ProductPage(props: PageProps<"/product/[slug]">) {
@@ -48,7 +48,7 @@ export default async function ProductPage(props: PageProps<"/product/[slug]">) {
   return (
     <div className="space-y-12">
       <nav aria-label="Breadcrumb" className="text-xs text-muted">
-        <Link href="/marketplace" className="hover:text-white">Marketplace</Link> / <Link href={`/skins?category=${p.category.slug}`} className="hover:text-white">{p.category.name}</Link> / <span className="text-zinc-300">{p.title}</span>
+        <Link href="/marketplace" className="hover:text-white">Marketplace</Link> / <Link href={`/category/${p.category.slug}`} className="hover:text-white">{p.category.name}</Link> / <span className="text-zinc-300">{p.title}</span>
       </nav>
       {p.status !== "APPROVED" && (
         <div className="card flex items-center gap-3 border-warn/40 p-4 text-sm">
@@ -60,7 +60,7 @@ export default async function ProductPage(props: PageProps<"/product/[slug]">) {
         <div className="space-y-5">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h1 className="heading text-3xl sm:text-4xl">{p.title}</h1>
+              <h1 className="heading gold-text text-3xl sm:text-4xl">{p.title}</h1>
               <div className="mt-3 flex flex-wrap gap-2">
                 <RarityBadge rarity={p.rarity} />
                 {p.level && p.maxLevel && p.level < p.maxLevel && <span className="badge border-amber-500/40 bg-amber-500/10 text-amber-300">Upgradable</span>}
@@ -86,10 +86,7 @@ export default async function ProductPage(props: PageProps<"/product/[slug]">) {
           {isOwn ? (
             <Link href={`/sell/listings/${p.id}/edit`} className="btn-outline w-full py-3">Edit your listing</Link>
           ) : (
-            <div className="grid grid-cols-2 gap-3">
-              <AddToCartButton productId={p.id} disabled={!available} />
-              <BuyNowButton productId={p.id} disabled={!available} />
-            </div>
+            <PurchasePanel productId={p.id} stock={p.stock} disabled={!available} />
           )}
 
           <div className="grid gap-2 text-xs text-zinc-400 sm:grid-cols-3">
@@ -121,7 +118,7 @@ export default async function ProductPage(props: PageProps<"/product/[slug]">) {
 
       {related.length > 0 && (
         <section>
-          <SectionHeader title="Related items" href={`/skins?category=${p.category.slug}`} />
+          <SectionHeader kicker="You may also like" title="Related items" href={`/category/${p.category.slug}`} />
           <ProductGrid items={related} savedIds={saved} />
         </section>
       )}

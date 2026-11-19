@@ -14,27 +14,36 @@ export const metadata: Metadata = { title: "Checkout" };
 export default async function CheckoutPage(props: PageProps<"/checkout">) {
   const sp = await props.searchParams;
   const productId = typeof sp.product === "string" ? sp.product : undefined;
-  const user = await pageUser(`/checkout${productId ? `?product=${productId}` : ""}`);
+  const qty = Math.min(10, Math.max(1, Number(sp.quantity) || 1));
+  const game = sp.game === "PUBG_MOBILE" || sp.game === "BGMI" ? sp.game : undefined;
+  const pid = typeof sp.pid === "string" && /^\d{6,15}$/.test(sp.pid) ? sp.pid : undefined;
+  const nick = typeof sp.nick === "string" ? sp.nick.slice(0, 40) : "";
+  const back = new URLSearchParams(Object.entries(sp).flatMap(([k, v]) => (typeof v === "string" ? [[k, v]] : [])));
+  const user = await pageUser(`/checkout${back.size ? `?${back}` : ""}`);
   const include = { media: { where: { type: "IMAGE" as const }, take: 1, orderBy: { sortOrder: "asc" as const } } };
 
   const lines = productId
-    ? await db.product.findMany({ where: { id: productId, status: "APPROVED" }, include }).then((ps) => ps.map((p) => ({ p, quantity: 1 })))
+    ? await db.product.findMany({ where: { id: productId, status: "APPROVED" }, include }).then((ps) => ps.map((p) => ({ p, quantity: Math.min(qty, Math.max(1, p.stock)) })))
     : await db.cartItem.findMany({ where: { userId: user.id }, include: { product: { include } } }).then((cs) => cs.map((c) => ({ p: c.product, quantity: c.quantity })));
   if (!productId && !lines.length) redirect("/cart");
   if (!lines.length) return <EmptyState title="Item unavailable" body="This item is no longer for sale." action={{ href: "/marketplace", label: "Back to marketplace" }} />;
 
-  const total = lines.reduce((s, l) => s + l.p.price * l.quantity, 0);
+  const subtotal = lines.reduce((s, l) => s + l.p.price * l.quantity, 0);
+  const needsNickname = lines.some((l) => l.p.isOfficialStore);
   return (
     <div>
       <PageTitle title="Checkout" />
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <div className="card p-5 sm:p-6">
           <CheckoutForm
-            total={total}
+            subtotal={subtotal}
+            quantity={productId ? lines[0].quantity : undefined}
+            needsNickname={needsNickname}
+            defaultNickname={nick}
             walletBalance={user.walletBalance}
             razorpayEnabled={razorpayConfigured()}
-            defaultPlayerId={user.gamePlayerId ?? ""}
-            defaultGame={user.preferredGame === "PUBG_MOBILE" ? "PUBG_MOBILE" : "BGMI"}
+            defaultPlayerId={pid ?? user.gamePlayerId ?? ""}
+            defaultGame={game ?? (user.preferredGame === "PUBG_MOBILE" ? "PUBG_MOBILE" : "BGMI")}
             productId={productId}
             user={{ name: user.name, email: user.email, phone: user.phone }}
           />
@@ -50,7 +59,8 @@ export default async function CheckoutPage(props: PageProps<"/checkout">) {
               <span className="text-sm font-semibold">{formatINR(p.price * quantity)}</span>
             </div>
           ))}
-          <div className="flex justify-between border-t border-line pt-3 font-display text-xl font-bold"><span>Total</span><span className="text-neon">{formatINR(total)}</span></div>
+          <div className="flex justify-between border-t border-line pt-3 font-display text-lg font-bold"><span>Subtotal</span><span className="text-neon">{formatINR(subtotal)}</span></div>
+          <p className="text-xs text-muted">Coupons are applied in the payment step.</p>
         </aside>
       </div>
     </div>

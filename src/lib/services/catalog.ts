@@ -153,9 +153,15 @@ export async function getCategories() {
 
 export async function getHomeData() {
   const base = { status: "APPROVED" as const, stock: { gt: 0 }, isOfficialStore: false };
+  const now = new Date();
+  const [campaign, bundles, outfits] = await Promise.all([
+    db.campaign.findFirst({ where: { isActive: true, OR: [{ endsAt: null }, { endsAt: { gt: now } }] }, orderBy: { createdAt: "desc" } }),
+    db.product.findMany({ where: { ...base, category: { slug: "bundles" } }, orderBy: { salesCount: "desc" }, take: 4, select: productCardSelect }),
+    db.product.findMany({ where: { ...base, category: { slug: { in: ["outfits", "mythic-sets"] } }, rarity: { in: ["LEGENDARY", "MYTHIC"] } }, orderBy: { salesCount: "desc" }, take: 3, select: productCardSelect }),
+  ]);
   const [banners, featured, trending, recent, deals, sellers, categories, ucPacks] = await Promise.all([
     db.banner.findMany({ where: { isActive: true }, orderBy: { sortOrder: "asc" }, take: 5 }),
-    db.product.findMany({ where: { ...base, isFeatured: true }, orderBy: { approvedAt: "desc" }, take: 8, select: productCardSelect }),
+    db.product.findMany({ where: { ...base, isFeatured: true, rarity: { in: ["LEGENDARY", "MYTHIC"] } }, orderBy: { approvedAt: "desc" }, take: 4, select: productCardSelect }),
     db.product.findMany({ where: base, orderBy: [{ salesCount: "desc" }, { wishlistCount: "desc" }, { views: "desc" }], take: 8, select: productCardSelect }),
     db.product.findMany({ where: base, orderBy: { approvedAt: "desc" }, take: 8, select: productCardSelect }),
     db.product.findMany({ where: { ...base, compareAtPrice: { not: null } }, orderBy: { price: "asc" }, take: 8, select: productCardSelect }),
@@ -168,7 +174,7 @@ export async function getHomeData() {
     db.category.findMany({ where: { isSkin: true }, orderBy: { sortOrder: "asc" } }),
     db.product.findMany({ where: { status: "APPROVED", isOfficialStore: true }, orderBy: { price: "asc" }, take: 1, select: { price: true } }),
   ]);
-  return { banners, featured, trending, recent, deals, sellers, categories, ucFrom: ucPacks[0]?.price ?? null };
+  return { campaign, bundles, outfits, banners, featured, trending, recent, deals, sellers, categories, ucFrom: ucPacks[0]?.price ?? null };
 }
 
 export async function getSellerPublic(userId: string) {

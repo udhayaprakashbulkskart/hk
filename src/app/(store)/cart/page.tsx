@@ -17,7 +17,7 @@ export default async function CartPage() {
     orderBy: { createdAt: "asc" },
     include: { product: { include: { media: { where: { type: "IMAGE" }, take: 1, orderBy: { sortOrder: "asc" } }, seller: { select: { seller: { select: { storeName: true } } } } } } },
   });
-  if (!items.length) return <><PageTitle title="Your Cart" /><EmptyState title="Your cart is empty" body="Find something you love in the marketplace." action={{ href: "/skins", label: "Browse skins" }} /></>;
+  if (!items.length) return <><PageTitle title="Your Cart" /><EmptyState title="Your cart is empty" body="Find something you love in the marketplace." action={{ href: "/marketplace", label: "Browse products" }} /></>;
   const unavailable = items.filter((i) => i.product.status !== "APPROVED" || i.product.stock < i.quantity);
   const total = items.reduce((s, i) => s + i.product.price * i.quantity, 0);
   return (
@@ -29,8 +29,8 @@ export default async function CartPage() {
             const bad = p.status !== "APPROVED" || p.stock < quantity;
             return (
               <li key={p.id} className={`card flex items-center gap-3 p-3 ${bad ? "border-neon/50" : ""}`}>
-                <Link href={`/product/${p.slug}`} className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-black">
-                  {p.media[0] && <Image src={p.media[0].url} alt="" fill sizes="80px" className="object-cover" unoptimized={p.media[0].url.endsWith(".svg") || p.media[0].url.startsWith("/uploads/")} />}
+                <Link href={`/product/${p.slug}`} className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-[radial-gradient(circle,#7a1420,#2a070b)]">
+                  {p.media[0] && <Image src={p.media[0].url} alt="" fill sizes="80px" className="object-contain p-1" unoptimized={p.media[0].url.endsWith(".svg") || p.media[0].url.startsWith("/uploads/")} />}
                 </Link>
                 <div className="min-w-0 flex-1">
                   <Link href={`/product/${p.slug}`} className="line-clamp-1 font-semibold hover:text-neon">{p.title}</Link>
@@ -49,6 +49,7 @@ export default async function CartPage() {
           <h2 className="heading text-lg">Summary</h2>
           <div className="flex justify-between text-sm text-muted"><span>Subtotal</span><span>{formatINR(total)}</span></div>
           <div className="flex justify-between text-sm text-muted"><span>Fees</span><span>₹0</span></div>
+          <p className="rounded-lg border border-neon/25 bg-[#1c0507]/60 p-2.5 text-xs text-[#e7cfa8]">Have a coupon? Apply it at checkout.</p>
           <div className="flex justify-between border-t border-line pt-3 font-display text-xl font-bold"><span>Total</span><span>{formatINR(total)}</span></div>
           {unavailable.length > 0 ? (
             <button className="btn-primary w-full" disabled>Fix cart issues to continue</button>

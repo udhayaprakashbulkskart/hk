@@ -34,7 +34,7 @@ export async function openRazorpay(opts: { keyId: string; razorpayOrderId: strin
       order_id: opts.razorpayOrderId,
       amount: opts.amount,
       currency: opts.currency,
-      name: "PUBG Store",
+      name: "DROPZONE STORE",
       description: opts.description,
       prefill: opts.prefill,
       theme: { color: "#2EF5C6" },

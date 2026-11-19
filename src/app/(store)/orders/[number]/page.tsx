@@ -53,6 +53,7 @@ export default async function OrderPage(props: PageProps<"/orders/[number]">) {
         <dl className="grid grid-cols-2 gap-3 border-b border-line py-4 text-sm sm:grid-cols-4">
           <div><dt className="text-muted">Player ID</dt><dd className="font-semibold">{order.gamePlayerId}</dd></div>
           <div><dt className="text-muted">Game</dt><dd>{GAME_LABEL[order.game]}</dd></div>
+          {order.gameNickname && <div><dt className="text-muted">Nickname</dt><dd className="font-semibold">{order.gameNickname}</dd></div>}
           <div><dt className="text-muted">Payment</dt><dd>{order.provider === "WALLET" ? "Wallet" : `Razorpay${pay?.method ? ` · ${pay.method}` : ""}`}</dd></div>
           <div><dt className="text-muted">Payment status</dt><dd>{pay ? <StatusBadge status={pay.status} /> : "—"}</dd></div>
           {pay?.razorpayPaymentId && <div className="col-span-2"><dt className="text-muted">Transaction ID</dt><dd className="font-mono text-xs">{pay.razorpayPaymentId}</dd></div>}
@@ -65,7 +66,7 @@ export default async function OrderPage(props: PageProps<"/orders/[number]">) {
                   <Link href={`/product/${it.product.slug}`} className="font-semibold hover:text-neon">{it.titleSnapshot}</Link>
                   <p className="text-xs text-muted">Sold by <Link href={`/seller/${it.seller.id}`} className="hover:text-white">{it.seller.seller?.storeName}</Link> · {formatINR(it.unitPrice)} × {it.quantity}</p>
                 </div>
-                <div className="flex items-center gap-2"><StatusBadge status={it.status} /><span className="font-semibold">{formatINR(it.lineTotal)}</span></div>
+                <div className="flex items-center gap-2"><StatusBadge status={it.status} /><span className="font-semibold">{formatINR(it.lineTotal - it.discount)}</span></div>
               </div>
               {it.deliveryNote && <p className="rounded-lg bg-panel-2 px-3 py-2 text-sm text-zinc-300"><span className="text-muted">Seller note:</span> {it.deliveryNote}</p>}
               {order.buyerId === user.id && <BuyerItemActions itemId={it.id} status={it.status} canReview={it.status === "COMPLETED" && !it.review} />}
@@ -75,6 +76,7 @@ export default async function OrderPage(props: PageProps<"/orders/[number]">) {
         </ul>
         <div className="space-y-1 border-t border-line pt-4 text-sm">
           <div className="flex justify-between text-muted"><span>Subtotal</span><span>{formatINR(order.subtotal)}</span></div>
+          {order.discount > 0 && <div className="flex justify-between text-success"><span>Coupon {order.couponCode}</span><span>−{formatINR(order.discount)}</span></div>}
           <div className="flex justify-between font-display text-xl font-bold"><span>Total paid</span><span>{formatINR(order.total)}</span></div>
         </div>
         {order.refunds.length > 0 && (
@@ -89,7 +91,7 @@ export default async function OrderPage(props: PageProps<"/orders/[number]">) {
           </div>
         )}
       </div>
-      <p className="text-center text-xs text-muted">Need help? <Link href={`/support?order=${order.orderNumber}`} className="text-neon">Contact support</Link></p>
+      <p className="text-center text-xs text-muted">Need help? <Link href={`/contact?order=${order.orderNumber}`} className="text-neon">Contact support</Link></p>
     </div>
   );
 }

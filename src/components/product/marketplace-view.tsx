@@ -15,7 +15,7 @@ async function Results({ sp, skinsOnly, basePath }: { sp: SP; skinsOnly: boolean
   const filters = parseFilters(sp);
   const [res, saved] = await Promise.all([listProducts({ ...filters, skinsOnly, officialOnly: skinsOnly ? false : undefined }), getSavedIds(user?.id)]);
   if (!res.items.length) {
-    const filtered = Boolean(filters.q || filters.category || filters.rarity || filters.game || filters.minPrice != null || filters.maxPrice != null || filters.minLevel != null);
+    const filtered = Boolean(filters.q || filters.rarity || filters.game || filters.minPrice != null || filters.maxPrice != null || filters.minLevel != null);
     return filtered ? (
       <EmptyState title="No items found" body="Try a different search or clear some filters." action={{ href: basePath, label: "Clear filters" }} />
     ) : (
@@ -35,14 +35,14 @@ async function Results({ sp, skinsOnly, basePath }: { sp: SP; skinsOnly: boolean
   );
 }
 
-export async function MarketplaceView({ searchParams, skinsOnly, title, subtitle, basePath }: { searchParams: Promise<SP>; skinsOnly: boolean; title: string; subtitle: string; basePath: string }) {
+export async function MarketplaceView({ searchParams, skinsOnly, title, subtitle, basePath, lockCategory = false }: { searchParams: Promise<SP>; skinsOnly: boolean; title: string; subtitle: string; basePath: string; lockCategory?: boolean }) {
   const sp = await searchParams;
   const categories = (await getCategories()).filter((c) => (skinsOnly ? c.isSkin : true));
   return (
     <div>
       <PageTitle title={title} subtitle={subtitle} />
       <div className="mb-5">
-        <MarketFilters categories={categories.map((c) => ({ slug: c.slug, name: c.name }))} />
+        <MarketFilters categories={categories.map((c) => ({ slug: c.slug, name: c.name }))} showCategories={!lockCategory} />
       </div>
       <Suspense key={JSON.stringify(sp)} fallback={<GridSkeleton />}>
         <Results sp={sp} skinsOnly={skinsOnly} basePath={basePath} />

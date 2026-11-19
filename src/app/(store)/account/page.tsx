@@ -21,7 +21,7 @@ export default async function AccountPage() {
   const links = [
     { href: "/orders", label: "My Purchases", Icon: Receipt, extra: purchases },
     ...(profile?.status === "VERIFIED" ? [{ href: "/account/sales", label: "My Sales", Icon: ChartNoAxesColumn }, { href: "/sell/listings", label: "My Listings", Icon: List }] : []),
-    { href: "/account/saved", label: "Saved Items", Icon: Heart, extra: saved },
+    { href: "/wishlist", label: "Wishlist", Icon: Heart, extra: saved },
     { href: "/account/notifications", label: "Notifications", Icon: Bell, extra: unread || undefined },
     { href: "/sell", label: "Seller Verification", Icon: ShieldCheck, badge: profile?.status ?? "NONE" },
     { href: "/account/settings", label: "Account Settings", Icon: Settings },

@@ -16,7 +16,7 @@ export default async function SalesPage() {
     where: { sellerId: user.id, status: { notIn: ["AWAITING_PAYMENT", "CANCELLED"] } },
     orderBy: { createdAt: "desc" },
     take: 100,
-    include: { order: { select: { orderNumber: true, gamePlayerId: true, game: true, buyer: { select: { name: true } } } }, review: { select: { rating: true, comment: true } } },
+    include: { order: { select: { orderNumber: true, gamePlayerId: true, gameNickname: true, game: true, buyer: { select: { name: true } } } }, review: { select: { rating: true, comment: true } } },
   });
   const toDeliver = items.filter((i) => i.status === "PROCESSING");
   return (
@@ -36,7 +36,7 @@ export default async function SalesPage() {
                 <StatusBadge status={it.status} />
               </div>
               <div className="grid grid-cols-2 gap-2 rounded-xl bg-panel-2 p-3 text-sm sm:grid-cols-4">
-                <div><p className="text-xs text-muted">Deliver to Player ID</p><p className="font-mono font-semibold">{it.order.gamePlayerId}</p></div>
+                <div><p className="text-xs text-muted">Deliver to Player ID</p><p className="font-mono font-semibold">{it.order.gamePlayerId}</p>{it.order.gameNickname && <p className="text-xs text-muted">Nickname: {it.order.gameNickname}</p>}</div>
                 <div><p className="text-xs text-muted">Game</p><p>{GAME_LABEL[it.order.game]}</p></div>
                 <div><p className="text-xs text-muted">Sale price</p><p>{formatINR(it.lineTotal)}</p></div>
                 <div><p className="text-xs text-muted">You earn</p><p className="font-semibold text-success">{formatINR(it.sellerEarning)}</p></div>

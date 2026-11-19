@@ -139,6 +139,11 @@ enum ReportStatus {
   DISMISSED
 }
 
+enum CouponType {
+  PERCENT // value = whole percent (1-90), optional maxDiscount cap
+  FLAT // value = paise off
+}
+
 enum TicketStatus {
   OPEN
   IN_PROGRESS
@@ -178,6 +183,7 @@ model User {
   notifications  Notification[]
   reports        Report[]
   tickets        SupportTicket[]
+  couponRedemptions CouponRedemption[]
   auditLogs      AuditLog[]
   topups         WalletTopup[]
 
@@ -321,11 +327,14 @@ model Order {
   buyer          User            @relation(fields: [buyerId], references: [id])
   status         OrderStatus     @default(PENDING_PAYMENT)
   subtotal       Int
-  platformFee    Int             @default(0) // commission (sum of items)
+  discount       Int             @default(0) // coupon discount (absorbed by the platform)
+  couponCode     String?
+  platformFee    Int             @default(0) // commission minus coupon discount
   total          Int
   provider       PaymentProvider
   // Delivery target: in-game Player ID + game. Never credentials.
   gamePlayerId   String
+  gameNickname   String? // buyer-entered in-game name, matched before UC is credited
   game           Game
   paidAt         DateTime?
   createdAt      DateTime        @default(now())
@@ -334,6 +343,7 @@ model Order {
   items    OrderItem[]
   payments Payment[]
   refunds  Refund[]
+  coupon   CouponRedemption?
 
   @@index([buyerId, createdAt])
   @@index([status])
@@ -351,6 +361,7 @@ model OrderItem {
   unitPrice         Int
   quantity          Int
   lineTotal         Int
+  discount          Int               @default(0) // this line's share of the order coupon
   commissionRateBps Int // basis points, 1000 = 10%
   commission        Int
   sellerEarning     Int
@@ -541,4 +552,55 @@ model AuditLog {
 
   @@index([entityType, entityId])
   @@index([createdAt])
+}
+
+// ───────────────────────────── Promotions ─────────────────────────────
+
+model Coupon {
+  id           String             @id @default(cuid())
+  code         String             @unique // stored uppercase
+  description  String?
+  type         CouponType
+  value        Int
+  minOrder     Int                @default(0) // paise
+  maxDiscount  Int? // paise cap for PERCENT coupons
+  usageLimit   Int? // total redemptions allowed
+  usedCount    Int                @default(0)
+  perUserLimit Int                @default(1)
+  startsAt     DateTime?
+  endsAt       DateTime?
+  isActive     Boolean            @default(true)
+  createdAt    DateTime           @default(now())
+  redemptions  CouponRedemption[]
+}
+
+model CouponRedemption {
+  id        String   @id @default(cuid())
+  couponId  String
+  coupon    Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderId   String   @unique
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount    Int
+  createdAt DateTime @default(now())
+
+  @@index([couponId, userId])
+}
+
+/// Festival / seasonal campaign driving the home hero, countdown and theming.
+model Campaign {
+  id          String    @id @default(cuid())
+  name        String // internal
+  kicker      String? // small label above the title
+  title       String
+  nativeTitle String? // optional title in another script (e.g. 新春礼包)
+  subtitle    String?
+  ctaLabel    String    @default("Shop Now")
+  ctaHref     String    @default("/marketplace")
+  heroLeft    String? // render URL
+  heroRight   String? // render URL
+  endsAt      DateTime?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
 }

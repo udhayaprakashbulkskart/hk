@@ -1,4 +1,4 @@
-import { handler, ok, parseBody } from "@/lib/api";
+import { handler, ok, parsePatch } from "@/lib/api";
 import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { bannerSchema } from "@/lib/validation";
@@ -6,7 +6,7 @@ import { audit } from "@/lib/audit";
 
 export const PATCH = handler<{ id: string }>(async (req, { id }) => {
   const admin = await requireRole("ADMIN");
-  const input = await parseBody(req, bannerSchema.partial());
+  const input = await parsePatch(req, bannerSchema.partial());
   await db.banner.update({ where: { id }, data: input });
   await audit(admin.id, "admin.banner.update", "Banner", id, input);
   return ok({});

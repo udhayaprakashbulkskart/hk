@@ -15,6 +15,7 @@ import {
   refundRazorpayPayment,
 } from "../razorpay";
 import type { Game } from "@/generated/prisma/enums";
+import { allocate, evaluateCoupon, releaseCoupon, reserveCoupon } from "./coupons";
 
 const PENDING_ORDER_TTL_MIN = 30;
 
@@ -32,6 +33,8 @@ export type CheckoutInput = {
   game: Exclude<Game, "BOTH">;
   productId?: string;
   quantity?: number;
+  couponCode?: string;
+  gameNickname?: string;
 };
 
 export type CheckoutResult =
@@ -64,7 +67,7 @@ export async function checkout(userId: string, input: CheckoutInput): Promise<Ch
   const order = await db.$transaction(async (tx) => {
     const products = await tx.product.findMany({
       where: { id: { in: lines.map((l) => l.productId) } },
-      select: { id: true, title: true, price: true, stock: true, status: true, sellerId: true, game: true },
+      select: { id: true, title: true, price: true, stock: true, status: true, sellerId: true, game: true, isOfficialStore: true },
     });
     const items = lines.map((l) => {
       const p = products.find((x) => x.id === l.productId);
@@ -82,20 +85,35 @@ export async function checkout(userId: string, input: CheckoutInput): Promise<Ch
       if (r.count !== 1) throw conflict(`"${it.p.title}" just went out of stock`);
     }
 
+    // UC is credited by in-game name + ID match, so a nickname is mandatory for top-ups.
+    if (items.some((i) => i.p.isOfficialStore) && !input.gameNickname) {
+      throw badRequest("Enter your in-game nickname for UC top-ups", { gameNickname: "Required for UC top-up" });
+    }
+
     const subtotal = items.reduce((s, i) => s + i.lineTotal, 0);
-    const platformFee = items.reduce((s, i) => s + i.commission, 0);
+    const commissionTotal = items.reduce((s, i) => s + i.commission, 0);
+    // Coupons are platform-funded: the buyer pays less, seller earnings are unchanged.
+    const promo = input.couponCode ? await evaluateCoupon(tx, input.couponCode, userId, subtotal) : null;
+    const discount = promo?.discount ?? 0;
+    if (promo) await reserveCoupon(tx, promo.coupon.id, promo.coupon.usageLimit);
+    const shares = allocate(discount, items.map((i) => i.lineTotal));
+    const total = subtotal - discount;
     const created = await tx.order.create({
       data: {
         orderNumber,
         buyerId: userId,
         subtotal,
-        platformFee,
-        total: subtotal, // commission is taken from the seller's side, buyer pays list price
+        discount,
+        couponCode: promo?.coupon.code ?? null,
+        platformFee: commissionTotal - discount,
+        total,
         provider: input.provider,
         gamePlayerId: input.gamePlayerId,
+        gameNickname: input.gameNickname || null,
         game: input.game,
         items: {
-          create: items.map((i) => ({
+          create: items.map((i, k) => ({
+            discount: shares[k],
             productId: i.p.id,
             sellerId: i.p.sellerId,
             titleSnapshot: i.p.title,
@@ -110,9 +128,11 @@ export async function checkout(userId: string, input: CheckoutInput): Promise<Ch
       },
     });
 
+    if (promo) await tx.couponRedemption.create({ data: { couponId: promo.coupon.id, userId, orderId: created.id, amount: discount } });
+
     if (input.provider === "WALLET") {
-      await debitWallet(tx, userId, subtotal, "PURCHASE", orderNumber, `Payment for order ${orderNumber}`);
-      await tx.payment.create({ data: { orderId: created.id, provider: "WALLET", amount: subtotal, status: "CAPTURED", method: "wallet" } });
+      await debitWallet(tx, userId, total, "PURCHASE", orderNumber, `Payment for order ${orderNumber}`);
+      await tx.payment.create({ data: { orderId: created.id, provider: "WALLET", amount: total, status: "CAPTURED", method: "wallet" } });
       await markOrderPaidTx(tx, created.id);
     }
     return created;
@@ -158,6 +178,7 @@ export async function cancelOrder(orderId: string, reason: string) {
     for (const it of items) await tx.product.update({ where: { id: it.productId }, data: { stock: { increment: it.quantity } } });
     await tx.orderItem.updateMany({ where: { orderId }, data: { status: "CANCELLED" } });
     await tx.payment.updateMany({ where: { orderId, status: "CREATED" }, data: { status: "FAILED", failureReason: reason } });
+    await releaseCoupon(tx, orderId);
   });
 }
 
@@ -297,7 +318,7 @@ export async function requestRefund(userId: string, orderItemId: string, reason:
         orderId: item.orderId,
         orderItemId: item.id,
         requesterId: userId,
-        amount: item.lineTotal,
+        amount: item.lineTotal - item.discount, // refund what was actually paid for this line
         reason,
         destination: item.order.provider === "RAZORPAY" ? "ORIGINAL" : "WALLET",
       },
