@@ -57,7 +57,7 @@ export function PurchasePanel({ productId, stock, disabled }: { productId: strin
       {max > 1 && (
         <div className="flex items-center gap-3">
           <span className="text-sm text-muted">Quantity</span>
-          <div className="flex items-center rounded-lg border border-neon/40 bg-[#1c0507]">
+          <div className="flex items-center rounded-lg border border-neon/40 bg-[#17191c]">
             <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} disabled={qty <= 1} aria-label="Decrease quantity" className="p-2.5 text-neon disabled:opacity-40"><Minus className="size-4" /></button>
             <span className="w-10 text-center font-bold tabular-nums" aria-live="polite">{qty}</span>
             <button type="button" onClick={() => setQty((q) => Math.min(max, q + 1))} disabled={qty >= max} aria-label="Increase quantity" className="p-2.5 text-neon disabled:opacity-40"><Plus className="size-4" /></button>

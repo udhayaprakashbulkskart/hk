@@ -86,8 +86,8 @@ export function CheckoutForm(props: {
           )}
         </div>
         {props.needsNickname && (
-          <label className="flex items-start gap-2 rounded-lg border border-neon/30 bg-[#1c0507]/60 p-3 text-xs text-[#f3dcb8]">
-            <input type="checkbox" name="nicknameConfirm" className="mt-0.5 accent-[#f2c14e]" />
+          <label className="flex items-start gap-2 rounded-lg border border-neon/30 bg-[#17191c]/60 p-3 text-xs text-[#c9d1d8]">
+            <input type="checkbox" name="nicknameConfirm" className="mt-0.5 accent-[#2fc6c8]" />
             <span>I&apos;ve checked that this Player ID belongs to the nickname above. ZYNOFLIX can&apos;t look nicknames up automatically, so please double-check — UC sent to a wrong ID can&apos;t be recovered.</span>
           </label>
         )}
@@ -112,7 +112,7 @@ export function CheckoutForm(props: {
         <PayOption selected={method} onSelect={setProvider} value="WALLET" title={`Wallet · ${formatINR(props.walletBalance)}`} sub={canWallet ? "Pay instantly from your balance" : "Insufficient balance — top up or pay online"} Icon={Wallet} disabled={!canWallet} />
         <PayOption selected={method} onSelect={setProvider} value="RAZORPAY" title="UPI, Cards, Netbanking" sub={props.razorpayEnabled ? "Secured by Razorpay" : "Online payments are not configured on this server"} Icon={CreditCard} disabled={!props.razorpayEnabled} />
       </section>
-      <dl className="space-y-1.5 rounded-lg border border-neon/25 bg-[#1c0507]/60 p-4 text-sm">
+      <dl className="space-y-1.5 rounded-lg border border-neon/25 bg-[#17191c]/60 p-4 text-sm">
         <div className="flex justify-between"><dt className="text-muted">Subtotal</dt><dd>{formatINR(props.subtotal)}</dd></div>
         {promo && <div className="flex justify-between text-success"><dt>Coupon {promo.code}</dt><dd>−{formatINR(promo.discount)}</dd></div>}
         <div className="flex justify-between border-t border-neon/20 pt-2 font-display text-lg font-bold"><dt>Total</dt><dd className="text-neon">{formatINR(total)}</dd></div>
@@ -128,7 +128,7 @@ export function CheckoutForm(props: {
 function PayOption({ value, selected, onSelect, title, sub, Icon, disabled }: { value: "WALLET" | "RAZORPAY"; selected: string; onSelect: (v: "WALLET" | "RAZORPAY") => void; title: string; sub: string; Icon: typeof Wallet; disabled?: boolean }) {
   return (
     <label className={clsx("flex cursor-pointer items-center gap-3 rounded-xl border p-3.5 transition", selected === value ? "border-neon bg-neon/10 shadow-neon" : "border-line hover:border-zinc-500", disabled && "cursor-not-allowed opacity-50")}>
-      <input type="radio" name="provider" value={value} checked={selected === value} disabled={disabled} onChange={() => onSelect(value)} className="accent-[#f2c14e]" />
+      <input type="radio" name="provider" value={value} checked={selected === value} disabled={disabled} onChange={() => onSelect(value)} className="accent-[#2fc6c8]" />
       <Icon className="size-5 text-neon" />
       <span className="flex-1"><span className="block text-sm font-semibold">{title}</span><span className="text-xs text-muted">{sub}</span></span>
     </label>

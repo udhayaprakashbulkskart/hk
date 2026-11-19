@@ -95,7 +95,7 @@ export default async function ProductPage(props: PageProps<"/product/[slug]">) {
           </div>
 
           <div className="card flex items-center gap-3 p-4">
-            <span className="grid size-12 shrink-0 place-items-center rounded-xl border border-neon/60 bg-[#5c0a12] text-neon"><BadgeCheck className="size-6" /></span>
+            <span className="grid size-12 shrink-0 place-items-center rounded-xl border border-neon/60 bg-[#30353b] text-neon"><BadgeCheck className="size-6" /></span>
             <div className="min-w-0 flex-1">
               <p className="font-semibold">Sold &amp; delivered by ZYNOFLIX STORE</p>
               <p className="mt-0.5 text-xs text-muted">Official store listing · delivered to your Player ID through the game&apos;s own gifting or redeem system.</p>

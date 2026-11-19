@@ -31,7 +31,7 @@ export function MobileDrawer({ signedIn, isAdmin }: { signedIn: boolean; isAdmin
       {open && (
         <div className="fixed inset-0 z-[70] lg:hidden">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setOpen(false)} />
-          <nav aria-label="Mobile" className="absolute inset-y-0 left-0 flex w-[84%] max-w-xs animate-fade-up flex-col gap-1 overflow-y-auto border-r border-neon/40 bg-gradient-to-b from-[#3a0b10] to-[#1c0507] p-4">
+          <nav aria-label="Mobile" className="absolute inset-y-0 left-0 flex w-[84%] max-w-xs animate-fade-up flex-col gap-1 overflow-y-auto border-r border-neon/40 bg-gradient-to-b from-[#2a2e33] to-[#17191c] p-4">
             <div className="mb-3 flex items-center justify-between">
               <Logo />
               <button onClick={() => setOpen(false)} aria-label="Close menu" className="btn-ghost p-2">

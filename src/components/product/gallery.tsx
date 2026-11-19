@@ -17,7 +17,7 @@ export function ProductGallery({ media, title }: { media: Media[]; title: string
 
   return (
     <div className="space-y-3">
-      <div className="card relative aspect-[4/3] overflow-hidden bg-[radial-gradient(ellipse_at_50%_85%,rgba(242,193,78,0.25),transparent_60%),radial-gradient(circle_at_50%_35%,#8b1420,#2a070b_75%)]">
+      <div className="card relative aspect-[4/3] overflow-hidden bg-[radial-gradient(ellipse_at_50%_85%,rgba(47,198,200,0.25),transparent_60%),radial-gradient(circle_at_50%_35%,#3b4148,#1f2226_75%)]">
         {view.kind === "spin" ? (
           <SpinViewer frames={frames.map((f) => f.url)} title={title} />
         ) : view.kind === "video" && video ? (
@@ -76,7 +76,7 @@ function ZoomImage({ src, alt }: { src: string; alt: string }) {
         unoptimized={src.endsWith(".svg") || src.startsWith("/uploads/")}
       />
       {!zoom && (
-        <span className="pointer-events-none absolute right-3 bottom-3 flex items-center gap-1 rounded-full border border-neon/40 bg-[#1c0507]/80 px-2.5 py-1 text-[11px] text-neon-soft">
+        <span className="pointer-events-none absolute right-3 bottom-3 flex items-center gap-1 rounded-full border border-neon/40 bg-[#17191c]/80 px-2.5 py-1 text-[11px] text-neon-soft">
           <ZoomIn className="size-3.5" /> Hover or tap to zoom
         </span>
       )}

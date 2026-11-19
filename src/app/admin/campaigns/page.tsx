@@ -22,7 +22,7 @@ export default async function AdminCampaigns() {
           const expired = c.endsAt != null && c.endsAt < now;
           return (
             <li key={c.id} className={`card overflow-hidden ${live?.id === c.id ? "border-neon shadow-neon" : ""}`}>
-              <div className="relative flex h-32 justify-between bg-[radial-gradient(circle_at_50%_0%,#9e1420,#2a070b_70%)] px-4">
+              <div className="relative flex h-32 justify-between bg-[radial-gradient(circle_at_50%_0%,#3b4148,#1f2226_70%)] px-4">
                 {[c.heroLeft, c.heroRight].map((u, i) => <div key={i} className="relative h-full w-24">{u && <Image src={u} alt="" fill sizes="96px" className="object-contain object-bottom" />}</div>)}
                 <div className="absolute inset-0 grid place-items-center text-center">
                   <p className="heading gold-text text-xl">{c.title}</p>

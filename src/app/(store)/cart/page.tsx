@@ -29,7 +29,7 @@ export default async function CartPage() {
             const bad = p.status !== "APPROVED" || p.stock < quantity;
             return (
               <li key={p.id} className={`card flex items-center gap-3 p-3 ${bad ? "border-neon/50" : ""}`}>
-                <Link href={`/product/${p.slug}`} className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-[radial-gradient(circle,#7a1420,#2a070b)]">
+                <Link href={`/product/${p.slug}`} className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-[radial-gradient(circle,#3b4148,#1f2226)]">
                   {p.media[0] && <Image src={p.media[0].url} alt="" fill sizes="80px" className="object-contain p-1" unoptimized={p.media[0].url.endsWith(".svg") || p.media[0].url.startsWith("/uploads/")} />}
                 </Link>
                 <div className="min-w-0 flex-1">
@@ -49,7 +49,7 @@ export default async function CartPage() {
           <h2 className="heading text-lg">Summary</h2>
           <div className="flex justify-between text-sm text-muted"><span>Subtotal</span><span>{formatINR(total)}</span></div>
           <div className="flex justify-between text-sm text-muted"><span>Fees</span><span>₹0</span></div>
-          <p className="rounded-lg border border-neon/25 bg-[#1c0507]/60 p-2.5 text-xs text-[#e7cfa8]">Have a coupon? Apply it at checkout.</p>
+          <p className="rounded-lg border border-neon/25 bg-[#17191c]/60 p-2.5 text-xs text-[#c9d1d8]">Have a coupon? Apply it at checkout.</p>
           <div className="flex justify-between border-t border-line pt-3 font-display text-xl font-bold"><span>Total</span><span>{formatINR(total)}</span></div>
           {unavailable.length > 0 ? (
             <button className="btn-primary w-full" disabled>Fix cart issues to continue</button>

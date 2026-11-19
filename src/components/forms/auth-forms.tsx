@@ -80,7 +80,7 @@ export function RegisterForm({ next }: { next?: string }) {
       <Input label="Email" name="email" type="email" required autoComplete="email" error={fields.email} />
       <PasswordInput autoComplete="new-password" error={fields.password} hint="At least 8 characters with a letter and a number" />
       <label className="flex items-start gap-2 text-sm text-zinc-300">
-        <input type="checkbox" name="acceptTerms" className="mt-1 accent-[#f2c14e]" />
+        <input type="checkbox" name="acceptTerms" className="mt-1 accent-[#2fc6c8]" />
         <span>
           I agree to the <Link href="/terms" className="text-neon hover:underline">terms</Link> and understand ZYNOFLIX STORE will never ask for my game password or OTP.
         </span>

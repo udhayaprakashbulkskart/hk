@@ -30,10 +30,10 @@ export function AdminNav({ counts }: { counts: Record<string, number> }) {
         const active = href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
         const n = counts[key] ?? 0;
         return (
-          <Link key={href} href={href} aria-current={active ? "page" : undefined} className={clsx("flex shrink-0 items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition", active ? "bg-neon/15 text-white ring-1 ring-neon/40" : "text-[#d9b98f] hover:bg-white/5 hover:text-white")}>
+          <Link key={href} href={href} aria-current={active ? "page" : undefined} className={clsx("flex shrink-0 items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition", active ? "bg-neon/15 text-white ring-1 ring-neon/40" : "text-[#8c959e] hover:bg-white/5 hover:text-white")}>
             <Icon className={clsx("size-4", active && "text-neon")} />
             <span className="flex-1 whitespace-nowrap">{label}</span>
-            {n > 0 && <span className="rounded-full bg-neon px-1.5 text-[10px] font-bold text-[#3a0a0e]">{n}</span>}
+            {n > 0 && <span className="rounded-full bg-neon px-1.5 text-[10px] font-bold text-[#062224]">{n}</span>}
           </Link>
         );
       })}

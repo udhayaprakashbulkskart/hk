@@ -10,7 +10,7 @@ import { MobileDrawer } from "./mobile-drawer";
 
 function CountDot({ n }: { n: number }) {
   if (!n) return null;
-  return <span className="absolute -top-1 -right-1 grid min-w-4 place-items-center rounded-full bg-neon shadow-neon px-1 text-[10px] leading-4 font-bold text-[#3a0a0e]">{n > 9 ? "9+" : n}</span>;
+  return <span className="absolute -top-1 -right-1 grid min-w-4 place-items-center rounded-full bg-neon shadow-neon px-1 text-[10px] leading-4 font-bold text-[#062224]">{n > 9 ? "9+" : n}</span>;
 }
 
 export async function Header() {
@@ -24,7 +24,7 @@ export async function Header() {
   const cartCount = cart?._sum.quantity ?? 0;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-neon/30 bg-[#2a070b]/90 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-white/[0.05] bg-[#1b1e21]/85 shadow-[0_10px_30px_-20px_rgb(0_0_0/0.9)] backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 lg:px-6">
         <MobileDrawer signedIn={!!user} isAdmin={user?.role === "ADMIN"} />
         <div className="flex flex-1 justify-center lg:flex-none lg:justify-start">
@@ -35,7 +35,7 @@ export async function Header() {
             <NavLink
               key={i.href}
               href={i.href}
-              className="relative px-2 py-2 text-[12px] font-semibold tracking-wider whitespace-nowrap text-[#f3dcb8] uppercase transition after:absolute after:inset-x-2.5 after:-bottom-[13px] after:h-0.5 after:origin-left after:scale-x-0 after:bg-neon after:shadow-[0_0_12px_#f2c14e] after:transition hover:text-white lg:px-3"
+              className="relative rounded-full px-3 py-1.5 text-[13px] font-medium whitespace-nowrap text-[#9aa4ad] transition hover:text-white aria-[current=page]:bg-white/[0.06] aria-[current=page]:text-white"
             >
               {i.label}
             </NavLink>

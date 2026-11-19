@@ -20,11 +20,11 @@ export const RARITY_LABEL: Record<Rarity, string> = {
 };
 
 export const RARITY_STYLE: Record<Rarity, string> = {
-  COMMON: "text-zinc-300 bg-[#1c0507]/85 border-zinc-500/30",
-  RARE: "text-sky-300 bg-[#1c0507]/85 border-sky-500/30",
-  EPIC: "text-violet-300 bg-[#1c0507]/85 border-violet-500/30",
-  LEGENDARY: "text-amber-300 bg-[#1c0507]/85 border-amber-500/30",
-  MYTHIC: "text-rose-300 bg-[#1c0507]/85 border-rose-500/40",
+  COMMON: "text-zinc-300 bg-[#17191c]/85 border-zinc-500/30",
+  RARE: "text-sky-300 bg-[#17191c]/85 border-sky-500/30",
+  EPIC: "text-violet-300 bg-[#17191c]/85 border-violet-500/30",
+  LEGENDARY: "text-amber-300 bg-[#17191c]/85 border-amber-500/30",
+  MYTHIC: "text-rose-300 bg-[#17191c]/85 border-rose-500/40",
 };
 
 export const DELIVERY_LABEL: Record<DeliveryMethod, string> = {

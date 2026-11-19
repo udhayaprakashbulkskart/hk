@@ -43,8 +43,8 @@ export default async function PaymentSuccessPage(props: PageProps<"/payment/succ
             <Icon className="size-8" />
           </span>
           <h1 className="heading gold-text text-3xl">{title}</h1>
-          <p className="text-sm text-[#f3dcb8]">{body}</p>
-          <dl className="mt-2 w-full space-y-1.5 rounded-lg border border-neon/25 bg-[#1c0507]/70 p-4 text-left text-sm">
+          <p className="text-sm text-[#c9d1d8]">{body}</p>
+          <dl className="mt-2 w-full space-y-1.5 rounded-lg border border-neon/25 bg-[#17191c]/70 p-4 text-left text-sm">
             <div className="flex justify-between"><dt className="text-muted">Order</dt><dd className="font-mono">{order.orderNumber}</dd></div>
             <div className="flex justify-between gap-3"><dt className="text-muted">Items</dt><dd className="truncate">{order.items.map((i) => `${i.titleSnapshot}${i.quantity > 1 ? ` ×${i.quantity}` : ""}`).join(", ")}</dd></div>
             <div className="flex justify-between"><dt className="text-muted">Deliver to</dt><dd>{order.gamePlayerId} · {GAME_LABEL[order.game]}</dd></div>

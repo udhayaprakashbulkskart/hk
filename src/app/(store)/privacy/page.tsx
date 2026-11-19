@@ -22,7 +22,7 @@ export default function PrivacyPage() {
         {SECTIONS.map(([h, b]) => (
           <section key={h} className="card p-5">
             <h2 className="heading mb-1.5 text-lg text-neon">{h}</h2>
-            <p className="text-sm leading-relaxed text-[#f3dcb8]">{b}</p>
+            <p className="text-sm leading-relaxed text-[#c9d1d8]">{b}</p>
           </section>
         ))}
       </div>

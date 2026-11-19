@@ -33,10 +33,10 @@ export default async function UcPage(props: PageProps<"/uc">) {
   return (
     <div>
       <PageTitle title="UC Top-Up" subtitle="Unknown Cash for PUBG Mobile and BGMI, sent to your Player ID. We never ask for your login, password or OTP." />
-      <ol className="mb-6 grid grid-cols-5 gap-1 text-center text-[10px] text-[#e7cfa8] sm:gap-3 sm:text-xs">
+      <ol className="mb-6 grid grid-cols-5 gap-1 text-center text-[10px] text-[#c9d1d8] sm:gap-3 sm:text-xs">
         {STEPS.map(({ Icon, t }, i) => (
           <li key={t} className="flex flex-col items-center gap-1.5">
-            <span className="grid size-9 place-items-center rounded-full border border-neon/60 bg-[#5c0a12] text-neon sm:size-11"><Icon className="size-4 sm:size-5" /></span>
+            <span className="grid size-9 place-items-center rounded-full border border-neon/60 bg-[#30353b] text-neon sm:size-11"><Icon className="size-4 sm:size-5" /></span>
             <span><b className="text-neon">{i + 1}.</b> {t}</span>
           </li>
         ))}

@@ -23,10 +23,10 @@ export default function FaqPage() {
             <div className="space-y-2">
               {g.items.map(([q, a]) => (
                 <details key={q} className="card group p-4 open:border-neon">
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-semibold text-[#ffe9b8] marker:hidden">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-semibold text-[#f2f5f7] marker:hidden">
                     {q} <ChevronDown className="size-4 shrink-0 text-neon transition group-open:rotate-180" />
                   </summary>
-                  <p className="mt-2 text-sm leading-relaxed text-[#f3dcb8]">{a}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-[#c9d1d8]">{a}</p>
                 </details>
               ))}
             </div>

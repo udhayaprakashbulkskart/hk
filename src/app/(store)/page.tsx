@@ -1,20 +1,20 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, BadgeCheck, Coins, Headset, KeyRound, ShieldCheck, Zap } from "lucide-react";
+import { ArrowRight, BadgeCheck, ChevronRight, Coins, CreditCard, Headset, Heart, KeyRound, LogIn, Receipt, Settings, ShieldCheck, Smartphone, Wallet } from "lucide-react";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { formatINR } from "@/lib/money";
+import { GAME_LABEL, RARITY_LABEL } from "@/lib/constants";
 import { getHomeData, type ProductCardData } from "@/lib/services/catalog";
 import { getSavedIds } from "@/lib/services/user-data";
 import { RENDERS } from "@/lib/media";
 import { CATEGORY_NAV } from "@/components/layout/nav";
-import { NavIcon } from "@/components/layout/icons";
 import { ProductGrid } from "@/components/product/product-card";
-import { SectionHeader, Flourish } from "@/components/ui/section";
-import { Frame } from "@/components/ui/frame";
+import { SectionHeader } from "@/components/ui/section";
+import { RarityStars } from "@/components/ui/badges";
 import { Countdown } from "@/components/home/countdown";
 
-const CATEGORY_ART: Record<string, string | undefined> = {
+const CATEGORY_ART: Record<string, string> = {
   "weapon-skins": RENDERS.moltenAkm,
   outfits: RENDERS.ravenKnight,
   helmets: RENDERS.skullRider,
@@ -26,200 +26,233 @@ const CATEGORY_ART: Record<string, string | undefined> = {
 
 const BENEFITS = [
   { Icon: ShieldCheck, title: "Secure payments", body: "Every payment is verified on our server before your order is confirmed." },
-  { Icon: KeyRound, title: "No passwords, ever", body: "We never ask for game passwords or OTPs. UC goes to your Player ID only." },
+  { Icon: KeyRound, title: "No passwords, ever", body: "We never ask for game passwords or OTPs. Delivery needs your Player ID only." },
   { Icon: BadgeCheck, title: "Official store", body: "Every product is listed and delivered by ZYNOFLIX STORE — no third-party sellers." },
-  { Icon: Headset, title: "Real support", body: "Raise a ticket or dispute from any order; refunds go back to your wallet or payment source." },
+  { Icon: Headset, title: "Real support", body: "Raise a ticket from any order; refunds go back to your wallet or payment source." },
 ];
 
-function ProductSection({ kicker, title, href, items, saved }: { kicker: string; title: string; href: string; items: ProductCardData[]; saved: string[] }) {
-  if (!items.length) return null;
+/** Small label/value pair used in the showcase detail bar. */
+function Spec({ k, v }: { k: string; v: string }) {
   return (
-    <section className="reveal">
-      <SectionHeader kicker={kicker} title={title} href={href} />
-      <ProductGrid items={items} savedIds={saved} />
-    </section>
+    <div className="min-w-0">
+      <p className="text-[11px] text-neon">{k}:</p>
+      <p className="truncate text-xs text-[#c9d1d8]">{v}</p>
+    </div>
   );
 }
 
+/** Popular-skins tile: render on a soft panel, name and rarity stars. */
+function SkinTile({ href, img, name, rarity }: { href: string; img: string; name: string; rarity?: ProductCardData["rarity"] }) {
+  return (
+    <Link href={href} className="group relative flex aspect-[4/5] flex-col justify-end overflow-hidden rounded-2xl border border-white/[0.05] bg-[linear-gradient(170deg,#2f3439,#202327)] p-2 shadow-[8px_8px_20px_-8px_rgb(0_0_0/0.7),-4px_-4px_14px_-8px_rgb(255_255_255/0.05)] transition hover:-translate-y-1 hover:border-neon/50">
+      <Image src={img} alt="" fill sizes="(min-width:1024px) 12vw, 40vw" className="object-contain object-top p-2 pb-10 transition duration-500 group-hover:scale-105" />
+      <div className="relative rounded-xl bg-[#1b1e21]/85 px-2 py-1.5 text-center backdrop-blur">
+        <p className="truncate text-[11px] font-medium text-white">{name}</p>
+        {rarity ? <RarityStars rarity={rarity} className="size-2.5" /> : <p className="text-[10px] text-neon">Browse</p>}
+      </div>
+    </Link>
+  );
+}
+
+const ACCOUNT_LINKS = [
+  { href: "/orders", label: "My orders", Icon: Receipt },
+  { href: "/wishlist", label: "Wishlist", Icon: Heart },
+  { href: "/wallet", label: "Wallet", Icon: Wallet },
+  { href: "/account/settings", label: "Settings", Icon: Settings },
+];
+
 export default async function HomePage() {
   const user = await getCurrentUser();
-  const [data, saved, ucPacks] = await Promise.all([
+  const [data, saved, ucPacks, orderCount] = await Promise.all([
     getHomeData(),
     getSavedIds(user?.id),
     db.product.findMany({ where: { status: "APPROVED", isOfficialStore: true, stock: { gt: 0 } }, orderBy: { price: "asc" }, take: 4, select: { id: true, ucAmount: true, price: true } }),
+    user ? db.order.count({ where: { buyerId: user.id, status: { not: "CANCELLED" } } }) : Promise.resolve(0),
   ]);
   const c = data.campaign;
-  const hasListings = data.recent.length > 0;
+  const hero = data.featured[0] ?? data.trending[0] ?? null;
+  const heroImg = hero?.media[0]?.url ?? c?.heroRight ?? RENDERS.ravenKnight;
+  const popular = data.trending.filter((p) => p.id !== hero?.id).slice(0, 4);
 
   return (
     <div className="space-y-16 pb-8 sm:space-y-20">
-      {/* ── Hero ── */}
-      <section className="relative -mx-4 overflow-hidden px-4 pt-6 pb-10 lg:-mx-6 lg:px-6">
-        <div className="relative mx-auto grid max-w-6xl items-end gap-4 md:grid-cols-[1fr_1.3fr_1fr]">
-          <div className="relative hidden h-[440px] md:block">
-            <Image src={c?.heroLeft || RENDERS.ravenKnight} alt="" fill priority sizes="30vw" className="animate-float object-contain object-bottom drop-shadow-[0_20px_40px_rgb(0_0_0/0.7)]" />
+      {/* ── Showcase dashboard ── */}
+      <section className="card grid gap-4 p-3 sm:p-4 lg:grid-cols-[1.35fr_1fr_280px]">
+        {/* Featured skin */}
+        <div className="relative min-h-[420px] overflow-hidden rounded-[22px] bg-[radial-gradient(120%_90%_at_30%_10%,#3b4148,#1d2024_70%)] sm:min-h-[480px]">
+          <div className="absolute top-4 left-5 z-10">
+            <h1 className="text-lg font-semibold text-white">{c?.title ?? "Skins List"}</h1>
+            {c?.kicker && <p className="text-xs text-muted">{c.kicker}</p>}
           </div>
-          <div className="relative z-10 text-center">
-            <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-neon/60 bg-[#5c0a12]/70 px-4 py-1 text-[11px] font-semibold tracking-[0.25em] text-neon-soft uppercase">
-              {c?.kicker || "PUBG Mobile & BGMI marketplace"}
-            </p>
-            <h1 className="heading mt-2 text-4xl leading-tight sm:text-6xl">
-              <span className="gold-text">{c?.title || "ZYNOFLIX STORE"}</span>
-            </h1>
-            <div className="mt-3 flex items-center justify-center gap-2">
-              <Flourish flip /> <span className="text-xs tracking-[0.3em] text-[#e7cfa8] uppercase">PUBG Mobile · BGMI</span> <Flourish />
+          {c?.endsAt && (
+            <div className="absolute top-4 right-4 z-10 hidden sm:block">
+              <Countdown endsAt={c.endsAt.toISOString()} compact />
             </div>
-            <p className="mx-auto mt-4 max-w-md text-sm text-[#f3dcb8] sm:text-base">
-              {c?.subtitle || "Weapon skins, outfits, bundles and UC top-ups — paid securely, delivered through in-game methods the games allow."}
-            </p>
-            {c?.endsAt && (
-              <div className="mt-5 flex flex-col items-center gap-2">
-                <span className="text-[11px] tracking-[0.25em] text-mint uppercase">Ends in</span>
-                <Countdown endsAt={c.endsAt.toISOString()} />
+          )}
+          <Image src={heroImg} alt={hero?.title ?? ""} fill priority sizes="(min-width:1024px) 45vw, 100vw" className="animate-float object-contain object-top px-6 pt-20 pb-40 drop-shadow-[0_30px_40px_rgb(0_0_0/0.6)]" />
+          <div className="absolute inset-x-3 bottom-3 rounded-2xl border border-white/[0.06] bg-[#1b1e21]/85 p-4 shadow-[0_20px_40px_-20px_rgb(0_0_0/0.9)] backdrop-blur-md">
+            {hero ? (
+              <>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <p className="text-lg font-semibold text-white">{hero.title}</p>
+                    <RarityStars rarity={hero.rarity} />
+                  </div>
+                  <Link href={`/product/${hero.slug}`} className="btn-primary px-6 text-xs">Choose skin</Link>
+                </div>
+                <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-5">
+                  <Spec k="Type" v={hero.category.name} />
+                  <Spec k="Game" v={GAME_LABEL[hero.game]} />
+                  <Spec k="Availability" v={hero.stock > 0 ? "In stock" : "Sold out"} />
+                  <Spec k="Price" v={formatINR(hero.price)} />
+                  <Spec k="Rarity" v={RARITY_LABEL[hero.rarity]} />
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-lg font-semibold text-white">{c?.subtitle ? "New drops landing soon" : "ZYNOFLIX STORE"}</p>
+                  <p className="text-xs text-muted">{c?.subtitle ?? "PUBG Mobile & BGMI skins, outfits and UC top-ups."}</p>
+                </div>
+                <Link href="/uc" className="btn-primary px-6 text-xs">Top up UC</Link>
               </div>
             )}
-            <div className="mt-6 flex flex-wrap justify-center gap-3">
-              <Link href={c?.ctaHref || "/marketplace"} className="btn-primary px-7 py-3 text-base">
-                {c?.ctaLabel || "Shop skins"} <ArrowRight className="size-4" />
-              </Link>
-              <Link href="/uc" className="btn-outline px-6 py-3 text-base">
-                <Coins className="size-4" /> UC Top-Up
-              </Link>
-            </div>
-          </div>
-          <div className="relative hidden h-[440px] md:block">
-            <Image src={c?.heroRight || RENDERS.goldenSeraph} alt="" fill priority sizes="30vw" className="animate-float object-contain object-bottom drop-shadow-[0_20px_40px_rgb(0_0_0/0.7)] [animation-delay:1.5s]" />
-          </div>
-          {/* phone: a single render under the copy */}
-          <div className="relative mx-auto h-64 w-full max-w-xs md:hidden">
-            <Image src={c?.heroRight || RENDERS.goldenSeraph} alt="" fill sizes="80vw" className="object-contain object-bottom" />
           </div>
         </div>
+
+        {/* Popular skins */}
+        <div className="flex flex-col rounded-[22px] border border-white/[0.04] bg-[#1d2024]/70 p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-white">{popular.length ? "Most popular skins" : "Browse categories"}</h2>
+            <Link href="/marketplace" className="text-xs text-neon hover:underline">View all</Link>
+          </div>
+          <div className="grid flex-1 grid-cols-2 gap-3">
+            {popular.length
+              ? popular.map((p) => <SkinTile key={p.id} href={`/product/${p.slug}`} img={p.media[0]?.url ?? RENDERS.ravenKnight} name={p.title} rarity={p.rarity} />)
+              : CATEGORY_NAV.filter((x) => ["outfits", "weapon-skins", "helmets", "bundles"].includes(x.slug)).map((x) => (
+                  <SkinTile key={x.slug} href={`/category/${x.slug}`} img={CATEGORY_ART[x.slug]} name={x.label} />
+                ))}
+          </div>
+        </div>
+
+        {/* Profile panel */}
+        <aside className="flex flex-col rounded-[22px] border border-white/[0.04] bg-[#1d2024]/70 p-4">
+          <h2 className="text-sm font-semibold text-white">{user ? "My Profile" : "Welcome"}</h2>
+          <div className="mt-4 flex flex-col items-center text-center">
+            <span className="grid size-16 place-items-center rounded-full bg-gradient-to-b from-[#3b4148] to-[#24282c] text-2xl font-semibold text-white ring-2 ring-neon/70 ring-offset-4 ring-offset-[#1d2024]">
+              {user ? user.name.slice(0, 1).toUpperCase() : <LogIn className="size-6 text-neon" />}
+            </span>
+            <p className="mt-3 font-semibold text-white">{user ? user.name : "Guest player"}</p>
+            <p className="text-xs text-muted">{user ? `${user.preferredGame === "PUBG_MOBILE" ? "PUBG Mobile" : "BGMI"} player` : "Sign in to track orders"}</p>
+          </div>
+          {user ? (
+            <>
+              <div className="mt-4 grid grid-cols-2 gap-2 text-center text-xs">
+                <div><p className="text-neon">Orders:</p><p className="text-[#c9d1d8]">{orderCount}</p></div>
+                <div><p className="text-neon">Wallet:</p><p className="text-[#c9d1d8]">{formatINR(user.walletBalance)}</p></div>
+              </div>
+              <nav className="mt-4 space-y-0.5">
+                {ACCOUNT_LINKS.map(({ href, label, Icon }) => (
+                  <Link key={href} href={href} className="flex items-center gap-3 rounded-xl px-2 py-2 text-sm text-[#9aa4ad] transition hover:bg-white/[0.04] hover:text-white">
+                    <Icon className="size-4" /> <span className="flex-1">{label}</span> <ChevronRight className="size-3.5" />
+                  </Link>
+                ))}
+              </nav>
+            </>
+          ) : (
+            <div className="mt-5 grid gap-2">
+              <Link href="/login" className="btn-primary text-xs">Sign in</Link>
+              <Link href="/register" className="btn-outline text-xs">Create account</Link>
+            </div>
+          )}
+          <div className="mt-auto pt-5">
+            <p className="text-center text-xs font-medium text-white">Payment methods</p>
+            <div className="mt-2 flex justify-center gap-2">
+              {[{ Icon: Smartphone, l: "UPI" }, { Icon: CreditCard, l: "Card" }, { Icon: Wallet, l: "Wallet" }].map(({ Icon, l }, i) => (
+                <span key={l} title={l} className={`grid size-10 place-items-center rounded-xl border bg-[#24282c] shadow-[4px_4px_10px_-4px_rgb(0_0_0/0.7)] ${i === 2 ? "border-neon/70 text-neon" : "border-white/[0.06] text-[#9aa4ad]"}`}>
+                  <Icon className="size-4" />
+                </span>
+              ))}
+            </div>
+          </div>
+        </aside>
       </section>
 
-      {/* ── Categories ── */}
-      <section className="reveal">
-        <SectionHeader kicker="Browse" title="Shop by category" href="/marketplace" />
-        <div className="grid grid-cols-4 gap-2 sm:gap-3 lg:grid-cols-8">
-          {CATEGORY_NAV.map((cat) => (
-            <Link key={cat.slug} href={`/category/${cat.slug}`} className="group card-glow flex flex-col items-center gap-1 p-2 text-center sm:p-3">
-              <div className="relative grid aspect-square w-full place-items-center overflow-hidden rounded-lg bg-[radial-gradient(circle_at_50%_40%,#7a1420,#2a070b_75%)]">
-                {CATEGORY_ART[cat.slug] ? (
-                  <Image src={CATEGORY_ART[cat.slug]!} alt="" fill sizes="(min-width:1024px) 12vw, 25vw" className="object-contain p-1 transition duration-500 group-hover:scale-110" />
-                ) : (
-                  <NavIcon name={cat.icon} className="size-8 text-neon" />
-                )}
+      {/* ── Intro ── */}
+      <section className="reveal grid items-center gap-8 lg:grid-cols-2">
+        <div>
+          <h2 className="text-4xl leading-tight font-semibold text-white sm:text-5xl">Every skin.<br />Every outfit.<br /><span className="text-neon">One store.</span></h2>
+          <p className="mt-4 max-w-md text-sm text-muted">If you&apos;re looking for PUBG Mobile and BGMI outfits, weapon skins, bundles and UC top-ups, you&apos;ve come to the right place.</p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link href="/marketplace" className="btn-primary px-7">Choose skin <ArrowRight className="size-4" /></Link>
+            <Link href="/uc" className="btn-outline px-6"><Coins className="size-4" /> UC Top-Up</Link>
+          </div>
+        </div>
+        <div className="grid grid-cols-4 gap-3">
+          {CATEGORY_NAV.map((x) => (
+            <Link key={x.slug} href={`/category/${x.slug}`} className="group card-glow flex flex-col items-center gap-1.5 p-2.5 text-center">
+              <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-[radial-gradient(circle_at_50%_35%,#3b4148,#1d2024_75%)]">
+                <Image src={CATEGORY_ART[x.slug]} alt="" fill sizes="(min-width:1024px) 10vw, 22vw" className="object-contain p-1 transition duration-500 group-hover:scale-110" />
               </div>
-              <span className="text-[11px] font-semibold text-[#ffe9b8] sm:text-xs">{cat.label}</span>
+              <span className="text-[11px] font-medium text-[#c9d1d8]">{x.label}</span>
             </Link>
           ))}
-          <Link href="/uc" className="group card-glow flex flex-col items-center gap-1 p-2 text-center sm:p-3">
-            <div className="grid aspect-square w-full place-items-center rounded-lg bg-[radial-gradient(circle_at_50%_40%,#b8862b,#5c0a12_75%)]">
-              <Coins className="size-9 text-[#ffe08a] transition group-hover:scale-110" />
+          <Link href="/uc" className="group card-glow flex flex-col items-center gap-1.5 p-2.5 text-center">
+            <div className="grid aspect-square w-full place-items-center rounded-2xl bg-[radial-gradient(circle_at_50%_35%,#2a5d60,#1d2024_75%)]">
+              <Coins className="size-8 text-neon transition group-hover:scale-110" />
             </div>
-            <span className="text-[11px] font-semibold text-[#ffe9b8] sm:text-xs">UC Top-Up</span>
+            <span className="text-[11px] font-medium text-[#c9d1d8]">UC Top-Up</span>
           </Link>
         </div>
       </section>
 
-      {/* ── Promo banners (admin → Banners) ── */}
-      {data.banners.length > 0 && (
-        <section className="reveal -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0">
-          {data.banners.slice(0, 3).map((b) => (
-            <Link key={b.id} href={b.ctaHref} className="group card-glow relative flex h-40 w-[80%] shrink-0 snap-start items-center overflow-hidden p-4 sm:w-auto">
-              <div className="relative z-10 max-w-[60%]">
-                {b.badge && <span className="mb-1 inline-block rounded bg-mint px-2 py-0.5 text-[10px] font-bold tracking-wider text-white uppercase">{b.badge}</span>}
-                <p className="heading gold-text text-xl leading-tight">{b.title}</p>
-                {b.subtitle && <p className="mt-1 line-clamp-2 text-xs text-[#f3dcb8]">{b.subtitle}</p>}
-                <span className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-neon">{b.ctaLabel} <ArrowRight className="size-3.5 transition group-hover:translate-x-1" /></span>
-              </div>
-              <Image src={b.imageUrl} alt="" width={180} height={180} className="absolute -right-4 bottom-0 h-full w-auto object-contain transition duration-500 group-hover:scale-105" unoptimized={b.imageUrl.endsWith(".svg") || b.imageUrl.startsWith("/uploads/")} />
-            </Link>
-          ))}
+      {data.featured.length > 0 && (
+        <section className="reveal">
+          <SectionHeader kicker="Legendary & Mythic" title="Featured skins" href="/marketplace?rarity=LEGENDARY&rarity=MYTHIC" />
+          <ProductGrid items={data.featured} savedIds={saved} />
         </section>
       )}
-
-      <ProductSection kicker="Legendary & Mythic" title="Featured legendary items" href="/marketplace?rarity=LEGENDARY&rarity=MYTHIC" items={data.featured} saved={saved} />
-
-      {/* ── Limited-time offers ── */}
       {data.deals.length > 0 && (
         <section className="reveal">
-          <Frame>
-            <div className="p-4 sm:p-6">
-              <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-                <div>
-                  <p className="text-[11px] font-semibold tracking-[0.25em] text-mint uppercase">Price drops</p>
-                  <h2 className="heading gold-text text-2xl sm:text-3xl">Limited-time offers</h2>
-                </div>
-                {c?.endsAt && <Countdown endsAt={c.endsAt.toISOString()} compact />}
-              </div>
-              <ProductGrid items={data.deals.slice(0, 4)} savedIds={saved} />
-            </div>
-          </Frame>
+          <SectionHeader kicker="Price drops" title="Limited-time offers" href="/marketplace?sort=price_asc" />
+          <ProductGrid items={data.deals.slice(0, 4)} savedIds={saved} />
         </section>
       )}
-
-      <ProductSection kicker="Value packs" title="Bundles" href="/category/bundles" items={data.bundles} saved={saved} />
-
-      {/* ── Exclusive outfit showcase ── */}
-      {data.outfits.length > 0 && (
+      {data.bundles.length > 0 && (
         <section className="reveal">
-          <SectionHeader kicker="Showcase" title="Exclusive outfits" href="/category/outfits" />
-          <div className="grid gap-4 md:grid-cols-3">
-            {data.outfits.map((p, i) => (
-              <Link key={p.id} href={`/product/${p.slug}`} className="group">
-                <Frame>
-                  <div className="relative h-80 overflow-hidden rounded-xl bg-[radial-gradient(circle_at_50%_30%,#9e1420,#2a070b_70%)]">
-                    {p.media[0] && <Image src={p.media[0].url} alt={p.media[0].alt ?? p.title} fill sizes="(min-width:768px) 33vw, 100vw" className="object-contain object-bottom transition duration-700 group-hover:scale-105" />}
-                    <span className="absolute top-3 left-3 rounded-full border border-neon/60 bg-[#2a070b]/80 px-2.5 py-0.5 text-[10px] font-bold tracking-widest text-neon uppercase">{p.rarity}</span>
-                    {i === 0 && <span className="absolute top-3 right-3 rounded bg-mint px-2 py-0.5 text-[10px] font-bold text-white">TOP PICK</span>}
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#1c0507] via-[#1c0507]/80 to-transparent p-4 pt-12">
-                      <p className="heading text-lg text-[#ffe9b8]">{p.title}</p>
-                      <p className="mt-1 flex items-baseline gap-2">
-                        <span className="font-bold text-neon">{formatINR(p.price)}</span>
-                        {p.compareAtPrice != null && p.compareAtPrice > p.price && <span className="text-xs text-[#b89a7a] line-through">{formatINR(p.compareAtPrice)}</span>}
-                      </p>
-                    </div>
-                  </div>
-                </Frame>
-              </Link>
-            ))}
-          </div>
+          <SectionHeader kicker="Value packs" title="Bundles" href="/category/bundles" />
+          <ProductGrid items={data.bundles} savedIds={saved} />
         </section>
       )}
 
-      {/* ── UC top-up teaser ── */}
+      {/* ── UC top-up ── */}
       {ucPacks.length > 0 && (
         <section className="reveal">
           <SectionHeader kicker="Delivered to your Player ID" title="UC Top-Up" href="/uc" />
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {ucPacks.map((p) => (
-              <Link key={p.id} href="/uc" className="card-glow flex flex-col items-center gap-2 p-4 text-center">
-                <span className="grid size-14 place-items-center rounded-full border border-[#fff1c2]/60 bg-gradient-to-b from-[#ffe08a] to-[#b8862b] text-[#3a0a0e] shadow-neon">
+              <Link key={p.id} href="/uc" className="card-glow flex flex-col items-center gap-2 p-5 text-center">
+                <span className="grid size-14 place-items-center rounded-full bg-gradient-to-b from-[#45d6d7] to-[#1a9ea2] text-[#062224] shadow-neon">
                   <Coins className="size-7" />
                 </span>
-                <span className="heading text-xl text-[#ffe9b8]">{(p.ucAmount ?? 0).toLocaleString("en-IN")} UC</span>
-                <span className="font-bold text-neon">{formatINR(p.price)}</span>
+                <span className="text-xl font-semibold text-white">{(p.ucAmount ?? 0).toLocaleString("en-IN")} UC</span>
+                <span className="font-semibold text-neon">{formatINR(p.price)}</span>
               </Link>
             ))}
           </div>
         </section>
       )}
 
-      <ProductSection kicker="Most wanted" title="Best sellers" href="/marketplace?sort=popular" items={data.trending} saved={saved} />
-      <ProductSection kicker="Just in" title="Recently added" href="/marketplace?sort=newest" items={data.recent} saved={saved} />
-
-      {!hasListings && (
+      {data.trending.length > 0 && (
         <section className="reveal">
-          <Frame>
-            <div className="flex flex-col items-center gap-3 p-8 text-center">
-              <h2 className="heading gold-text text-2xl sm:text-3xl">First drops landing soon</h2>
-              <p className="max-w-lg text-sm text-[#f3dcb8]">New skins, outfits and bundles are being added. UC top-ups are available now.</p>
-              <div className="flex flex-wrap justify-center gap-3">
-                <Link href="/uc" className="btn-primary">Top up UC</Link>
-              </div>
-            </div>
-          </Frame>
+          <SectionHeader kicker="Most wanted" title="Best sellers" href="/marketplace?sort=popular" />
+          <ProductGrid items={data.trending} savedIds={saved} />
+        </section>
+      )}
+      {data.recent.length > 0 && (
+        <section className="reveal">
+          <SectionHeader kicker="Just in" title="Recently added" href="/marketplace?sort=newest" />
+          <ProductGrid items={data.recent} savedIds={saved} />
         </section>
       )}
 
@@ -229,17 +262,14 @@ export default async function HomePage() {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {BENEFITS.map(({ Icon, title, body }) => (
             <div key={title} className="card p-5">
-              <span className="mb-3 grid size-11 place-items-center rounded-full border border-neon/60 bg-[#5c0a12] text-neon">
+              <span className="mb-3 grid size-11 place-items-center rounded-2xl bg-[#24282c] text-neon shadow-[4px_4px_10px_-4px_rgb(0_0_0/0.7)]">
                 <Icon className="size-5" />
               </span>
-              <h3 className="heading text-base text-[#ffe9b8]">{title}</h3>
+              <h3 className="font-semibold text-white">{title}</h3>
               <p className="mt-1 text-sm text-muted">{body}</p>
             </div>
           ))}
         </div>
-        <p className="mt-4 flex items-center justify-center gap-2 text-center text-xs text-[#b89a7a]">
-          <Zap className="size-3.5 shrink-0 text-neon" /> Payments by Razorpay, verified on our server before any order is marked paid.
-        </p>
       </section>
     </div>
   );

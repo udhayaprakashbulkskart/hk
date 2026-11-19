@@ -44,7 +44,7 @@ export function Price({ price, compareAt, size = "md" }: { price: number; compar
 const STATUS_TONE: Record<string, string> = {
   green: "border-success/40 bg-success/10 text-success",
   amber: "border-warn/40 bg-warn/10 text-warn",
-  red: "border-mint/60 bg-mint/15 text-[#ff8a95]",
+  red: "border-mint/60 bg-mint/15 text-[#ff9b9b]",
   zinc: "border-zinc-600 bg-zinc-800/60 text-zinc-300",
   sky: "border-sky-500/40 bg-sky-500/10 text-sky-300",
 };
@@ -55,4 +55,18 @@ const STATUS_MAP: Record<string, keyof typeof STATUS_TONE> = {
 };
 export function StatusBadge({ status }: { status: string }) {
   return <span className={clsx("badge", STATUS_TONE[STATUS_MAP[status] ?? "zinc"])}>{status.replace(/_/g, " ")}</span>;
+}
+
+const RARITY_STARS: Record<Rarity, number> = { COMMON: 1, RARE: 2, EPIC: 3, LEGENDARY: 4, MYTHIC: 5 };
+
+/** Five-star rarity meter (filled stars = rarity tier). */
+export function RarityStars({ rarity, className = "size-3" }: { rarity: Rarity; className?: string }) {
+  const n = RARITY_STARS[rarity];
+  return (
+    <span className="inline-flex items-center gap-0.5" aria-label={`${RARITY_LABEL[rarity]} rarity, ${n} of 5`} role="img">
+      {Array.from({ length: 5 }, (_, i) => (
+        <Star key={i} className={clsx(className, i < n ? "fill-neon text-neon" : "text-white/15")} aria-hidden />
+      ))}
+    </span>
+  );
 }

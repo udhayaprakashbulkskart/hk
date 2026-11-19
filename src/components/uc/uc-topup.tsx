@@ -36,12 +36,12 @@ export function UcTopup({ packs, defaultGame, defaultPlayerId }: { packs: Pack[]
     <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
       <div className="space-y-6">
         <section>
-          <h2 className="heading mb-3 text-lg text-[#ffe9b8]">1 · Choose your game</h2>
+          <h2 className="heading mb-3 text-lg text-[#f2f5f7]">1 · Choose your game</h2>
           <div role="tablist" className="grid grid-cols-2 gap-3">
             {GAMES.map((g) => (
               <button key={g.key} role="tab" aria-selected={game === g.key} onClick={() => { setGame(g.key); setPackId(null); }}
-                className={clsx("rounded-xl border p-4 text-left transition", game === g.key ? "border-neon bg-gradient-to-b from-[#7a1420] to-[#3a0b10] shadow-neon" : "border-neon/25 bg-[#2a070b] hover:border-neon/60")}>
-                <span className="heading block text-lg text-[#ffe9b8]">{g.label}</span>
+                className={clsx("rounded-xl border p-4 text-left transition", game === g.key ? "border-neon bg-gradient-to-b from-[#3b4148] to-[#2a2e33] shadow-neon" : "border-neon/25 bg-[#1f2226] hover:border-neon/60")}>
+                <span className="heading block text-lg text-[#f2f5f7]">{g.label}</span>
                 <span className="text-xs text-muted">{g.note}</span>
               </button>
             ))}
@@ -49,19 +49,19 @@ export function UcTopup({ packs, defaultGame, defaultPlayerId }: { packs: Pack[]
         </section>
 
         <section>
-          <h2 className="heading mb-3 text-lg text-[#ffe9b8]">2 · Select a package</h2>
+          <h2 className="heading mb-3 text-lg text-[#f2f5f7]">2 · Select a package</h2>
           {list.length === 0 ? (
             <p className="card p-4 text-sm text-muted">No packages for this game right now.</p>
           ) : (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {list.map((p) => (
                 <button key={p.id} type="button" onClick={() => { setPackId(p.id); setErr(null); }} aria-pressed={pack?.id === p.id}
-                  className={clsx("relative flex flex-col items-center gap-1.5 rounded-xl border p-4 text-center transition", pack?.id === p.id ? "border-neon bg-gradient-to-b from-[#7a1420] to-[#3a0b10] shadow-neon" : "border-neon/25 bg-[#2a070b] hover:-translate-y-0.5 hover:border-neon/60")}>
+                  className={clsx("relative flex flex-col items-center gap-1.5 rounded-xl border p-4 text-center transition", pack?.id === p.id ? "border-neon bg-gradient-to-b from-[#3b4148] to-[#2a2e33] shadow-neon" : "border-neon/25 bg-[#1f2226] hover:-translate-y-0.5 hover:border-neon/60")}>
                   {best?.id === p.id && <span className="absolute -top-2.5 rounded bg-mint px-2 py-0.5 text-[10px] font-bold tracking-wider text-white uppercase">Best value</span>}
-                  <span className="grid size-12 place-items-center rounded-full border border-[#fff1c2]/60 bg-gradient-to-b from-[#ffe08a] to-[#b8862b] text-[#3a0a0e]"><Coins className="size-6" /></span>
-                  <span className="heading text-xl text-[#ffe9b8]">{p.ucAmount.toLocaleString("en-IN")} UC</span>
+                  <span className="grid size-12 place-items-center rounded-full border border-[#8ef0ef]/60 bg-gradient-to-b from-[#8ef0ef] to-[#1a9ea2] text-[#062224]"><Coins className="size-6" /></span>
+                  <span className="heading text-xl text-[#f2f5f7]">{p.ucAmount.toLocaleString("en-IN")} UC</span>
                   <span className="font-bold text-neon">{formatINR(p.price)}</span>
-                  {p.compareAtPrice && p.compareAtPrice > p.price && <span className="text-[11px] text-[#b89a7a] line-through">{formatINR(p.compareAtPrice)}</span>}
+                  {p.compareAtPrice && p.compareAtPrice > p.price && <span className="text-[11px] text-[#8c959e] line-through">{formatINR(p.compareAtPrice)}</span>}
                 </button>
               ))}
             </div>
@@ -69,7 +69,7 @@ export function UcTopup({ packs, defaultGame, defaultPlayerId }: { packs: Pack[]
         </section>
 
         <section className="space-y-3">
-          <h2 className="heading text-lg text-[#ffe9b8]">3 · Player details</h2>
+          <h2 className="heading text-lg text-[#f2f5f7]">3 · Player details</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="block">
               <span className="label">Player ID</span>

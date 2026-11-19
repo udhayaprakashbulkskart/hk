@@ -26,9 +26,9 @@ export function Countdown({ endsAt, compact = false }: { endsAt: string; compact
   return (
     <div className="flex items-center gap-1.5" role="timer" aria-label="Time remaining">
       {p.map(([label, v]) => (
-        <div key={label} className={compact ? "min-w-10 rounded-md border border-neon/50 bg-[#1c0507]/80 px-1.5 py-1 text-center" : "min-w-14 rounded-lg border border-neon/60 bg-gradient-to-b from-[#5c0a12] to-[#2a070b] px-2 py-1.5 text-center shadow-[inset_0_1px_0_rgb(255_220_160/0.25)]"}>
+        <div key={label} className={compact ? "min-w-10 rounded-md border border-neon/50 bg-[#17191c]/80 px-1.5 py-1 text-center" : "min-w-14 rounded-lg border border-neon/60 bg-gradient-to-b from-[#30353b] to-[#1f2226] px-2 py-1.5 text-center shadow-[inset_0_1px_0_rgb(255_255_255/0.25)]"}>
           <span key={now == null ? "x" : v} className={`tick block font-display font-bold tabular-nums text-neon-soft ${compact ? "text-sm" : "text-xl sm:text-2xl"}`}>{now == null ? "--" : String(v).padStart(2, "0")}</span>
-          <span className="block text-[9px] tracking-widest text-[#d9b98f] uppercase">{label}</span>
+          <span className="block text-[9px] tracking-widest text-[#8c959e] uppercase">{label}</span>
         </div>
       ))}
     </div>

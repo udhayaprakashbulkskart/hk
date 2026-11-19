@@ -64,7 +64,7 @@ export function ListingForm({ categories, defaults = {} }: { categories: { id: s
       <div className="card flex gap-3 border-warn/30 p-4 text-sm text-zinc-300">
         <ShieldAlert className="size-5 shrink-0 text-warn" />
         <label className="flex items-start gap-2">
-          <input type="checkbox" name="complianceAck" className="mt-1 accent-[#f2c14e]" />
+          <input type="checkbox" name="complianceAck" className="mt-1 accent-[#2fc6c8]" />
           <span>This item can be transferred using the game&apos;s official gifting or redeem system under its current terms. This is not a game account, and the buyer will never be asked for a password or OTP.</span>
         </label>
       </div>
