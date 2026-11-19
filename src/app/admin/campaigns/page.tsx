@@ -6,7 +6,7 @@ import { CampaignForm } from "@/components/admin/admin-forms";
 import { StatusBadge } from "@/components/ui/badges";
 import { PageTitle } from "@/components/ui/section";
 
-export const metadata = { title: "Festival campaigns" };
+export const metadata = { title: "Home campaigns" };
 
 const label = (k: string) => k.replace(/([A-Z])/g, " $1").replace(/^./, (c) => c.toUpperCase());
 
@@ -16,7 +16,7 @@ export default async function AdminCampaigns() {
   const live = campaigns.find((c) => c.isActive && (!c.endsAt || c.endsAt > now));
   return (
     <div className="space-y-6">
-      <PageTitle title="Festival campaigns" subtitle="Drives the home page hero: title, artwork, call to action and countdown." />
+      <PageTitle title="Home campaigns" subtitle="Drives the home page hero: title, artwork, call to action and countdown." />
       <ul className="grid gap-3 md:grid-cols-2">
         {campaigns.map((c) => {
           const expired = c.endsAt != null && c.endsAt < now;
@@ -25,7 +25,7 @@ export default async function AdminCampaigns() {
               <div className="relative flex h-32 justify-between bg-[radial-gradient(circle_at_50%_0%,#9e1420,#2a070b_70%)] px-4">
                 {[c.heroLeft, c.heroRight].map((u, i) => <div key={i} className="relative h-full w-24">{u && <Image src={u} alt="" fill sizes="96px" className="object-contain object-bottom" />}</div>)}
                 <div className="absolute inset-0 grid place-items-center text-center">
-                  <div>{c.nativeTitle && <p className="gold-text text-2xl font-black">{c.nativeTitle}</p>}<p className="heading gold-text text-xl">{c.title}</p></div>
+                  <p className="heading gold-text text-xl">{c.title}</p>
                 </div>
               </div>
               <div className="space-y-2 p-4">
@@ -43,7 +43,7 @@ export default async function AdminCampaigns() {
             </li>
           );
         })}
-        {!campaigns.length && <li className="card p-6 text-sm text-muted">No campaigns — the home page shows the default DROPZONE hero.</li>}
+        {!campaigns.length && <li className="card p-6 text-sm text-muted">No campaigns — the home page shows the default ZYNOFLIX hero.</li>}
       </ul>
       <section className="card p-5">
         <h2 className="heading mb-4 text-lg">New campaign</h2>

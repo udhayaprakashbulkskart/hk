@@ -1,4 +1,4 @@
-/** Gold ornamental frame (corner brackets + inner hairline) used for festival panels. */
+/** Gold ornamental frame (corner brackets + inner hairline) used for featured panels. */
 export function Frame({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   const corner = "pointer-events-none absolute size-6 border-neon";
   return (

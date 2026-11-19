@@ -1,6 +1,6 @@
 import type { DeliveryMethod, Game, Rarity } from "@/generated/prisma/enums";
 
-export const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || "DROPZONE STORE";
+export const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || "ZYNOFLIX STORE";
 
 export const DISCLAIMER =
   "Independent fan marketplace. Not affiliated with, endorsed or sponsored by KRAFTON, Inc., PUBG Corporation, Tencent, or any game publisher. PUBG MOBILE and BATTLEGROUNDS MOBILE INDIA are trademarks of their respective owners.";

@@ -15,7 +15,7 @@ const ITEMS = [
   { href: "/admin/users", label: "Users", Icon: Users, key: "users" },
   { href: "/admin/categories", label: "Categories", Icon: FolderTree, key: "categories" },
   { href: "/admin/coupons", label: "Coupons", Icon: TicketPercent, key: "coupons" },
-  { href: "/admin/campaigns", label: "Festival campaigns", Icon: PartyPopper, key: "campaigns" },
+  { href: "/admin/campaigns", label: "Home campaigns", Icon: PartyPopper, key: "campaigns" },
   { href: "/admin/banners", label: "Banners", Icon: ImageIcon, key: "banners" },
   { href: "/admin/tickets", label: "Support tickets", Icon: LifeBuoy, key: "tickets" },
   { href: "/admin/settings", label: "Commission", Icon: Percent, key: "settings" },

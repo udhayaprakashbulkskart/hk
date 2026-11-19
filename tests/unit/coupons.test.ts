@@ -3,7 +3,7 @@ vi.mock("@/lib/db", () => ({ db: {} }));
 const { allocate, discountFor, normalizeCode } = await import("@/lib/services/coupons");
 
 describe("coupon maths", () => {
-  it("normalises codes", () => expect(normalizeCode(" lunar 10 ")).toBe("LUNAR10"));
+  it("normalises codes", () => expect(normalizeCode(" drop 10 ")).toBe("DROP10"));
   it("percent with cap", () => {
     expect(discountFor({ type: "PERCENT", value: 10, maxDiscount: null }, 100_000)).toBe(10_000);
     expect(discountFor({ type: "PERCENT", value: 10, maxDiscount: 5_000 }, 100_000)).toBe(5_000);

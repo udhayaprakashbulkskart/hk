@@ -29,7 +29,7 @@ function assertCompliant(input: ProductInput) {
     });
   }
   for (const m of input.media) {
-    if (!isAllowedMediaUrl(m.url)) throw badRequest("Media must be uploaded through DROPZONE STORE", { media: "Invalid media URL" });
+    if (!isAllowedMediaUrl(m.url)) throw badRequest("Media must be uploaded through ZYNOFLIX STORE", { media: "Invalid media URL" });
   }
 }
 

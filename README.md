@@ -1,4 +1,4 @@
-# DROPZONE STORE — PUBG Mobile & BGMI Marketplace
+# ZYNOFLIX STORE — PUBG Mobile & BGMI Marketplace
 
 A mobile-first marketplace for buying and selling **officially transferable** PUBG Mobile / BGMI cosmetics and UC top-ups, with verified sellers, escrow-protected payouts, Razorpay payments and a separate admin console.
 

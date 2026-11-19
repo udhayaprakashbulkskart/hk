@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
-/* ─── DROPZONE STORE · "Festival Red & Gold" design tokens ───
-   Lacquer-red surfaces, antique-gold actions and borders, crimson for sale tags.
+/* ─── ZYNOFLIX STORE · "Battle Red & Gold" design tokens ───
+   Deep red surfaces, gold actions and borders, crimson for sale tags.
    Token names are kept stable (neon = primary, mint = secondary) so every page follows. */
 @theme {
   --color-ink: #1c0507; /* lacquer black-red */
@@ -11,7 +11,7 @@
   --color-neon: #f2c14e; /* antique gold — primary actions, highlights */
   --color-neon-soft: #ffe08a;
   --color-crimson: #8b0f1a;
-  --color-mint: #e3263a; /* festival crimson — secondary, sale tags */
+  --color-mint: #e3263a; /* crimson — secondary, sale tags */
   --color-mint-deep: #b5121f;
   --color-muted: #e2c7a6;
   --color-success: #3ddc84;
@@ -215,7 +215,7 @@ body {
   }
 }
 
-/* ─── Festival ornaments ─── */
+/* ─── Ornaments ─── */
 /* Gold-framed ribbon title (section headings) */
 @utility ribbon {
   @apply relative inline-flex items-center justify-center rounded-full border border-neon/80 bg-gradient-to-b from-[#a8121f] to-[#6d0a12] px-8 py-2 font-display text-lg font-bold text-[#ffe9b8] shadow-[0_0_0_3px_#2b090c,0_0_0_4px_rgb(242_193_78/0.55),0_10px_30px_-10px_rgb(0_0_0/0.8)] sm:text-2xl;
@@ -227,23 +227,12 @@ body {
   color: transparent;
 }
 
-@keyframes lantern-sway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
-.lantern { animation: lantern-sway 5s ease-in-out infinite; transform-origin: 50% 0; }
-
-@keyframes petal-fall {
-  0% { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 0; }
-  10% { opacity: 0.9; }
-  100% { transform: translate3d(-12vw, 110vh, 0) rotate(540deg); opacity: 0; }
+@keyframes ember-rise {
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  15% { opacity: 0.9; }
+  100% { transform: translate3d(3vw, -105vh, 0); opacity: 0; }
 }
-.petal { animation: petal-fall linear infinite; }
-
-@keyframes firework {
-  0% { transform: scale(0.2); opacity: 0; }
-  15% { opacity: 1; }
-  70% { opacity: 0.8; }
-  100% { transform: scale(1.4); opacity: 0; }
-}
-.firework { animation: firework 4.5s ease-out infinite; }
+.ember { animation: ember-rise linear infinite; box-shadow: 0 0 6px 1px rgb(255 160 60 / 0.8); }
 
 @keyframes tick { 0% { transform: translateY(-30%); opacity: 0; } 100% { transform: none; opacity: 1; } }
 .tick { animation: tick 0.35s ease-out; }

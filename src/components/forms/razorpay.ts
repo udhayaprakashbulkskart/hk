@@ -34,7 +34,7 @@ export async function openRazorpay(opts: { keyId: string; razorpayOrderId: strin
       order_id: opts.razorpayOrderId,
       amount: opts.amount,
       currency: opts.currency,
-      name: "DROPZONE STORE",
+      name: "ZYNOFLIX STORE",
       description: opts.description,
       prefill: opts.prefill,
       theme: { color: "#2EF5C6" },

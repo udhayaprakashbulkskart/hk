@@ -13,7 +13,6 @@ import { ProductGrid } from "@/components/product/product-card";
 import { SectionHeader, Flourish } from "@/components/ui/section";
 import { Frame } from "@/components/ui/frame";
 import { Countdown } from "@/components/home/countdown";
-import { CloudScroll, Lantern } from "@/components/fx/festive-backdrop";
 
 const CATEGORY_ART: Record<string, string | undefined> = {
   "weapon-skins": RENDERS.moltenAkm,
@@ -22,7 +21,7 @@ const CATEGORY_ART: Record<string, string | undefined> = {
   backpacks: RENDERS.tridentWarden,
   vehicles: RENDERS.celestialRifle,
   crates: RENDERS.dragonfireSmg,
-  bundles: RENDERS.blossomEmpress,
+  bundles: RENDERS.pharaohGold,
 };
 
 const BENEFITS = [
@@ -54,21 +53,18 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-16 pb-8 sm:space-y-20">
-      {/* ── Festival hero ── */}
+      {/* ── Hero ── */}
       <section className="relative -mx-4 overflow-hidden px-4 pt-6 pb-10 lg:-mx-6 lg:px-6">
-        <Lantern className="absolute top-0 left-2 w-8 sm:left-8 sm:w-12" />
-        <Lantern className="absolute top-0 right-2 w-8 sm:right-8 sm:w-12" delay="1.4s" />
         <div className="relative mx-auto grid max-w-6xl items-end gap-4 md:grid-cols-[1fr_1.3fr_1fr]">
           <div className="relative hidden h-[440px] md:block">
-            <Image src={c?.heroLeft || RENDERS.blossomEmpress} alt="" fill priority sizes="30vw" className="animate-float object-contain object-bottom drop-shadow-[0_20px_40px_rgb(0_0_0/0.7)]" />
+            <Image src={c?.heroLeft || RENDERS.ravenKnight} alt="" fill priority sizes="30vw" className="animate-float object-contain object-bottom drop-shadow-[0_20px_40px_rgb(0_0_0/0.7)]" />
           </div>
           <div className="relative z-10 text-center">
             <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-neon/60 bg-[#5c0a12]/70 px-4 py-1 text-[11px] font-semibold tracking-[0.25em] text-neon-soft uppercase">
-              {c?.kicker || "Festival marketplace"}
+              {c?.kicker || "PUBG Mobile & BGMI marketplace"}
             </p>
-            {c?.nativeTitle && <p className="gold-text font-serif text-5xl leading-none font-black sm:text-7xl" lang="zh">{c.nativeTitle}</p>}
             <h1 className="heading mt-2 text-4xl leading-tight sm:text-6xl">
-              <span className="gold-text">{c?.title || "DROPZONE STORE"}</span>
+              <span className="gold-text">{c?.title || "ZYNOFLIX STORE"}</span>
             </h1>
             <div className="mt-3 flex items-center justify-center gap-2">
               <Flourish flip /> <span className="text-xs tracking-[0.3em] text-[#e7cfa8] uppercase">PUBG Mobile · BGMI</span> <Flourish />
@@ -84,7 +80,7 @@ export default async function HomePage() {
             )}
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Link href={c?.ctaHref || "/marketplace"} className="btn-primary px-7 py-3 text-base">
-                {c?.ctaLabel || "Shop now"} <ArrowRight className="size-4" />
+                {c?.ctaLabel || "Shop skins"} <ArrowRight className="size-4" />
               </Link>
               <Link href="/uc" className="btn-outline px-6 py-3 text-base">
                 <Coins className="size-4" /> UC Top-Up
@@ -99,8 +95,6 @@ export default async function HomePage() {
             <Image src={c?.heroRight || RENDERS.goldenSeraph} alt="" fill sizes="80vw" className="object-contain object-bottom" />
           </div>
         </div>
-        <CloudScroll className="absolute bottom-0 left-0 w-56 opacity-60 sm:w-80" />
-        <CloudScroll className="absolute right-0 bottom-0 w-56 opacity-60 sm:w-80" flip />
       </section>
 
       {/* ── Categories ── */}
@@ -165,7 +159,7 @@ export default async function HomePage() {
         </section>
       )}
 
-      <ProductSection kicker="Festival" title="Festival bundles" href="/category/bundles" items={data.bundles} saved={saved} />
+      <ProductSection kicker="Value packs" title="Bundles" href="/category/bundles" items={data.bundles} saved={saved} />
 
       {/* ── Exclusive outfit showcase ── */}
       {data.outfits.length > 0 && (
@@ -219,7 +213,7 @@ export default async function HomePage() {
         <section className="reveal">
           <Frame>
             <div className="flex flex-col items-center gap-3 p-8 text-center">
-              <h2 className="heading gold-text text-2xl sm:text-3xl">First festival drops landing soon</h2>
+              <h2 className="heading gold-text text-2xl sm:text-3xl">First drops landing soon</h2>
               <p className="max-w-lg text-sm text-[#f3dcb8]">Verified sellers are preparing their listings. Own officially transferable cosmetics? List them and reach buyers first.</p>
               <div className="flex flex-wrap justify-center gap-3">
                 <Link href="/sell" className="btn-primary">Start selling</Link>
@@ -232,7 +226,7 @@ export default async function HomePage() {
 
       {/* ── Benefits ── */}
       <section className="reveal">
-        <SectionHeader kicker="Why DROPZONE" title="Shop with confidence" />
+        <SectionHeader kicker="Why ZYNOFLIX" title="Shop with confidence" />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {BENEFITS.map(({ Icon, title, body }) => (
             <div key={title} className="card p-5">

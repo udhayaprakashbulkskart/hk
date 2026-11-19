@@ -78,10 +78,10 @@ export function CouponForm() {
     }}>
       <FormError message={error} />
       <div className="grid gap-4 sm:grid-cols-3">
-        <Input label="Code" name="code" required error={fields.code} placeholder="LUNAR10" className="uppercase" />
+        <Input label="Code" name="code" required error={fields.code} placeholder="DROP10" className="uppercase" />
         <Select label="Type" name="type" value={type} onChange={(e) => setType(e.target.value as "PERCENT" | "FLAT")} options={[{ value: "PERCENT", label: "Percent off" }, { value: "FLAT", label: "Flat ₹ off" }]} />
         <Input label={type === "PERCENT" ? "Percent (1–90)" : "Amount (₹)"} name="value" type="number" min={1} required error={fields.value} />
-        <Input label="Description" name="description" error={fields.description} className="sm:col-span-3" placeholder="10% off festival orders" />
+        <Input label="Description" name="description" error={fields.description} className="sm:col-span-3" placeholder="10% off skins" />
         <Input label="Minimum order (₹)" name="minOrder" type="number" min={0} defaultValue={0} error={fields.minOrder} />
         {type === "PERCENT" && <Input label="Max discount (₹, optional)" name="maxDiscount" type="number" min={1} error={fields.maxDiscount} />}
         <Input label="Total uses (optional)" name="usageLimit" type="number" min={1} error={fields.usageLimit} />
@@ -128,10 +128,9 @@ export function CampaignForm({ renders }: { renders: { value: string; label: str
     }}>
       <FormError message={error} />
       <div className="grid gap-4 sm:grid-cols-2">
-        <Input label="Internal name" name="name" required error={fields.name} placeholder="Lunar Festival 2027" />
-        <Input label="Kicker" name="kicker" error={fields.kicker} placeholder="Limited-time festival event" />
-        <Input label="Title" name="title" required error={fields.title} placeholder="Lunar Festival Sale" />
-        <Input label="Decorative title (optional)" name="nativeTitle" error={fields.nativeTitle} placeholder="新春" />
+        <Input label="Internal name" name="name" required error={fields.name} placeholder="Weekend Drop Sale" />
+        <Input label="Kicker" name="kicker" error={fields.kicker} placeholder="Limited-time event" />
+        <Input label="Title" name="title" required error={fields.title} placeholder="Weekend Drop Sale" />
         <Input label="Subtitle" name="subtitle" error={fields.subtitle} className="sm:col-span-2" />
         <Input label="Button label" name="ctaLabel" defaultValue="Shop Now" error={fields.ctaLabel} />
         <Input label="Button link" name="ctaHref" defaultValue="/category/bundles" error={fields.ctaHref} />

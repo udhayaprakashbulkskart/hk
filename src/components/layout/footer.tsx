@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { DISCLAIMER } from "@/lib/constants";
 import { LogoMark } from "@/components/ui/logo";
-import { CloudScroll } from "@/components/fx/festive-backdrop";
 import { CATEGORY_NAV } from "./nav";
 
 const col = (title: string, links: [string, string][]) => (
@@ -19,12 +18,11 @@ export function Footer() {
   return (
     <footer className="relative mt-16 border-t border-neon/40 bg-gradient-to-b from-[#2a070b] to-[#140304] pb-24 md:pb-0">
       <div className="hazard absolute inset-x-0 top-0 h-px" />
-      <CloudScroll className="pointer-events-none absolute -top-8 right-4 w-40 opacity-40" />
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-5 lg:px-6">
         <div className="space-y-3 lg:col-span-2">
           <div className="flex items-center gap-2">
             <LogoMark className="size-9" />
-            <span className="font-display text-lg font-extrabold tracking-[0.12em]"><span className="gold-text">DROPZONE</span> <span className="text-[#ffe9b8]">STORE</span></span>
+            <span className="font-display text-lg font-extrabold tracking-[0.12em]"><span className="gold-text">ZYNOFLIX</span> <span className="text-[#ffe9b8]">STORE</span></span>
           </div>
           <p className="max-w-md text-sm text-muted">An independent marketplace for officially transferable PUBG Mobile &amp; BGMI cosmetics and UC top-ups. We never ask for game passwords or OTPs.</p>
         </div>

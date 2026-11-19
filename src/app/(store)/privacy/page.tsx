@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { PageTitle } from "@/components/ui/section";
 
-export const metadata: Metadata = { title: "Privacy Policy", description: "How DROPZONE STORE collects, uses and protects your data.", alternates: { canonical: "/privacy" } };
+export const metadata: Metadata = { title: "Privacy Policy", description: "How ZYNOFLIX STORE collects, uses and protects your data.", alternates: { canonical: "/privacy" } };
 
 const SECTIONS: [string, string][] = [
   ["What we collect", "Account details you give us (name, email, optional phone), the in-game Player ID and nickname you enter for delivery, your orders, wallet activity, support messages and listings. We do not collect game passwords, OTPs or payment card numbers."],

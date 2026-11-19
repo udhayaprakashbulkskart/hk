@@ -4,7 +4,7 @@ export const FAQ: { group: string; items: [string, string][] }[] = [
     group: "Safety",
     items: [
       ["Do you need my game password or OTP?", "Never. We only need your in-game Player ID (and nickname for UC). Anyone asking for your password or OTP is a scammer — report them to us."],
-      ["Is DROPZONE STORE official?", "No. DROPZONE STORE is an independent marketplace and is not affiliated with, endorsed by or sponsored by KRAFTON, PUBG Corporation, Tencent or Level Infinite."],
+      ["Is ZYNOFLIX STORE official?", "No. ZYNOFLIX STORE is an independent marketplace and is not affiliated with, endorsed by or sponsored by KRAFTON, PUBG Corporation, Tencent or Level Infinite."],
       ["Can I buy or sell game accounts?", "No. Account trading breaks the games' terms of service and is not allowed here."],
     ],
   },
@@ -20,7 +20,7 @@ export const FAQ: { group: string; items: [string, string][] }[] = [
   {
     group: "Payments & coupons",
     items: [
-      ["Which payment methods do you accept?", "UPI, cards and netbanking through Razorpay (when enabled), plus your DROPZONE wallet balance. An order is marked paid only after the payment is verified on our server."],
+      ["Which payment methods do you accept?", "UPI, cards and netbanking through Razorpay (when enabled), plus your ZYNOFLIX wallet balance. An order is marked paid only after the payment is verified on our server."],
       ["How do coupons work?", "Enter a code at checkout and tap Apply. Each coupon has its own minimum order, expiry and per-customer limit, shown when you apply it. One coupon per order."],
       ["When does the seller get paid?", "Funds are held in escrow. The seller is paid after you confirm receipt, or automatically after the protection window if you don't raise an issue."],
     ],

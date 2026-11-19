@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
-/** Small gold flourish used either side of festival headings. */
+/** Small gold flourish used beside section headings. */
 export function Flourish({ flip = false, className = "w-10 sm:w-16" }: { flip?: boolean; className?: string }) {
   return (
     <svg viewBox="0 0 80 16" className={className} style={flip ? { transform: "scaleX(-1)" } : undefined} aria-hidden fill="none">

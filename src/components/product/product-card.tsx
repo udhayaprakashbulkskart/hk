@@ -8,7 +8,7 @@ import { MediaImage } from "./media-image";
 import { WishlistButton } from "./wishlist-button";
 import { AddToCartButton } from "./cart-buttons";
 
-/** Festival product card: gold-framed art, rarity, original + sale price, wishlist, add to cart and view details. */
+/** Product card: gold-framed art, rarity, original + sale price, wishlist, add to cart and view details. */
 export function ProductCard({ p, saved = false, priority }: { p: ProductCardData; saved?: boolean; priority?: boolean }) {
   const img = p.media[0]?.url ?? "/art/rifle-1.svg";
   const store = p.seller.seller;

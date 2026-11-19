@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-/** Original DROPZONE mark: gold medallion with a parachute-drop chevron — not a game publisher logo. */
+/** Original ZYNOFLIX mark: gold medallion with a parachute-drop chevron — not a game publisher logo. */
 export function LogoMark({ className = "size-9" }: { className?: string }) {
   return (
     <svg viewBox="0 0 64 64" className={className} aria-hidden>
@@ -22,10 +22,10 @@ export function LogoMark({ className = "size-9" }: { className?: string }) {
 
 export function Logo() {
   return (
-    <Link href="/" className="flex items-center gap-2" aria-label="DROPZONE STORE home">
+    <Link href="/" className="flex items-center gap-2" aria-label="ZYNOFLIX STORE home">
       <LogoMark />
       <span className="font-display text-lg leading-none font-extrabold tracking-[0.12em]">
-        <span className="gold-text">DROPZONE</span> <span className="text-[#ffe9b8]">STORE</span>
+        <span className="gold-text">ZYNOFLIX</span> <span className="text-[#ffe9b8]">STORE</span>
       </span>
     </Link>
   );

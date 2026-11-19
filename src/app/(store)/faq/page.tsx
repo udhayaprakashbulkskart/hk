@@ -4,7 +4,7 @@ import { ChevronDown } from "lucide-react";
 import { FAQ } from "@/lib/content/faq";
 import { PageTitle } from "@/components/ui/section";
 
-export const metadata: Metadata = { title: "FAQ", description: "Answers about safety, delivery, UC top-ups, payments and coupons on DROPZONE STORE.", alternates: { canonical: "/faq" } };
+export const metadata: Metadata = { title: "FAQ", description: "Answers about safety, delivery, UC top-ups, payments and coupons on ZYNOFLIX STORE.", alternates: { canonical: "/faq" } };
 
 export default function FaqPage() {
   const jsonLd = {

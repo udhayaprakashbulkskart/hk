@@ -122,7 +122,6 @@ export const campaignSchema = z.object({
   name: z.string().trim().min(2).max(60),
   kicker: z.string().trim().max(40).optional(),
   title: z.string().trim().min(2).max(60),
-  nativeTitle: z.string().trim().max(20).optional(),
   subtitle: z.string().trim().max(140).optional(),
   ctaLabel: z.string().trim().min(2).max(24).default("Shop Now"),
   ctaHref: z.string().trim().startsWith("/", "Use an internal path like /bundles").default("/marketplace"),

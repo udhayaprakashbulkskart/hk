@@ -56,7 +56,7 @@ async function main() {
   const admin = await db.user.create({
     data: {
       email: "admin@pubgstore.dev", name: "Store Admin", passwordHash: pw("Admin@12345"), role: "ADMIN",
-      seller: { create: { storeName: "DROPZONE Official", legalName: "DROPZONE Ops", status: "VERIFIED", verifiedAt: new Date(), ratingAvg: 4.9, ratingCount: 312, totalSales: 1840 } },
+      seller: { create: { storeName: "ZYNOFLIX Official", legalName: "ZYNOFLIX Ops", status: "VERIFIED", verifiedAt: new Date(), ratingAvg: 4.9, ratingCount: 312, totalSales: 1840 } },
     },
   });
   const buyer = await db.user.create({
@@ -111,7 +111,7 @@ async function main() {
     { t: "Phantom Helmet", c: "helmets", img: ["helmet-4"], price: 449, r: "RARE", f: ["Helmet Skin"], s: 3, sales: 1 },
     { t: "Tactical Backpack Lv.3", c: "backpacks", img: ["backpack-1"], price: 499, r: "EPIC", f: ["Backpack Skin"], s: 3, sales: 9 },
     { t: "Frost Backpack", c: "backpacks", img: ["backpack-2"], price: 649, mrp: 799, r: "LEGENDARY", f: ["Backpack Skin"], s: 3, sales: 6 },
-    { t: "Lunar Festival Bundle", c: "bundles", img: ["/media/skins/outfit-blossom-empress.webp", "/media/skins/gun-dragonfire-smg.webp"], price: 3299, mrp: 4499, r: "LEGENDARY", f: ["Outfit", "Weapon Finish", "Emote"], s: 1, feat: true, sales: 15 },
+    { t: "Royal Warrior Bundle", c: "bundles", img: ["/media/skins/outfit-blossom-empress.webp", "/media/skins/gun-dragonfire-smg.webp"], price: 3299, mrp: 4499, r: "LEGENDARY", f: ["Outfit", "Weapon Finish", "Emote"], s: 1, feat: true, sales: 15 },
     { t: "Dragon Treasure Crate Pack", c: "crates", img: ["/media/skins/gun-molten-akm.webp"], price: 799, mrp: 999, r: "EPIC", f: ["Crate coupon x5"], s: 3, d: "REDEEM_CODE", sales: 6 },
     { t: "Royal Parachute", c: "accessories", img: ["parachute-1"], price: 399, r: "EPIC", f: ["Parachute Skin", "Trail"], s: 3, d: "REDEEM_CODE", sales: 4 },
     { t: "Sky Rider Parachute", c: "accessories", img: ["parachute-2"], price: 349, r: "RARE", f: ["Parachute Skin"], s: 3, d: "REDEEM_CODE", sales: 2 },
@@ -182,18 +182,18 @@ async function main() {
     ],
   });
 
-  // ── Festival campaign + coupons ──
+  // ── Home campaign + coupons ──
   await db.campaign.create({
     data: {
-      name: "Lunar Festival", kicker: "Limited-time festival event", title: "Lunar Festival Sale", nativeTitle: "新春",
-      subtitle: "Festival bundles, legendary outfits and weapon skins at special prices.", ctaLabel: "Shop the festival", ctaHref: "/category/bundles",
-      heroLeft: "/media/skins/outfit-blossom-empress.webp", heroRight: "/media/skins/outfit-golden-seraph.webp",
+      name: "Weekend Drop Sale", kicker: "Limited-time event", title: "Weekend Drop Sale",
+      subtitle: "Legendary outfits, weapon skins and bundles at special prices.", ctaLabel: "Shop the sale", ctaHref: "/marketplace",
+      heroLeft: "/media/skins/outfit-raven-knight.webp", heroRight: "/media/skins/outfit-golden-seraph.webp",
       endsAt: new Date(Date.now() + 10 * 86_400_000), isActive: true,
     },
   });
   await db.coupon.createMany({
     data: [
-      { code: "LUNAR10", description: "10% off festival orders (max ₹500)", type: "PERCENT", value: 10, maxDiscount: rs(500), minOrder: rs(499), perUserLimit: 1 },
+      { code: "DROP10", description: "10% off skins (max ₹500)", type: "PERCENT", value: 10, maxDiscount: rs(500), minOrder: rs(499), perUserLimit: 1 },
       { code: "WELCOME50", description: "₹50 off your first order over ₹299", type: "FLAT", value: rs(50), minOrder: rs(299), perUserLimit: 1 },
     ],
   });

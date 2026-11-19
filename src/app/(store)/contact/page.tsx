@@ -6,7 +6,7 @@ import { SupportForm } from "@/components/forms/account-forms";
 import { PageTitle } from "@/components/ui/section";
 import { Frame } from "@/components/ui/frame";
 
-export const metadata: Metadata = { title: "Contact Us", description: "Message the DROPZONE STORE support team about orders, payments, UC top-ups or selling.", alternates: { canonical: "/contact" } };
+export const metadata: Metadata = { title: "Contact Us", description: "Message the ZYNOFLIX STORE support team about orders, payments, UC top-ups or selling.", alternates: { canonical: "/contact" } };
 
 export default async function ContactPage(props: PageProps<"/contact">) {
   const sp = await props.searchParams;

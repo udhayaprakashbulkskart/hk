@@ -26,7 +26,7 @@ export function couponData(input: ReturnType<typeof couponSchema.parse>) {
 export function campaignData(input: Partial<ReturnType<typeof campaignSchema.parse>>) {
   for (const u of [input.heroLeft, input.heroRight]) if (u && !isAllowedMediaUrl(u) && !u.startsWith("/media/")) throw badRequest("Use an uploaded image", { heroLeft: "Invalid image" });
   const out: Record<string, unknown> = { ...input };
-  for (const k of ["kicker", "nativeTitle", "subtitle", "heroLeft", "heroRight"] as const) if (k in input) out[k] = input[k] || null;
+  for (const k of ["kicker", "subtitle", "heroLeft", "heroRight"] as const) if (k in input) out[k] = input[k] || null;
   if ("endsAt" in input) out.endsAt = input.endsAt ? new Date(input.endsAt) : null;
   return out as Omit<typeof input, "endsAt"> & { endsAt?: Date | null };
 }

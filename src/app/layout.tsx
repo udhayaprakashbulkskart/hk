@@ -3,7 +3,7 @@ import { Cinzel, Inter } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/toast";
 import { Spotlight } from "@/components/fx/spotlight";
-import { FestiveBackdrop } from "@/components/fx/festive-backdrop";
+import { BattleBackdrop } from "@/components/fx/battle-backdrop";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -22,7 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${inter.variable} ${cinzel.variable}`}>
       <body className="antialiased">
-        <FestiveBackdrop />
+        <BattleBackdrop />
         <Spotlight />
         <ToastProvider>{children}</ToastProvider>
       </body>

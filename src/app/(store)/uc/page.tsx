@@ -47,7 +47,7 @@ export default async function UcPage(props: PageProps<"/uc">) {
         <UcTopup packs={packs.map((p) => ({ ...p, ucAmount: p.ucAmount ?? 0 }))} defaultGame={defaultGame} defaultPlayerId={user?.gamePlayerId ?? ""} />
       )}
       <p className="mt-8 text-center text-xs text-muted">
-        Top-ups are fulfilled by the DROPZONE team after your payment is confirmed. Status updates appear in <Link href="/orders" className="text-neon hover:underline">My Orders</Link>; if a top-up can&apos;t be completed you can request a refund from the order.
+        Top-ups are fulfilled by the ZYNOFLIX team after your payment is confirmed. Status updates appear in <Link href="/orders" className="text-neon hover:underline">My Orders</Link>; if a top-up can&apos;t be completed you can request a refund from the order.
       </p>
     </div>
   );

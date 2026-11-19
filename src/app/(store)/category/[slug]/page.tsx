@@ -10,7 +10,7 @@ const BLURBS: Record<string, string> = {
   backpacks: "Backpack skins — from classic to legendary.",
   vehicles: "Vehicle skins for the drive to the next circle.",
   crates: "Crate and coupon items, where the game permits transfer.",
-  bundles: "Curated festival bundles — several items, one price.",
+  bundles: "Curated bundles — several items, one price.",
 };
 
 const category = (slug: string) => db.category.findUnique({ where: { slug }, select: { slug: true, name: true, description: true, isSkin: true } });
@@ -18,7 +18,7 @@ const category = (slug: string) => db.category.findUnique({ where: { slug }, sel
 export async function generateMetadata(props: PageProps<"/category/[slug]">): Promise<Metadata> {
   const c = await category((await props.params).slug);
   if (!c) return { title: "Category not found" };
-  return { title: c.name, description: c.description ?? BLURBS[c.slug] ?? `Shop ${c.name} on DROPZONE STORE.`, alternates: { canonical: `/category/${c.slug}` } };
+  return { title: c.name, description: c.description ?? BLURBS[c.slug] ?? `Shop ${c.name} on ZYNOFLIX STORE.`, alternates: { canonical: `/category/${c.slug}` } };
 }
 
 export default async function CategoryPage(props: PageProps<"/category/[slug]">) {

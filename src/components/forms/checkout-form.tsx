@@ -88,7 +88,7 @@ export function CheckoutForm(props: {
         {props.needsNickname && (
           <label className="flex items-start gap-2 rounded-lg border border-neon/30 bg-[#1c0507]/60 p-3 text-xs text-[#f3dcb8]">
             <input type="checkbox" name="nicknameConfirm" className="mt-0.5 accent-[#f2c14e]" />
-            <span>I&apos;ve checked that this Player ID belongs to the nickname above. DROPZONE can&apos;t look nicknames up automatically, so please double-check — UC sent to a wrong ID can&apos;t be recovered.</span>
+            <span>I&apos;ve checked that this Player ID belongs to the nickname above. ZYNOFLIX can&apos;t look nicknames up automatically, so please double-check — UC sent to a wrong ID can&apos;t be recovered.</span>
           </label>
         )}
       </section>
