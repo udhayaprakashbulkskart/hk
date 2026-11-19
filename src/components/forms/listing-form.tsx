@@ -33,8 +33,8 @@ export function ListingForm({ categories, defaults = {} }: { categories: { id: s
     };
     const res = await submit<{ id: string; status: string }>(editing ? `/api/products/${defaults.id}` : "/api/products", body, editing ? "PATCH" : "POST");
     if (res) {
-      toast("success", publish ? "Submitted for review — we'll notify you once it's approved" : "Draft saved");
-      router.push("/sell/listings");
+      toast("success", publish ? "Product published" : "Draft saved");
+      router.push("/admin/products?status=APPROVED");
       router.refresh();
     } else window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -57,7 +57,7 @@ export function ListingForm({ categories, defaults = {} }: { categories: { id: s
       <Input label="Features (comma separated)" name="features" defaultValue={defaults.features?.join(", ")} error={fields.features} placeholder="Kill Effect, Loot Crate, Advanced Look" />
       <MediaUploader value={media} onChange={setMedia} error={fields.media ?? fields["media.0.url"]} />
       <div className="grid gap-4 sm:grid-cols-3">
-        <Input label="Your price (₹)" name="price" type="number" min={10} required defaultValue={defaults.price ?? ""} error={fields.price} placeholder="Enter selling price" />
+        <Input label="Price (₹)" name="price" type="number" min={10} required defaultValue={defaults.price ?? ""} error={fields.price} placeholder="Sale price" />
         <Input label="Original price (₹, optional)" name="compareAtPrice" type="number" min={10} defaultValue={defaults.compareAtPrice ?? ""} error={fields.compareAtPrice} hint="Shows a discount badge" />
         <Input label="Quantity available" name="stock" type="number" min={1} max={999} required defaultValue={defaults.stock ?? 1} error={fields.stock} />
       </div>
@@ -65,13 +65,12 @@ export function ListingForm({ categories, defaults = {} }: { categories: { id: s
         <ShieldAlert className="size-5 shrink-0 text-warn" />
         <label className="flex items-start gap-2">
           <input type="checkbox" name="complianceAck" className="mt-1 accent-[#f2c14e]" />
-          <span>This item can be transferred using the game&apos;s official gifting or redeem system under its current terms. I am not selling an account and will never ask the buyer for a password or OTP.</span>
+          <span>This item can be transferred using the game&apos;s official gifting or redeem system under its current terms. This is not a game account, and the buyer will never be asked for a password or OTP.</span>
         </label>
       </div>
       {fields.complianceAck && <p className="-mt-3 text-xs text-neon-soft">{fields.complianceAck}</p>}
-      <p className="text-xs text-muted">Every new or edited listing is reviewed by our team before it goes live.</p>
       <div className="flex flex-col gap-3 sm:flex-row">
-        <button type="submit" className="btn-primary flex-1 py-3" disabled={pending}>{pending ? <Spinner /> : <Tag className="size-4" />} {editing ? "Save & resubmit" : "List for Sale"}</button>
+        <button type="submit" className="btn-primary flex-1 py-3" disabled={pending}>{pending ? <Spinner /> : <Tag className="size-4" />} {editing ? "Save & publish" : "Publish product"}</button>
         <button type="button" className="btn-outline py-3" disabled={pending} onClick={(e) => save(e.currentTarget.form!, false)}>Save as draft</button>
       </div>
     </form>

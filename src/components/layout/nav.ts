@@ -25,9 +25,6 @@ export const ACCOUNT_NAV = [
   { href: "/wishlist", label: "Wishlist", icon: "heart" },
   { href: "/wallet", label: "Wallet", icon: "wallet" },
   { href: "/account", label: "Profile", icon: "user" },
-  { href: "/account/sales", label: "My Sales", icon: "chart" },
-  { href: "/sell/listings", label: "My Listings", icon: "list" },
-  { href: "/sell", label: "Sell on ZYNOFLIX", icon: "tag" },
   { href: "/account/notifications", label: "Notifications", icon: "bell" },
   { href: "/account/settings", label: "Settings", icon: "settings" },
 ] as const;

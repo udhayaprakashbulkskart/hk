@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { pageUser } from "@/lib/auth";
+
 import { db } from "@/lib/db";
 import { formatINR } from "@/lib/money";
 import { GAME_LABEL } from "@/lib/constants";
@@ -8,12 +8,12 @@ import { StatusBadge } from "@/components/ui/badges";
 import { EmptyState } from "@/components/ui/states";
 import { PageTitle } from "@/components/ui/section";
 
-export const metadata: Metadata = { title: "My Sales" };
+export const metadata: Metadata = { title: "Fulfilment" };
 
-export default async function SalesPage() {
-  const user = await pageUser("/account/sales");
+/** Store fulfilment queue: every paid order item, with the buyer's Player ID, to deliver in-game. */
+export default async function FulfilmentPage() {
   const items = await db.orderItem.findMany({
-    where: { sellerId: user.id, status: { notIn: ["AWAITING_PAYMENT", "CANCELLED"] } },
+    where: { status: { notIn: ["AWAITING_PAYMENT", "CANCELLED"] } },
     orderBy: { createdAt: "desc" },
     take: 100,
     include: { order: { select: { orderNumber: true, gamePlayerId: true, gameNickname: true, game: true, buyer: { select: { name: true } } } }, review: { select: { rating: true, comment: true } } },
@@ -21,9 +21,9 @@ export default async function SalesPage() {
   const toDeliver = items.filter((i) => i.status === "PROCESSING");
   return (
     <div>
-      <PageTitle title="My Sales" subtitle={`${toDeliver.length} awaiting delivery`} />
+      <PageTitle title="Order fulfilment" subtitle={`${toDeliver.length} awaiting delivery`} />
       {items.length === 0 ? (
-        <EmptyState title="No sales yet" body="When someone buys your item, it shows up here with the buyer's Player ID." action={{ href: "/sell/new", label: "List an item" }} />
+        <EmptyState title="No orders yet" body="Paid orders appear here with the buyer's Player ID to deliver to." />
       ) : (
         <ul className="space-y-3">
           {items.map((it) => (
@@ -39,9 +39,9 @@ export default async function SalesPage() {
                 <div><p className="text-xs text-muted">Deliver to Player ID</p><p className="font-mono font-semibold">{it.order.gamePlayerId}</p>{it.order.gameNickname && <p className="text-xs text-muted">Nickname: {it.order.gameNickname}</p>}</div>
                 <div><p className="text-xs text-muted">Game</p><p>{GAME_LABEL[it.order.game]}</p></div>
                 <div><p className="text-xs text-muted">Sale price</p><p>{formatINR(it.lineTotal)}</p></div>
-                <div><p className="text-xs text-muted">You earn</p><p className="font-semibold text-success">{formatINR(it.sellerEarning)}</p></div>
+                <div><p className="text-xs text-muted">Paid</p><p className="font-semibold text-success">{formatINR(it.lineTotal - it.discount)}</p></div>
               </div>
-              {it.deliveryNote && <p className="text-sm text-zinc-400">Your note: {it.deliveryNote}</p>}
+              {it.deliveryNote && <p className="text-sm text-zinc-400">Delivery note: {it.deliveryNote}</p>}
               {it.review && <p className="text-sm text-zinc-300">★ {it.review.rating}/5 {it.review.comment && `— “${it.review.comment}”`}</p>}
               {it.status === "PROCESSING" && <DeliverForm itemId={it.id} />}
             </li>

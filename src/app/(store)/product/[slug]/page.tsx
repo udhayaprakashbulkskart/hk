@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CalendarDays, Gift, PackageCheck, ShieldCheck, Sparkles } from "lucide-react";
+import { BadgeCheck, Gift, PackageCheck, ShieldCheck, Sparkles } from "lucide-react";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { getProductBySlug, relatedProducts } from "@/lib/services/catalog";
@@ -12,7 +12,7 @@ import { PurchasePanel } from "@/components/product/cart-buttons";
 import { WishlistButton } from "@/components/product/wishlist-button";
 import { ProductGrid } from "@/components/product/product-card";
 import { ReportButton } from "@/components/forms/report-button";
-import { Price, RarityBadge, Stars, StatusBadge, VerifiedBadge } from "@/components/ui/badges";
+import { Price, RarityBadge, StatusBadge } from "@/components/ui/badges";
 import { SectionHeader } from "@/components/ui/section";
 
 export async function generateMetadata(props: PageProps<"/product/[slug]">): Promise<Metadata> {
@@ -31,7 +31,6 @@ export default async function ProductPage(props: PageProps<"/product/[slug]">) {
   const [related, saved] = await Promise.all([relatedProducts(p.id, p.categoryId), getSavedIds(user?.id)]);
   if (p.status === "APPROVED") db.product.update({ where: { id: p.id }, data: { views: { increment: 1 } } }).catch(() => {});
 
-  const store = p.seller.seller;
   const available = p.status === "APPROVED" && p.stock > 0;
   const isOwn = user?.id === p.sellerId;
   const specs: [string, string][] = [
@@ -84,29 +83,24 @@ export default async function ProductPage(props: PageProps<"/product/[slug]">) {
           </dl>
 
           {isOwn ? (
-            <Link href={`/sell/listings/${p.id}/edit`} className="btn-outline w-full py-3">Edit your listing</Link>
+            <Link href={`/admin/products/${p.id}/edit`} className="btn-outline w-full py-3">Edit product (admin)</Link>
           ) : (
             <PurchasePanel productId={p.id} stock={p.stock} disabled={!available} />
           )}
 
           <div className="grid gap-2 text-xs text-zinc-400 sm:grid-cols-3">
-            <p className="flex items-center gap-2"><ShieldCheck className="size-4 text-neon" /> Escrow protected</p>
+            <p className="flex items-center gap-2"><ShieldCheck className="size-4 text-neon" /> Secure payment</p>
             <p className="flex items-center gap-2"><Gift className="size-4 text-neon" /> Player ID only</p>
             <p className="flex items-center gap-2"><PackageCheck className="size-4 text-neon" /> Refund if not delivered</p>
           </div>
 
-          <Link href={`/seller/${p.seller.id}`} className="card-glow flex items-center gap-3 p-4">
-            <span className="grid size-12 place-items-center rounded-xl bg-gradient-to-br from-neon to-crimson font-display text-xl font-bold">{(store?.storeName ?? p.seller.name).slice(0, 1)}</span>
+          <div className="card flex items-center gap-3 p-4">
+            <span className="grid size-12 shrink-0 place-items-center rounded-xl border border-neon/60 bg-[#5c0a12] text-neon"><BadgeCheck className="size-6" /></span>
             <div className="min-w-0 flex-1">
-              <p className="flex items-center gap-2 font-semibold">
-                {store?.storeName ?? p.seller.name} {store?.status === "VERIFIED" && <VerifiedBadge />}
-              </p>
-              <p className="mt-0.5 flex flex-wrap items-center gap-x-3 text-xs text-muted">
-                <Stars value={store?.ratingAvg ?? 0} count={store?.ratingCount} /> {store?.totalSales ?? 0} sold
-                <span className="flex items-center gap-1"><CalendarDays className="size-3" /> Since {p.seller.createdAt.getFullYear()}</span>
-              </p>
+              <p className="font-semibold">Sold &amp; delivered by ZYNOFLIX STORE</p>
+              <p className="mt-0.5 text-xs text-muted">Official store listing · delivered to your Player ID through the game&apos;s own gifting or redeem system.</p>
             </div>
-          </Link>
+          </div>
 
           <section>
             <h2 className="heading mb-2 text-lg">Description</h2>

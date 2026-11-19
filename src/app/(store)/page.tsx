@@ -25,9 +25,9 @@ const CATEGORY_ART: Record<string, string | undefined> = {
 };
 
 const BENEFITS = [
-  { Icon: ShieldCheck, title: "Escrow protection", body: "Seller payouts are released only after you confirm delivery or the protection window passes." },
+  { Icon: ShieldCheck, title: "Secure payments", body: "Every payment is verified on our server before your order is confirmed." },
   { Icon: KeyRound, title: "No passwords, ever", body: "We never ask for game passwords or OTPs. UC goes to your Player ID only." },
-  { Icon: BadgeCheck, title: "Verified sellers", body: "Sellers complete verification before listing, and every listing is reviewed." },
+  { Icon: BadgeCheck, title: "Official store", body: "Every product is listed and delivered by ZYNOFLIX STORE — no third-party sellers." },
   { Icon: Headset, title: "Real support", body: "Raise a ticket or dispute from any order; refunds go back to your wallet or payment source." },
 ];
 
@@ -70,7 +70,7 @@ export default async function HomePage() {
               <Flourish flip /> <span className="text-xs tracking-[0.3em] text-[#e7cfa8] uppercase">PUBG Mobile · BGMI</span> <Flourish />
             </div>
             <p className="mx-auto mt-4 max-w-md text-sm text-[#f3dcb8] sm:text-base">
-              {c?.subtitle || "Weapon skins, outfits, bundles and UC top-ups from verified sellers — paid securely, delivered through in-game methods the games allow."}
+              {c?.subtitle || "Weapon skins, outfits, bundles and UC top-ups — paid securely, delivered through in-game methods the games allow."}
             </p>
             {c?.endsAt && (
               <div className="mt-5 flex flex-col items-center gap-2">
@@ -214,10 +214,9 @@ export default async function HomePage() {
           <Frame>
             <div className="flex flex-col items-center gap-3 p-8 text-center">
               <h2 className="heading gold-text text-2xl sm:text-3xl">First drops landing soon</h2>
-              <p className="max-w-lg text-sm text-[#f3dcb8]">Verified sellers are preparing their listings. Own officially transferable cosmetics? List them and reach buyers first.</p>
+              <p className="max-w-lg text-sm text-[#f3dcb8]">New skins, outfits and bundles are being added. UC top-ups are available now.</p>
               <div className="flex flex-wrap justify-center gap-3">
-                <Link href="/sell" className="btn-primary">Start selling</Link>
-                <Link href="/uc" className="btn-outline">Top up UC</Link>
+                <Link href="/uc" className="btn-primary">Top up UC</Link>
               </div>
             </div>
           </Frame>

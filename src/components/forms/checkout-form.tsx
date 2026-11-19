@@ -120,7 +120,7 @@ export function CheckoutForm(props: {
       <button className="btn-primary w-full py-3.5 text-base" disabled={busy || (!canWallet && !props.razorpayEnabled)}>
         {busy ? <Spinner /> : <Lock className="size-4" />} {stage ?? `Pay ${formatINR(total)}`}
       </button>
-      <p className="flex items-center justify-center gap-1.5 text-xs text-muted"><ShieldCheck className="size-3.5 text-neon" /> Seller is paid only after you confirm delivery.</p>
+      <p className="flex items-center justify-center gap-1.5 text-xs text-muted"><ShieldCheck className="size-3.5 text-neon" /> Refund available if your order can&apos;t be delivered.</p>
     </form>
   );
 }

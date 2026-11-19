@@ -23,13 +23,10 @@ const fund = async (email: string, paise: number) => {
   await tdb.walletTransaction.create({ data: { userId: u.id, type: "CREDIT", reason: "ADJUSTMENT", amount: paise, balanceAfter: u.walletBalance, note: "test fixture" } });
 };
 
+/** Single-store model: every product is listed and fulfilled by the store admin. */
 async function makeSeller() {
-  const s = await register("Seller Person");
-  const r = await s.post("/api/seller/onboard", { storeName: `Store ${uid()}`, legalName: "Seller Person", panLast4: "12AB", payoutUpi: "seller@okaxis", agree: true });
-  expect(r.status).toBe(201);
-  const u = await tdb.user.findUniqueOrThrow({ where: { email: s.email } });
-  expect((await admin.patch(`/api/admin/sellers/${u.id}`, { action: "verify" })).status).toBe(200);
-  return Object.assign(s, { id: u.id });
+  const u = await tdb.user.findUniqueOrThrow({ where: { email: "admin@pubgstore.dev" } });
+  return Object.assign(admin, { id: u.id, email: u.email });
 }
 
 const listing = (over: Record<string, unknown> = {}) => ({
@@ -41,7 +38,7 @@ const listing = (over: Record<string, unknown> = {}) => ({
 async function liveProduct(seller: Client, over: Record<string, unknown> = {}) {
   const r = await seller.post("/api/products", listing(over));
   expect(r.status, JSON.stringify(r.json)).toBe(201);
-  expect((await admin.patch(`/api/admin/products/${r.data.id}`, { action: "approve" })).status).toBe(200);
+  expect(r.data.status).toBe("APPROVED"); // admin-published products go live immediately
   return r.data as { id: string; slug: string };
 }
 
@@ -87,18 +84,24 @@ describe("auth & sessions", () => {
 });
 
 describe("role-based access", () => {
-  it("protects admin APIs and seller-only actions", async () => {
+  it("protects admin APIs", async () => {
     const buyer = await register();
     expect((await new Client().get("/api/cart")).status).toBe(401);
     expect((await buyer.put("/api/admin/settings", { commissionPercent: 0, autoCompleteDays: 1 })).status).toBe(403);
     expect((await buyer.patch("/api/admin/products/x", { action: "approve" })).status).toBe(403);
-    expect((await buyer.post("/api/products", listing())).status).toBe(403); // not a verified seller
   });
-  it("prevents sellers editing someone else's listing", async () => {
-    const a = await makeSeller();
-    const b = await makeSeller();
-    const p = await liveProduct(a);
-    expect((await b.patch(`/api/products/${p.id}`, listing())).status).toBe(403);
+  it("only admins can add, edit or archive products; customers can only buy", async () => {
+    const buyer = await register();
+    expect((await buyer.post("/api/products", listing())).status).toBe(403);
+    expect((await buyer.post("/api/seller/onboard", { storeName: "Nope", legalName: "Nope", panLast4: "12AB", payoutUpi: "x@okaxis", agree: true })).status).toBe(403);
+    // Even a user who somehow holds a verified seller profile can't list.
+    const u = await tdb.user.findUniqueOrThrow({ where: { email: buyer.email } });
+    await tdb.sellerProfile.create({ data: { userId: u.id, storeName: `Legacy ${uid()}`, legalName: "Legacy", status: "VERIFIED" } });
+    expect((await buyer.post("/api/products", listing())).status).toBe(403);
+    const p = await liveProduct(admin);
+    expect((await buyer.patch(`/api/products/${p.id}`, listing())).status).toBe(403);
+    expect((await buyer.del(`/api/products/${p.id}`)).status).toBe(403);
+    expect((await tdb.product.findUniqueOrThrow({ where: { id: p.id } })).status).toBe("APPROVED");
   });
 });
 
@@ -110,18 +113,15 @@ describe("listings & moderation", () => {
     const uc = await tdb.category.findUniqueOrThrow({ where: { slug: "uc-topup" } });
     expect((await s.post("/api/products", listing({ categoryId: uc.id }))).status).toBe(400);
   });
-  it("keeps pending listings out of the marketplace until approved", async () => {
-    const s = await makeSeller();
-    const title = `Pending Skin ${uid()}`;
-    const r = await s.post("/api/products", listing({ title }));
-    expect(r.data.status).toBe("PENDING");
+  it("keeps drafts out of the store until published, and archived products disappear", async () => {
+    const title = `Draft Skin ${uid()}`;
+    const r = await admin.post("/api/products", listing({ title, submit: false }));
+    expect(r.data.status).toBe("DRAFT");
     const search = async () => (await new Client().get(`/api/products?q=${encodeURIComponent(title)}`)).data.total;
     expect(await search()).toBe(0);
-    expect((await admin.patch(`/api/admin/products/${r.data.id}`, { action: "reject" })).status).toBe(400); // reason required
-    await admin.patch(`/api/admin/products/${r.data.id}`, { action: "approve" });
+    expect((await admin.patch(`/api/products/${r.data.id}`, listing({ title }))).data.status).toBe("APPROVED");
     expect(await search()).toBe(1);
-    // Editing sends it back to review.
-    await s.patch(`/api/products/${r.data.id}`, listing({ title }));
+    expect((await admin.del(`/api/products/${r.data.id}`)).status).toBe(200);
     expect(await search()).toBe(0);
   });
 });
@@ -156,7 +156,7 @@ describe("wallet checkout, fulfilment and escrow", () => {
 
     expect((await buyer.post("/api/reviews", { orderItemId: item, rating: 4 })).status).toBe(201);
     expect((await buyer.post("/api/reviews", { orderItemId: item, rating: 5 })).status).toBe(409);
-    expect((await tdb.sellerProfile.findUniqueOrThrow({ where: { userId: seller.id } })).ratingAvg).toBe(4);
+    expect((await tdb.review.findFirstOrThrow({ where: { orderItemId: item } })).rating).toBe(4);
   });
 
   it("rolls back stock and money when the wallet balance is insufficient", async () => {
@@ -229,7 +229,10 @@ describe("refunds & withdrawals", () => {
   });
 
   it("holds withdrawal funds and returns them on rejection", async () => {
-    const seller = await makeSeller();
+    // Withdrawal mechanics for a payout-enabled account (created directly; onboarding is closed).
+    const seller = await register("Payout Person");
+    const su = await tdb.user.findUniqueOrThrow({ where: { email: seller.email } });
+    await tdb.sellerProfile.create({ data: { userId: su.id, storeName: `Payout ${uid()}`, legalName: "Payout Person", status: "VERIFIED", payoutUpi: "seller@okaxis" } });
     await fund(seller.email, 50_000);
     expect((await seller.post("/api/wallet/withdraw", { amount: 1000, upiId: "seller@okaxis" })).status).toBe(402);
     expect((await seller.post("/api/wallet/withdraw", { amount: 50, upiId: "seller@okaxis" })).status).toBe(422);

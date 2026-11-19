@@ -64,11 +64,11 @@ export default async function OrderPage(props: PageProps<"/orders/[number]">) {
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
                   <Link href={`/product/${it.product.slug}`} className="font-semibold hover:text-neon">{it.titleSnapshot}</Link>
-                  <p className="text-xs text-muted">Sold by <Link href={`/seller/${it.seller.id}`} className="hover:text-white">{it.seller.seller?.storeName}</Link> · {formatINR(it.unitPrice)} × {it.quantity}</p>
+                  <p className="text-xs text-muted">{formatINR(it.unitPrice)} × {it.quantity}</p>
                 </div>
                 <div className="flex items-center gap-2"><StatusBadge status={it.status} /><span className="font-semibold">{formatINR(it.lineTotal - it.discount)}</span></div>
               </div>
-              {it.deliveryNote && <p className="rounded-lg bg-panel-2 px-3 py-2 text-sm text-zinc-300"><span className="text-muted">Seller note:</span> {it.deliveryNote}</p>}
+              {it.deliveryNote && <p className="rounded-lg bg-panel-2 px-3 py-2 text-sm text-zinc-300"><span className="text-muted">Delivery note:</span> {it.deliveryNote}</p>}
               {order.buyerId === user.id && <BuyerItemActions itemId={it.id} status={it.status} canReview={it.status === "COMPLETED" && !it.review} />}
               {it.review && <p className="text-xs text-muted">You rated this seller {it.review.rating}/5.</p>}
             </li>

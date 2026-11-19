@@ -10,9 +10,9 @@ export const metadata: Metadata = { title: { default: "Admin", template: "%s · 
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const admin = await pageAdmin();
-  const [products, sellers, refunds, withdrawals, reports, tickets] = await Promise.all([
+  const [products, fulfilment, refunds, withdrawals, reports, tickets] = await Promise.all([
     db.product.count({ where: { status: "PENDING" } }),
-    db.sellerProfile.count({ where: { status: "PENDING" } }),
+    db.orderItem.count({ where: { status: "PROCESSING" } }),
     db.refund.count({ where: { status: "REQUESTED" } }),
     db.withdrawal.count({ where: { status: { in: ["PENDING", "APPROVED"] } } }),
     db.report.count({ where: { status: "OPEN" } }),
@@ -29,7 +29,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </div>
       </header>
       <div className="mx-auto grid max-w-[1400px] gap-6 px-4 py-5 lg:grid-cols-[230px_1fr] lg:px-6">
-        <aside className="lg:sticky lg:top-20 lg:h-fit"><AdminNav counts={{ products, sellers, refunds, withdrawals, reports, tickets }} /></aside>
+        <aside className="lg:sticky lg:top-20 lg:h-fit"><AdminNav counts={{ products, fulfilment, refunds, withdrawals, reports, tickets }} /></aside>
         <main className="min-w-0">{children}</main>
       </div>
     </div>

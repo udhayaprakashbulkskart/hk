@@ -27,7 +27,7 @@ export function Footer() {
           <p className="max-w-md text-sm text-muted">An independent marketplace for officially transferable PUBG Mobile &amp; BGMI cosmetics and UC top-ups. We never ask for game passwords or OTPs.</p>
         </div>
         {col("Shop", [["/marketplace", "All products"], ...CATEGORY_NAV.slice(0, 4).map((c) => [`/category/${c.slug}`, c.label] as [string, string]), ["/uc", "UC Top-Up"]])}
-        {col("Account", [["/orders", "My orders"], ["/wishlist", "Wishlist"], ["/cart", "Cart"], ["/account", "Profile"], ["/sell", "Sell with us"]])}
+        {col("Account", [["/orders", "My orders"], ["/wishlist", "Wishlist"], ["/cart", "Cart"], ["/account", "Profile"]])}
         {col("Help", [["/contact", "Contact us"], ["/faq", "FAQ"], ["/support", "Support tickets"], ["/terms", "Terms of service"], ["/privacy", "Privacy policy"]])}
       </div>
       <p className="mx-auto max-w-7xl border-t border-neon/20 px-4 py-5 text-xs leading-relaxed text-[#b89a7a] lg:px-6">{DISCLAIMER}</p>

@@ -11,7 +11,6 @@ import { AddToCartButton } from "./cart-buttons";
 /** Product card: gold-framed art, rarity, original + sale price, wishlist, add to cart and view details. */
 export function ProductCard({ p, saved = false, priority }: { p: ProductCardData; saved?: boolean; priority?: boolean }) {
   const img = p.media[0]?.url ?? "/art/rifle-1.svg";
-  const store = p.seller.seller;
   const off = discountPercent(p.price, p.compareAtPrice);
   return (
     <div className="group card-glow reveal flex flex-col p-2.5 sm:p-3">
@@ -35,8 +34,7 @@ export function ProductCard({ p, saved = false, priority }: { p: ProductCardData
           <div className="min-w-0">
             <Link href={`/product/${p.slug}`} className="line-clamp-2 text-sm leading-snug font-bold sm:line-clamp-1 text-[#ffe9b8] transition hover:text-neon">{p.title}</Link>
             <p className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-muted">
-              {p.isOfficialStore ? "Official store" : store?.storeName}
-              {store?.status === "VERIFIED" && <BadgeCheck className="size-3 shrink-0 text-neon" aria-label="Verified" />}
+              ZYNOFLIX STORE <BadgeCheck className="size-3 shrink-0 text-neon" aria-label="Official" />
             </p>
           </div>
           <div className="shrink-0 sm:text-right">

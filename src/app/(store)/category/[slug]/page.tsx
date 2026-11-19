@@ -5,7 +5,7 @@ import { MarketplaceView } from "@/components/product/marketplace-view";
 
 const BLURBS: Record<string, string> = {
   "weapon-skins": "Upgradable rifles, SMGs and snipers with kill effects and premium finishes.",
-  outfits: "Full outfits and mythic sets from verified sellers.",
+  outfits: "Full outfits and mythic sets.",
   helmets: "Rare helmet skins to finish your look.",
   backpacks: "Backpack skins — from classic to legendary.",
   vehicles: "Vehicle skins for the drive to the next circle.",

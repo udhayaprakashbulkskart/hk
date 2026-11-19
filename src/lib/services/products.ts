@@ -54,7 +54,9 @@ function toData(input: ProductInput) {
     price: toPaise(input.price),
     compareAtPrice: input.compareAtPrice ? toPaise(input.compareAtPrice) : null,
     stock: input.stock,
-    status: input.submit ? ("PENDING" as const) : ("DRAFT" as const),
+    // Products are added by store admins, so publishing makes them live straight away.
+    status: input.submit ? ("APPROVED" as const) : ("DRAFT" as const),
+    approvedAt: input.submit ? new Date() : null,
     rejectionReason: null,
   };
 }
@@ -80,7 +82,6 @@ export async function updateListing(user: SessionUser, productId: string, input:
   if (existing.status === "ARCHIVED") throw conflict("Archived listings can't be edited");
   assertCompliant(input);
   await assertCategory(input.categoryId);
-  // Any edit sends the listing back through moderation.
   const product = await db.$transaction(async (tx) => {
     await tx.productMedia.deleteMany({ where: { productId } });
     return tx.product.update({ where: { id: productId }, data: { ...toData(input), media: { create: mediaRows(input) } } });
@@ -108,7 +109,7 @@ export async function moderateListing(adminId: string, productId: string, action
     if (!reason) throw badRequest("A rejection reason is required", { reason: "Required" });
     await db.product.update({ where: { id: productId }, data: { status: "REJECTED", rejectionReason: reason, isFeatured: false } });
     await db.cartItem.deleteMany({ where: { productId } });
-    await notify(p.sellerId, "Listing rejected", `"${p.title}": ${reason}`, `/sell/listings`);
+    await notify(p.sellerId, "Listing rejected", `"${p.title}": ${reason}`, `/admin/products`);
   } else {
     if (action === "feature" && p.status !== "APPROVED") throw conflict("Only approved listings can be featured");
     await db.product.update({ where: { id: productId }, data: { isFeatured: action === "feature" } });

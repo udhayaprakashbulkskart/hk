@@ -12,7 +12,7 @@ export default async function RegisterPage(props: PageProps<"/register">) {
   const next = typeof sp.next === "string" ? sp.next : undefined;
   if (await getCurrentUser()) redirect("/");
   return (
-    <AuthShell title="Join ZYNOFLIX STORE" subtitle="Buy and sell officially transferable cosmetics safely." render={RENDERS.goldenSeraph}>
+    <AuthShell title="Join ZYNOFLIX STORE" subtitle="Buy officially transferable PUBG Mobile &amp; BGMI cosmetics safely." render={RENDERS.goldenSeraph}>
       <RegisterForm next={next} />
     </AuthShell>
   );

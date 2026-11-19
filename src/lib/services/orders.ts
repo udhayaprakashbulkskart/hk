@@ -162,7 +162,7 @@ async function markOrderPaidTx(tx: Tx, orderId: string) {
   const items = await tx.orderItem.findMany({ where: { orderId }, include: { order: { select: { orderNumber: true, buyerId: true } } } });
   for (const it of items) {
     await tx.product.update({ where: { id: it.productId }, data: { salesCount: { increment: it.quantity } } });
-    await notify(it.sellerId, "New sale 🎉", `You sold "${it.titleSnapshot}". Deliver it to the buyer's Player ID.`, `/account/sales`, tx);
+    await notify(it.sellerId, "New order 🎉", `"${it.titleSnapshot}" was purchased. Deliver it to the buyer's Player ID.`, `/admin/fulfilment`, tx);
   }
   if (items[0]) await tx.cartItem.deleteMany({ where: { userId: items[0].order.buyerId, productId: { in: items.map((i) => i.productId) } } });
   if (items[0]) await notify(items[0].order.buyerId, "Payment received", `Order ${items[0].order.orderNumber} is confirmed.`, `/orders/${items[0].order.orderNumber}`, tx);
@@ -323,7 +323,7 @@ export async function requestRefund(userId: string, orderItemId: string, reason:
         destination: item.order.provider === "RAZORPAY" ? "ORIGINAL" : "WALLET",
       },
     });
-    await notify(item.sellerId, "Refund requested", `The buyer requested a refund for "${item.titleSnapshot}". An admin will review it.`, "/account/sales", tx);
+    await notify(item.sellerId, "Refund requested", `The buyer requested a refund for "${item.titleSnapshot}". An admin will review it.`, "/admin/fulfilment", tx);
     await audit(userId, "refund.requested", "Refund", refund.id, { orderItemId }, tx);
     return refund;
   });
@@ -368,7 +368,7 @@ export async function decideRefund(adminId: string, refundId: string, approve: b
       `/orders/${refund.order.orderNumber}`,
       tx,
     );
-    await notify(refund.orderItem.sellerId, "Refund issued", `"${refund.orderItem.titleSnapshot}" was refunded to the buyer.`, "/account/sales", tx);
+    await notify(refund.orderItem.sellerId, "Refund issued", `"${refund.orderItem.titleSnapshot}" was refunded to the buyer.`, "/admin/fulfilment", tx);
     await audit(adminId, "refund.processed", "Refund", refund.id, { destination, providerRef, amount: refund.amount }, tx);
   });
 }

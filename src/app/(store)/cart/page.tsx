@@ -34,7 +34,7 @@ export default async function CartPage() {
                 </Link>
                 <div className="min-w-0 flex-1">
                   <Link href={`/product/${p.slug}`} className="line-clamp-1 font-semibold hover:text-neon">{p.title}</Link>
-                  <p className="text-xs text-muted">{p.isOfficialStore ? "Official store" : p.seller.seller?.storeName}</p>
+                  <p className="text-xs text-muted">ZYNOFLIX STORE</p>
                   {bad && <p className="text-xs text-neon-soft">{p.status !== "APPROVED" ? "No longer available — remove it to continue" : `Only ${p.stock} left`}</p>}
                   <div className="mt-2 flex items-center justify-between gap-2">
                     <CartQty productId={p.id} quantity={quantity} stock={p.stock} />

@@ -6,12 +6,12 @@ export const metadata: Metadata = { title: "Terms & Policies" };
 
 export default function TermsPage() {
   const sections: [string, string][] = [
-    ["Independent marketplace", DISCLAIMER],
-    ["What can be sold", "Only cosmetic items and top-ups that can be transferred through the relevant game's official mechanisms (in-game gifting to a Player ID, officially issued redeem codes, or authorised UC top-up channels) under that game's current terms. Sellers must confirm this for every listing."],
-    ["What is prohibited", "Selling, renting or sharing game accounts; requesting or collecting passwords, OTPs or login sessions; cheats, hacks or exploits; items obtained fraudulently. Listings that break these rules are removed and the seller may be suspended."],
-    ["Payments & escrow", "Payments are processed by Razorpay or your ZYNOFLIX STORE wallet. Seller earnings are released only after the buyer confirms receipt or the protection window passes. A platform commission (shown in the seller hub) is deducted from each completed sale."],
+    ["Independent store", DISCLAIMER],
+    ["What we sell", "Only cosmetic items and top-ups that can be transferred through the relevant game's official mechanisms (in-game gifting to a Player ID, officially issued redeem codes, or authorised UC top-up channels) under that game's current terms. All products are listed by ZYNOFLIX STORE; customers cannot list items."],
+    ["What is prohibited", "Selling, renting or sharing game accounts; requesting or collecting passwords, OTPs or login sessions; cheats, hacks or exploits; items obtained fraudulently. Accounts that attempt these may be suspended."],
+    ["Payments", "Payments are processed by Razorpay or your ZYNOFLIX STORE wallet. An order is confirmed only after the payment is verified on our server."],
     ["Refunds", "Buyers may request a refund before confirming receipt. Approved refunds are returned to the original payment method or your wallet."],
-    ["Privacy", "We store the minimum data needed to run the marketplace: your account details, Player ID for delivery, order history and, for sellers, verification and payout details (PAN last 4 characters and UPI ID only)."],
+    ["Privacy", "We store the minimum data needed to run the store: your account details, Player ID and nickname for delivery, and order history."],
   ];
   return (
     <div className="mx-auto max-w-3xl">

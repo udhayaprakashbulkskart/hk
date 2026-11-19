@@ -19,7 +19,7 @@ async function Results({ sp, skinsOnly, basePath }: { sp: SP; skinsOnly: boolean
     return filtered ? (
       <EmptyState title="No items found" body="Try a different search or clear some filters." action={{ href: basePath, label: "Clear filters" }} />
     ) : (
-      <EmptyState title="First drops landing soon" body="Verified sellers are getting ready. Have officially transferable skins? Be the first to list them." action={{ href: "/sell", label: "Start selling" }} />
+      <EmptyState title="New drops landing soon" body="Fresh skins and outfits are being added. Check back shortly, or top up UC now." action={{ href: "/uc", label: "UC Top-Up" }} />
     );
   }
   const flat = Object.fromEntries(Object.entries(sp).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v]));

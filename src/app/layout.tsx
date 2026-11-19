@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   openGraph: { type: "website", siteName: SITE_NAME, locale: "en_IN" },
   title: { default: `${SITE_NAME} — PUBG Mobile & BGMI Marketplace`, template: `%s · ${SITE_NAME}` },
-  description: "Buy and sell officially transferable PUBG Mobile & BGMI skins, outfits and UC top-ups. Verified sellers, secure Razorpay payments.",
+  description: "Buy officially transferable PUBG Mobile & BGMI skins, outfits, bundles and UC top-ups. Secure Razorpay payments.",
 };
 
 export const viewport: Viewport = { themeColor: "#1c0507", width: "device-width", initialScale: 1 };

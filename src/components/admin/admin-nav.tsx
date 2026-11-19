@@ -2,12 +2,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { BadgeCheck, ChartNoAxesCombined, Flag, FolderTree, Image as ImageIcon, LifeBuoy, Package, Percent, PartyPopper, Receipt, RotateCcw, ScrollText, TicketPercent, Users, Wallet } from "lucide-react";
+import { ChartNoAxesCombined, Flag, FolderTree, Image as ImageIcon, LifeBuoy, Package, Percent, PartyPopper, Receipt, RotateCcw, ScrollText, TicketPercent, Truck, Users, Wallet } from "lucide-react";
 
 const ITEMS = [
   { href: "/admin", label: "Analytics", Icon: ChartNoAxesCombined, key: "" },
-  { href: "/admin/products", label: "Listings", Icon: Package, key: "products" },
-  { href: "/admin/sellers", label: "Seller verification", Icon: BadgeCheck, key: "sellers" },
+  { href: "/admin/products", label: "Products", Icon: Package, key: "products" },
+  { href: "/admin/fulfilment", label: "Fulfilment", Icon: Truck, key: "fulfilment" },
   { href: "/admin/orders", label: "Orders & payments", Icon: Receipt, key: "orders" },
   { href: "/admin/refunds", label: "Refunds", Icon: RotateCcw, key: "refunds" },
   { href: "/admin/withdrawals", label: "Withdrawals", Icon: Wallet, key: "withdrawals" },

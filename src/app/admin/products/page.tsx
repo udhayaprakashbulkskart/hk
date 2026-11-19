@@ -9,12 +9,12 @@ import { StatusBadge } from "@/components/ui/badges";
 import { EmptyState } from "@/components/ui/states";
 import { PageTitle } from "@/components/ui/section";
 
-export const metadata = { title: "Listings" };
-const TABS = ["PENDING", "APPROVED", "REJECTED", "DRAFT", "ARCHIVED"] as const;
+export const metadata = { title: "Products" };
+const TABS = ["APPROVED", "DRAFT", "PENDING", "REJECTED", "ARCHIVED"] as const;
 
 export default async function AdminProducts(props: PageProps<"/admin/products">) {
   const sp = await props.searchParams;
-  const status = pick(sp.status, TABS, "PENDING");
+  const status = pick(sp.status, TABS, "APPROVED");
   const q = typeof sp.q === "string" ? sp.q.trim() : "";
   const items = await db.product.findMany({
     where: { status, ...(q ? { title: { contains: q, mode: "insensitive" as const } } : {}) },
@@ -24,11 +24,11 @@ export default async function AdminProducts(props: PageProps<"/admin/products">)
   });
   return (
     <div>
-      <PageTitle title="Listings" subtitle="Approve, reject and feature products.">
-        <form className="flex gap-2"><input type="hidden" name="status" value={status} /><input name="q" defaultValue={q} placeholder="Search title" className="input w-56" /></form>
+      <PageTitle title="Products" subtitle="Only admins can add products. Published products are live in the store.">
+        <form className="flex flex-wrap gap-2"><input type="hidden" name="status" value={status} /><input name="q" defaultValue={q} placeholder="Search title" className="input w-56" /><Link href="/admin/products/new" className="btn-primary">+ Add product</Link></form>
       </PageTitle>
       <StatusTabs base="/admin/products" tabs={TABS} current={status} />
-      {items.length === 0 ? <EmptyState title="Queue is empty" body="Nothing to review here." /> : (
+      {items.length === 0 ? <EmptyState title="No products here" body="Add a product to get started." action={{ href: "/admin/products/new", label: "Add product" }} /> : (
         <ul className="space-y-3">
           {items.map((p) => (
             <li key={p.id} className="card flex flex-col gap-3 p-4 sm:flex-row">
@@ -41,14 +41,15 @@ export default async function AdminProducts(props: PageProps<"/admin/products">)
                   <StatusBadge status={p.status} /> {p.isFeatured && <span className="badge border-amber-500/40 text-amber-300">Featured</span>}
                   {p._count.reports > 0 && <span className="badge border-neon/50 text-neon-soft">{p._count.reports} reports</span>}
                 </div>
-                <p className="text-xs text-muted">{p.category.name} · {RARITY_LABEL[p.rarity]} · {formatINR(p.price)} · stock {p.stock} · {p.seller.seller?.storeName ?? p.seller.email} {p.seller.seller?.status !== "VERIFIED" && "(unverified)"}</p>
+                <p className="text-xs text-muted">{p.category.name} · {RARITY_LABEL[p.rarity]} · {formatINR(p.price)} · stock {p.stock}</p>
                 <p className="text-xs text-zinc-400">Delivery: {DELIVERY_LABEL[p.deliveryMethod]}</p>
                 <p className="line-clamp-2 text-sm text-zinc-300">{p.description}</p>
                 {p.rejectionReason && <p className="text-xs text-neon-soft">Reason: {p.rejectionReason}</p>}
               </div>
               <div className="flex flex-wrap items-start gap-2 sm:w-44 sm:flex-col">
-                {p.status !== "APPROVED" && p.status !== "ARCHIVED" && <ActionButton url={`/api/admin/products/${p.id}`} body={{ action: "approve" }} variant="primary" label="Approve" success="Listing approved" className="sm:w-full" />}
-                {p.status !== "REJECTED" && p.status !== "ARCHIVED" && <ActionButton url={`/api/admin/products/${p.id}`} body={{ action: "reject" }} variant="danger" label="Reject" prompt="Reason for rejection (shown to seller):" success="Listing rejected" className="sm:w-full" />}
+                {p.status !== "ARCHIVED" && !p.isOfficialStore && <Link href={`/admin/products/${p.id}/edit`} className="btn-outline btn-sm sm:w-full">Edit</Link>}
+                {p.status !== "APPROVED" && p.status !== "ARCHIVED" && <ActionButton url={`/api/admin/products/${p.id}`} body={{ action: "approve" }} variant="primary" label="Publish" success="Product published" className="sm:w-full" />}
+                {p.status !== "ARCHIVED" && !p.isOfficialStore && <ActionButton url={`/api/products/${p.id}`} method="DELETE" variant="danger" label="Archive" confirm="Archive this product? It will be removed from the store and from carts." success="Product archived" className="sm:w-full" />}
                 {p.status === "APPROVED" && <ActionButton url={`/api/admin/products/${p.id}`} body={{ action: p.isFeatured ? "unfeature" : "feature" }} label={p.isFeatured ? "Unfeature" : "Feature"} success="Updated" className="sm:w-full" />}
               </div>
             </li>

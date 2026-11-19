@@ -65,8 +65,8 @@ export default async function WalletPage() {
           </section>
         ) : (
           <section className="card p-5 text-sm text-muted">
-            <h2 className="heading mb-2 text-lg text-white">Withdrawals</h2>
-            Withdrawals to UPI are available to verified sellers. Purchase refunds land in this wallet instantly.
+            <h2 className="heading mb-2 text-lg text-white">How your wallet works</h2>
+            Wallet balance can be used for any purchase. Refunds land in this wallet instantly.
           </section>
         )}
       </div>
