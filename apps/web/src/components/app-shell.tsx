@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { Bell, Search, Home, LineChart, ArrowLeftRight, PieChart, MoreHorizontal } from "lucide-react";
+import { Search, Home, LineChart, ArrowLeftRight, ReceiptText, MoreHorizontal } from "lucide-react";
 import { Logo, cn } from "@hkfinhub/ui";
 import { ThemeToggle } from "./theme-toggle";
 import { NAV } from "@/lib/nav";
@@ -11,8 +11,8 @@ import { NAV } from "@/lib/nav";
 const BOTTOM = [
   { href: "/dashboard", label: "Home", icon: Home },
   { href: "/invest", label: "Markets", icon: LineChart },
-  { href: "/send", label: "Transfer", icon: ArrowLeftRight },
-  { href: "/portfolio", label: "Portfolio", icon: PieChart },
+  { href: "/exchange", label: "Exchange", icon: ArrowLeftRight },
+  { href: "/history", label: "Transactions", icon: ReceiptText },
   { href: "/more", label: "More", icon: MoreHorizontal },
 ] as const;
 
@@ -79,17 +79,7 @@ export function AppShell({ children, unread = 0 }: { children: ReactNode; unread
               />
             </form>
             <div className="ml-auto flex items-center gap-1">
-              <Link href="/send" className="hidden min-h-10 items-center rounded-lg bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)] sm:inline-flex">
-                Send money
-              </Link>
               <ThemeToggle />
-              <Link href="/notifications" aria-label={unread ? `Notifications, ${unread} unread` : "Notifications"} className="relative inline-flex size-11 items-center justify-center rounded-lg hover:bg-[var(--secondary)] sm:size-10">
-                <Bell className="size-5" aria-hidden="true" />
-                {unread > 0 ? <span className="absolute right-2 top-2 size-2 rounded-full bg-[var(--primary)]" aria-hidden="true" /> : null}
-              </Link>
-              <Link href="/profile" aria-label="Your profile" className="inline-flex size-9 items-center justify-center rounded-full border border-[var(--gold)] bg-[var(--secondary)] text-xs font-semibold text-[var(--gold)]">
-                HK
-              </Link>
             </div>
           </div>
         </header>
