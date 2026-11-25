@@ -50,6 +50,14 @@ export class AccountsController {
     return { configured: true, ...acct };
   }
 
+  /** Owner-recorded balance, login required. Never public. */
+  @Get("manual-balance")
+  @UseGuards(AuthGuard)
+  manualBalance() {
+    const v = this.c.config.manualBalanceInr;
+    return v === null ? { configured: false } : { configured: true, currency: "INR", amount: v };
+  }
+
   @Post("currencies")
   @HttpCode(200)
   @UseGuards(AuthGuard)

@@ -192093,6 +192093,7 @@ var schema = external_exports.object({
   RECEIVING_ACCOUNT_NAME: external_exports.string().optional(),
   RECEIVING_ACCOUNT_NUMBER: external_exports.string().optional(),
   RECEIVING_BANK_NAME: external_exports.string().optional(),
+  MANUAL_BALANCE_INR: external_exports.string().optional(),
   KYC_MASTER_KEY: external_exports.string().optional(),
   KYC_WEBHOOK_SECRET: external_exports.string().optional(),
   KYC_DOCUMENT_BUCKET: external_exports.string().optional(),
@@ -192140,6 +192141,7 @@ function loadConfig(env2 = process.env) {
     paymentReturnUrl: e5.PAYMENT_RETURN_URL,
     adminAllowedIps: e5.ADMIN_ALLOWED_IPS.split(",").map((s2) => s2.trim()).filter(Boolean),
     loginUser: loginUserFrom(e5),
+    manualBalanceInr: e5.MANUAL_BALANCE_INR && Number.isFinite(Number(e5.MANUAL_BALANCE_INR)) ? Number(e5.MANUAL_BALANCE_INR) : null,
     receivingAccount: e5.RECEIVING_ACCOUNT_NUMBER ? { accountName: e5.RECEIVING_ACCOUNT_NAME ?? "", accountNumber: e5.RECEIVING_ACCOUNT_NUMBER, bankName: e5.RECEIVING_BANK_NAME ?? "" } : null,
     kyc: {
       masterKey: e5.KYC_MASTER_KEY ? Buffer.from(e5.KYC_MASTER_KEY, "base64") : void 0,
@@ -204253,6 +204255,10 @@ var AccountsController = class {
     if (!acct) return { configured: false };
     return { configured: true, ...acct };
   }
+  manualBalance() {
+    const v2 = this.c.config.manualBalanceInr;
+    return v2 === null ? { configured: false } : { configured: true, currency: "INR", amount: v2 };
+  }
   async openCurrency(body, req) {
     try {
       return await this.c.accounts.openCurrencyAccount(req.auth.userId, body.currency);
@@ -204270,6 +204276,10 @@ __decorateClass([
   Get("receiving-account"),
   UseGuards(AuthGuard)
 ], AccountsController.prototype, "receivingAccount", 1);
+__decorateClass([
+  Get("manual-balance"),
+  UseGuards(AuthGuard)
+], AccountsController.prototype, "manualBalance", 1);
 __decorateClass([
   Post("currencies"),
   HttpCode(200),

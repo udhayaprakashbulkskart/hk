@@ -44,6 +44,7 @@ const schema = z.object({
   RECEIVING_ACCOUNT_NAME: z.string().optional(),
   RECEIVING_ACCOUNT_NUMBER: z.string().optional(),
   RECEIVING_BANK_NAME: z.string().optional(),
+  MANUAL_BALANCE_INR: z.string().optional(),
   KYC_MASTER_KEY: z.string().optional(),
   KYC_WEBHOOK_SECRET: z.string().optional(),
   KYC_DOCUMENT_BUCKET: z.string().optional(),
@@ -54,6 +55,8 @@ const schema = z.object({
 export interface ApiConfig {
   /** The operator's own receiving account. Read from environment only; never committed. Null when unset. */
   receivingAccount: { accountName: string; accountNumber: string; bankName: string } | null;
+  /** Owner-recorded INR figure, shown only to the logged-in owner. Null when unset. */
+  manualBalanceInr: number | null;
   appEnv: "local" | "test" | "staging" | "production";
   port: number;
   logLevel: string;
@@ -135,6 +138,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
     paymentReturnUrl: e.PAYMENT_RETURN_URL,
     adminAllowedIps: e.ADMIN_ALLOWED_IPS.split(",").map((s) => s.trim()).filter(Boolean),
     loginUser: loginUserFrom(e),
+    manualBalanceInr: e.MANUAL_BALANCE_INR && Number.isFinite(Number(e.MANUAL_BALANCE_INR)) ? Number(e.MANUAL_BALANCE_INR) : null,
     receivingAccount: e.RECEIVING_ACCOUNT_NUMBER
       ? { accountName: e.RECEIVING_ACCOUNT_NAME ?? "", accountNumber: e.RECEIVING_ACCOUNT_NUMBER, bankName: e.RECEIVING_BANK_NAME ?? "" }
       : null,
