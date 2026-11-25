@@ -2,7 +2,6 @@ import { PageHeader } from "@/components/page";
 import { Card, CardContent, CardHeader, CardTitle, Badge } from "@hkfinhub/ui";
 import { formatMoney } from "@hkfinhub/api-client";
 import { api } from "@/lib/api";
-import { DemoBalanceCard } from "@/components/demo-balance-card";
 import { fetchReferenceRates, unitsPerHkd } from "@/lib/reference-rates";
 
 /** Dashboard shows the balance only, in INR. Deposit, withdrawal and other activity live on their own pages. */
@@ -31,7 +30,6 @@ export default async function DashboardPage() {
             </p>
           </CardContent>
         </Card>
-        <DemoBalanceCard />
       </div>
     </div>
   );
