@@ -192094,6 +192094,7 @@ var schema = external_exports.object({
   RECEIVING_ACCOUNT_NUMBER: external_exports.string().optional(),
   RECEIVING_BANK_NAME: external_exports.string().optional(),
   MANUAL_BALANCE_INR: external_exports.string().optional(),
+  MANUAL_BALANCE_CURRENCY: external_exports.string().default("INR"),
   KYC_MASTER_KEY: external_exports.string().optional(),
   KYC_WEBHOOK_SECRET: external_exports.string().optional(),
   KYC_DOCUMENT_BUCKET: external_exports.string().optional(),
@@ -192141,7 +192142,7 @@ function loadConfig(env2 = process.env) {
     paymentReturnUrl: e5.PAYMENT_RETURN_URL,
     adminAllowedIps: e5.ADMIN_ALLOWED_IPS.split(",").map((s2) => s2.trim()).filter(Boolean),
     loginUser: loginUserFrom(e5),
-    manualBalanceInr: e5.MANUAL_BALANCE_INR && Number.isFinite(Number(e5.MANUAL_BALANCE_INR)) ? Number(e5.MANUAL_BALANCE_INR) : null,
+    manualBalance: e5.MANUAL_BALANCE_INR && Number.isFinite(Number(e5.MANUAL_BALANCE_INR)) ? { amount: Number(e5.MANUAL_BALANCE_INR), currency: e5.MANUAL_BALANCE_CURRENCY.toUpperCase() } : null,
     receivingAccount: e5.RECEIVING_ACCOUNT_NUMBER ? { accountName: e5.RECEIVING_ACCOUNT_NAME ?? "", accountNumber: e5.RECEIVING_ACCOUNT_NUMBER, bankName: e5.RECEIVING_BANK_NAME ?? "" } : null,
     kyc: {
       masterKey: e5.KYC_MASTER_KEY ? Buffer.from(e5.KYC_MASTER_KEY, "base64") : void 0,
@@ -204224,6 +204225,51 @@ function mapDomainError(err) {
   throw err;
 }
 
+// src/fx/reference-rates.ts
+var REFERENCE_SOURCE = "European Central Bank reference rates, via Frankfurter";
+var REFERENCE_CURRENCIES = ["USD", "INR", "EUR", "GBP", "SGD", "CNY"];
+var BASE = "HKD";
+var ENDPOINT = "https://api.frankfurter.app/latest";
+var CACHE_MS = 6 * 60 * 60 * 1e3;
+var TIMEOUT_MS2 = 5e3;
+var UNAVAILABLE = () => ({
+  available: false,
+  source: REFERENCE_SOURCE,
+  base: BASE,
+  date: null,
+  rates: [],
+  note: "Reference rates are temporarily unavailable."
+});
+var cache6 = null;
+function isFrankfurterBody(x3) {
+  if (!x3 || typeof x3 !== "object") return false;
+  const o3 = x3;
+  if (typeof o3.date !== "string" || !o3.rates || typeof o3.rates !== "object") return false;
+  return Object.values(o3.rates).every((v2) => typeof v2 === "number" && Number.isFinite(v2) && v2 > 0);
+}
+async function getReferenceRates() {
+  if (cache6 && Date.now() - cache6.at < CACHE_MS) return cache6.value;
+  try {
+    const url2 = `${ENDPOINT}?base=${BASE}&symbols=${REFERENCE_CURRENCIES.join(",")}`;
+    const res = await fetch(url2, { headers: { accept: "application/json" }, signal: AbortSignal.timeout(TIMEOUT_MS2) });
+    if (!res.ok) throw new Error(`status ${res.status}`);
+    const body = await res.json();
+    if (!isFrankfurterBody(body)) throw new Error("unexpected response");
+    const value = {
+      available: true,
+      source: REFERENCE_SOURCE,
+      base: BASE,
+      date: body.date,
+      rates: REFERENCE_CURRENCIES.filter((c7) => typeof body.rates[c7] === "number").map((c7) => ({ currency: c7, unitsPerHkd: body.rates[c7] })),
+      note: "Daily reference rates. Not a live quote and not a rate you can transact at."
+    };
+    cache6 = { at: Date.now(), value };
+    return value;
+  } catch {
+    return cache6?.value ?? UNAVAILABLE();
+  }
+}
+
 // src/accounts/accounts.controller.ts
 var uuid5 = external_exports.uuid();
 function mapAccountError(err) {
@@ -204255,9 +204301,23 @@ var AccountsController = class {
     if (!acct) return { configured: false };
     return { configured: true, ...acct };
   }
-  manualBalance() {
-    const v2 = this.c.config.manualBalanceInr;
-    return v2 === null ? { configured: false } : { configured: true, currency: "INR", amount: v2 };
+  async manualBalance() {
+    const v2 = this.c.config.manualBalance;
+    if (!v2) return { configured: false };
+    const ref = await getReferenceRates();
+    let hkdEquivalent = null;
+    if (v2.currency === "HKD") hkdEquivalent = v2.amount;
+    else {
+      const unitsPerHkd = ref.rates.find((r6) => r6.currency === v2.currency)?.unitsPerHkd;
+      if (unitsPerHkd) hkdEquivalent = v2.amount / unitsPerHkd;
+    }
+    return {
+      configured: true,
+      amount: v2.amount,
+      currency: v2.currency,
+      hkdEquivalent,
+      rateDate: hkdEquivalent !== null && v2.currency !== "HKD" ? ref.date : null
+    };
   }
   async openCurrency(body, req) {
     try {
@@ -205342,53 +205402,6 @@ function presentRequest(r6) {
 
 // src/fx/reference-rates.controller.ts
 init_common2();
-
-// src/fx/reference-rates.ts
-var REFERENCE_SOURCE = "European Central Bank reference rates, via Frankfurter";
-var REFERENCE_CURRENCIES = ["USD", "INR", "EUR", "GBP", "SGD", "CNY"];
-var BASE = "HKD";
-var ENDPOINT = "https://api.frankfurter.app/latest";
-var CACHE_MS = 6 * 60 * 60 * 1e3;
-var TIMEOUT_MS2 = 5e3;
-var UNAVAILABLE = () => ({
-  available: false,
-  source: REFERENCE_SOURCE,
-  base: BASE,
-  date: null,
-  rates: [],
-  note: "Reference rates are temporarily unavailable."
-});
-var cache6 = null;
-function isFrankfurterBody(x3) {
-  if (!x3 || typeof x3 !== "object") return false;
-  const o3 = x3;
-  if (typeof o3.date !== "string" || !o3.rates || typeof o3.rates !== "object") return false;
-  return Object.values(o3.rates).every((v2) => typeof v2 === "number" && Number.isFinite(v2) && v2 > 0);
-}
-async function getReferenceRates() {
-  if (cache6 && Date.now() - cache6.at < CACHE_MS) return cache6.value;
-  try {
-    const url2 = `${ENDPOINT}?base=${BASE}&symbols=${REFERENCE_CURRENCIES.join(",")}`;
-    const res = await fetch(url2, { headers: { accept: "application/json" }, signal: AbortSignal.timeout(TIMEOUT_MS2) });
-    if (!res.ok) throw new Error(`status ${res.status}`);
-    const body = await res.json();
-    if (!isFrankfurterBody(body)) throw new Error("unexpected response");
-    const value = {
-      available: true,
-      source: REFERENCE_SOURCE,
-      base: BASE,
-      date: body.date,
-      rates: REFERENCE_CURRENCIES.filter((c7) => typeof body.rates[c7] === "number").map((c7) => ({ currency: c7, unitsPerHkd: body.rates[c7] })),
-      note: "Daily reference rates. Not a live quote and not a rate you can transact at."
-    };
-    cache6 = { at: Date.now(), value };
-    return value;
-  } catch {
-    return cache6?.value ?? UNAVAILABLE();
-  }
-}
-
-// src/fx/reference-rates.controller.ts
 var ReferenceRatesController = class {
   async referenceRates() {
     return getReferenceRates();

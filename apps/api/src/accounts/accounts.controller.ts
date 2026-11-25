@@ -8,6 +8,7 @@ import { ZodPipe } from "../common/zod-pipe";
 import { beneficiarySchema, openCurrencySchema, type BeneficiaryBody } from "./schemas";
 import { formatMinor } from "./format";
 import { mapDomainError } from "../common/domain-errors";
+import { getReferenceRates } from "../fx/reference-rates";
 
 const uuid = z.uuid();
 
@@ -53,9 +54,23 @@ export class AccountsController {
   /** Owner-recorded balance, login required. Never public. */
   @Get("manual-balance")
   @UseGuards(AuthGuard)
-  manualBalance() {
-    const v = this.c.config.manualBalanceInr;
-    return v === null ? { configured: false } : { configured: true, currency: "INR", amount: v };
+  async manualBalance() {
+    const v = this.c.config.manualBalance;
+    if (!v) return { configured: false };
+    const ref = await getReferenceRates();
+    let hkdEquivalent: number | null = null;
+    if (v.currency === "HKD") hkdEquivalent = v.amount;
+    else {
+      const unitsPerHkd = ref.rates.find((r) => r.currency === v.currency)?.unitsPerHkd;
+      if (unitsPerHkd) hkdEquivalent = v.amount / unitsPerHkd;
+    }
+    return {
+      configured: true,
+      amount: v.amount,
+      currency: v.currency,
+      hkdEquivalent,
+      rateDate: hkdEquivalent !== null && v.currency !== "HKD" ? ref.date : null,
+    };
   }
 
   @Post("currencies")

@@ -4,9 +4,17 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@hkfinhub/ui";
 import { getSession } from "@/lib/auth";
 
+interface ManualBalance {
+  configured: boolean;
+  amount?: number;
+  currency?: string;
+  hkdEquivalent?: number | null;
+  rateDate?: string | null;
+}
+
 /** Owner-only. Fetched with the login token, so nothing is shown to anyone who is not signed in. */
 export function ManualBalanceCard() {
-  const [text, setText] = useState<string | null>(null);
+  const [data, setData] = useState<ManualBalance | null>(null);
 
   useEffect(() => {
     const session = getSession();
@@ -17,21 +25,25 @@ export function ManualBalanceCard() {
       cache: "no-store",
     })
       .then(async (res) => {
-        if (!res.ok) return;
-        const body = (await res.json()) as { configured: boolean; amount?: number };
-        if (body.configured && typeof body.amount === "number") {
-          setText(new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(body.amount));
-        }
+        if (res.ok) setData((await res.json()) as ManualBalance);
       })
       .catch(() => undefined);
   }, []);
 
-  if (!text) return null;
+  if (!data?.configured || data.amount === undefined || !data.currency) return null;
+  const money = (amount: number, currency: string) =>
+    new Intl.NumberFormat("en-US", { style: "currency", currency }).format(amount);
   return (
     <Card>
       <CardHeader><CardTitle>Balance</CardTitle></CardHeader>
-      <CardContent>
-        <p className="text-3xl font-semibold tabular-nums sm:text-4xl">{text}</p>
+      <CardContent className="space-y-2">
+        <p className="text-3xl font-semibold tabular-nums sm:text-4xl">{money(data.amount, data.currency)}</p>
+        {data.hkdEquivalent !== null && data.hkdEquivalent !== undefined && (
+          <p className="text-sm text-[var(--muted-foreground)] tabular-nums">
+            ≈ {money(data.hkdEquivalent, "HKD")}
+            {data.rateDate ? ` at the ECB reference rate for ${data.rateDate}` : ""}
+          </p>
+        )}
       </CardContent>
     </Card>
   );
