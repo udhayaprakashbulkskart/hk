@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowDownToLine, ArrowUpFromLine, Send, Download, TrendingUp, TrendingDown, Globe2, Briefcase, ArrowRight } from "lucide-react";
 import { Badge, Card, CardContent, CardHeader, CardTitle, Stat, cn } from "@hkfinhub/ui";
 import { ReceivingAccountCard } from "@/components/receiving-account";
+import { DemoBalanceCard } from "@/components/demo-balance-card";
 import { fetchReferenceRates, unitsPerHkd } from "@/lib/reference-rates";
 import { PageHeader, Section } from "@/components/page";
 import { TrendChart, Sparkline } from "@/components/charts";
@@ -135,6 +136,7 @@ export default async function DashboardPage() {
 
       <div className="grid gap-4 lg:grid-cols-3">
         <ReceivingAccountCard />
+        <DemoBalanceCard />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
