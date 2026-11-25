@@ -204305,18 +204305,23 @@ var AccountsController = class {
     const v2 = this.c.config.manualBalance;
     if (!v2) return { configured: false };
     const ref = await getReferenceRates();
-    let hkdEquivalent = null;
-    if (v2.currency === "HKD") hkdEquivalent = v2.amount;
-    else {
-      const unitsPerHkd = ref.rates.find((r6) => r6.currency === v2.currency)?.unitsPerHkd;
-      if (unitsPerHkd) hkdEquivalent = v2.amount / unitsPerHkd;
-    }
+    const perHkd = (c7) => c7 === "HKD" ? 1 : ref.rates.find((r6) => r6.currency === c7)?.unitsPerHkd ?? null;
+    const unitsPerHkdOfSource = perHkd(v2.currency);
+    const hkd = unitsPerHkdOfSource ? v2.amount / unitsPerHkdOfSource : null;
+    const toCurrency = (c7) => {
+      if (hkd === null) return null;
+      const u2 = perHkd(c7);
+      return u2 ? hkd * u2 : null;
+    };
     return {
       configured: true,
-      amount: v2.amount,
-      currency: v2.currency,
-      hkdEquivalent,
-      rateDate: hkdEquivalent !== null && v2.currency !== "HKD" ? ref.date : null
+      held: { amount: v2.amount, currency: v2.currency },
+      equivalents: {
+        HKD: toCurrency("HKD"),
+        INR: toCurrency("INR"),
+        USD: toCurrency("USD")
+      },
+      rateDate: v2.currency === "HKD" ? null : ref.date
     };
   }
   async openCurrency(body, req) {

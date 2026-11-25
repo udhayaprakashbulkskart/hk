@@ -58,18 +58,24 @@ export class AccountsController {
     const v = this.c.config.manualBalance;
     if (!v) return { configured: false };
     const ref = await getReferenceRates();
-    let hkdEquivalent: number | null = null;
-    if (v.currency === "HKD") hkdEquivalent = v.amount;
-    else {
-      const unitsPerHkd = ref.rates.find((r) => r.currency === v.currency)?.unitsPerHkd;
-      if (unitsPerHkd) hkdEquivalent = v.amount / unitsPerHkd;
-    }
+    const perHkd = (c: string): number | null => (c === "HKD" ? 1 : (ref.rates.find((r) => r.currency === c)?.unitsPerHkd ?? null));
+    const unitsPerHkdOfSource = perHkd(v.currency);
+    // Value in HKD of the recorded amount, then converted to each display currency at the same reference rates.
+    const hkd = unitsPerHkdOfSource ? v.amount / unitsPerHkdOfSource : null;
+    const toCurrency = (c: string): number | null => {
+      if (hkd === null) return null;
+      const u = perHkd(c);
+      return u ? hkd * u : null;
+    };
     return {
       configured: true,
-      amount: v.amount,
-      currency: v.currency,
-      hkdEquivalent,
-      rateDate: hkdEquivalent !== null && v.currency !== "HKD" ? ref.date : null,
+      held: { amount: v.amount, currency: v.currency },
+      equivalents: {
+        HKD: toCurrency("HKD"),
+        INR: toCurrency("INR"),
+        USD: toCurrency("USD"),
+      },
+      rateDate: v.currency === "HKD" ? null : ref.date,
     };
   }
 
