@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { Search, Home, LineChart, ArrowLeftRight, ReceiptText, MoreHorizontal } from "lucide-react";
+import { Search, Home, LineChart, ArrowLeftRight, MoreHorizontal } from "lucide-react";
 import { Logo, cn } from "@hkfinhub/ui";
 import { ThemeToggle } from "./theme-toggle";
 import { NAV } from "@/lib/nav";
@@ -12,7 +12,6 @@ const BOTTOM = [
   { href: "/dashboard", label: "Home", icon: Home },
   { href: "/invest", label: "Markets", icon: LineChart },
   { href: "/exchange", label: "Exchange", icon: ArrowLeftRight },
-  { href: "/history", label: "Transactions", icon: ReceiptText },
   { href: "/more", label: "More", icon: MoreHorizontal },
 ] as const;
 
